@@ -70,11 +70,11 @@ stored text no longer has with `new StorageError("changed", key)`.
 
 ## Registering the plugin
 
-In the app's `Cargo.toml`, by git (pinned to a commit) or by path
-(decision 11):
+In the app's `Cargo.toml`, from crates.io (decision 11), with the typed
+client from npm (`bun add @frodobaggins.jr/eisenhower-tauri`):
 
 ```toml
-tauri-plugin-eisenhower = { git = "https://github.com/Federiker/eisenhower", rev = "<commit>" }
+tauri-plugin-eisenhower = "0.1"
 ```
 
 then in the app's builder (`src-tauri/src/lib.rs`):

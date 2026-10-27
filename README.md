@@ -56,14 +56,27 @@ like), checked by `mise run audit`; see
 
 ## Use it in an app
 
+The packages are on npm under the owner's scope, the Tauri plugin on
+crates.io (in this repository they are `@eisenhower/*`):
+
+```sh
+bun add @frodobaggins.jr/eisenhower-react @frodobaggins.jr/eisenhower-model
+bun add @frodobaggins.jr/eisenhower-tauri   # in a Tauri app, with the plugin
+```
+
+```toml
+# src-tauri/Cargo.toml, in a Tauri app
+tauri-plugin-eisenhower = "0.1"
+```
+
 Each view takes its data as `value` and gives every change back as the
 whole new value; `useHistory` adds undo and redo, and `EisenhowerProvider`
 sets the theme, the locale and the strings of every view inside it:
 
 ```tsx
-import { emptyBoard } from "@eisenhower/model";
-import { Board, EisenhowerProvider, Gantt, TimelineEditor, TodoList, useHistory } from "@eisenhower/react";
-import "@eisenhower/react/style.css";
+import { emptyBoard } from "@frodobaggins.jr/eisenhower-model";
+import { Board, EisenhowerProvider, Gantt, TimelineEditor, TodoList, useHistory } from "@frodobaggins.jr/eisenhower-react";
+import "@frodobaggins.jr/eisenhower-react/style.css";
 
 const board = useHistory(emptyBoard());
 <EisenhowerProvider theme="system" locale="en-GB">
@@ -80,14 +93,14 @@ through a storage adapter, with its view's `DocumentKind` (`boardDocument`,
 read, so a save never overwrites a change made elsewhere unseen:
 
 ```ts
-import { boardDocument, loadDocument, localStorageAdapter, saveDocument } from "@eisenhower/model";
+import { boardDocument, loadDocument, localStorageAdapter, saveDocument } from "@frodobaggins.jr/eisenhower-model";
 
-const storage = localStorageAdapter("my-app:"); // or memoryStorage(), or tauriStorage() from @eisenhower/tauri
+const storage = localStorageAdapter("my-app:"); // or memoryStorage(), or tauriStorage() from …-tauri
 const loaded = await loadDocument(storage, "board", boardDocument); // null when nothing is stored
 const revision = await saveDocument(storage, "board", boardDocument, board.value, loaded?.revision);
 ```
 
-In a Tauri app, `tauri-plugin-eisenhower` and `@eisenhower/tauri` keep the
+In a Tauri app, `tauri-plugin-eisenhower` and `@frodobaggins.jr/eisenhower-tauri` keep the
 documents in files with a hash guard; the demo app in
 [packages/app](packages/app/README.md) shows the whole integration, in the
 browser and as a window. See [docs/features/](docs/README.md) for each view
@@ -131,6 +144,27 @@ needed. It is disposable local developer data, not a required build input.
 Do not stage it or depend on another developer having its contents; keep
 durable findings in tracked documentation.
 
+### Publishing
+
+`@eisenhower/model`, `@eisenhower/react` and `@eisenhower/tauri` are
+published to npm as `@frodobaggins.jr/eisenhower-model`, `-react` and
+`-tauri`, built (`dist/index.js`, declarations and, for the views,
+`style.css`); `tauri-plugin-eisenhower` to crates.io. Everything takes the
+version in the root `Cargo.toml` (`[workspace.package]`). See
+[decision 11](docs/development.md#decisions).
+
+```sh
+mise run publish:dry   # the checks, the builds in tmp/publish, then npm's and cargo's dry runs
+mise run publish       # the same on a clean tree, then publishes for real
+```
+
+`mise run publish:dry --allow-dirty` dry-runs with uncommitted changes and
+`--skip-checks` without the type-check, the tests and Clippy. Publishing
+needs the tokens in the gitignored `.env` (copy [.env.example](.env.example)):
+`NPM_TOKEN` for the frodobaggins.jr npm account and `CRATES_IO_TOKEN`. A
+version a registry already has is skipped, so a publish that stopped half
+way is run again as it is.
+
 ### Commands
 
 `mise tasks` lists them all; the main ones:
@@ -140,6 +174,8 @@ durable findings in tracked documentation.
 | `mise run dev` | The demo app in the browser (Vite) |
 | `mise run tauri:dev` | The demo app as a native window |
 | `mise run build` | The demo app's production build |
+| `mise run publish:dry` | Check, build and dry-run publishing to npm and crates.io |
+| `mise run publish` | The same, then publish for real (tokens in `.env`) |
 | `mise run test` | The TypeScript tests (Vitest) |
 | `mise run coverage` | The same, failing below 80% |
 | `mise run rust:test` | The Rust tests (nextest when installed) |
@@ -168,6 +204,10 @@ Bun's caches from Microsoft Defender, or working on a Dev Drive, helps further.
 | [packages/tooling](packages/tooling) | `@eisenhower/tooling` | Shared TypeScript settings |
 | [crates/tauri-plugin](crates/tauri-plugin) | `tauri-plugin-eisenhower` | The Tauri plugin: documents on disk with a hash guard |
 | [tests/e2e](tests/e2e) | `@eisenhower/e2e` | Playwright tests of the demo app |
+
+Model, react and tauri are published to npm as
+`@frodobaggins.jr/eisenhower-<name>`, the plugin to crates.io under its own
+name ([Publishing](#publishing)); the others stay private.
 
 ## Checks
 

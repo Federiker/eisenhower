@@ -68,12 +68,35 @@ Owner decisions, 27 October 2026, for the first round (slices in the
     document's text with its SHA-256 hash and writes it in one rename (a
     temporary file beside it), refused when the file changed on disk since
     it was read, as Donizetti and jerome guard their files.
-11. **Distribution: by path or git now, npm and crates.io later.** The
-    packages export their TypeScript sources (`"exports": "./src/index.ts"`),
-    as jerome's and Donizetti's do, so a Vite and TypeScript app uses them
-    without a build step: jerome depends on the npm packages by path and on
-    the crate by git or by path. Builds to `dist/` with declarations come
-    with publishing. The repository is meant for
+11. **Distribution: npm under the owner's scope, and crates.io** (owner
+    decision, 27 October 2026, replacing "by path or git now"). The
+    packages are published as `@frodobaggins.jr/eisenhower-model`,
+    `@frodobaggins.jr/eisenhower-react` and
+    `@frodobaggins.jr/eisenhower-tauri`; in the workspace they keep their
+    `@eisenhower/*` names and export their TypeScript sources, so the demo
+    app and the tests need no build step. `scripts/publish.ts` holds the one
+    mapping between the two names and publishes **built files**: each
+    package's `dist/index.js` (Vite's library mode, ES modules, every
+    dependency left external) with tsc's declarations of `src` (each
+    package's `tsconfig.build.json`), and for the views one `dist/style.css`
+    with its imports inlined (`<package>/style.css`). The published
+    manifests are made in `tmp/publish/<package>/`, never in the tracked
+    `package.json` files: the catalog's ranges resolved, a sibling under its
+    published name at `^<version>`, React and React DOM as peers, no
+    devDependencies; each tarball holds `dist`, the package's README and
+    the licence. `tauri-plugin-eisenhower` is published to crates.io; the
+    demo app's crate is not. One version for all, the root `Cargo.toml`'s
+    `[workspace.package]` version (0.1.0 first), npm tag `latest`, public.
+    `mise run publish:dry` runs the type-check, the tests and Clippy, builds
+    the packages, installs the packed tarballs in a throwaway consumer
+    (imported with Node, type-checked with `nodenext`), then
+    `npm publish --dry-run` and `cargo publish --dry-run`;
+    `mise run publish` does the same on a clean tree and then publishes,
+    skipping a version a registry already has. The tokens (`NPM_TOKEN`,
+    `CRATES_IO_TOKEN`) are in the gitignored `.env`
+    ([.env.example](../.env.example)), and reach only the publishing
+    commands, through their environment. jerome may depend on the published
+    packages instead of paths. The repository is
     `github.com/Federiker/eisenhower`.
 12. **Tooling, as in jerome and Donizetti:** mise pins the tools
     (`mise.toml`), Bun runs the packages, Biome formats and lints, Vitest

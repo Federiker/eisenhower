@@ -34,7 +34,6 @@ is under **Verification** and **Awaiting owner decisions**.
 
 ## Later
 
-- Publishing to npm and crates.io (decision 11).
 - Replacing jerome's plot board and timelines with Eisenhower's views.
 - Working calendars for the gantt chart (decision 17).
 

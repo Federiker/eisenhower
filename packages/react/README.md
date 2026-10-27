@@ -1,5 +1,11 @@
 # @eisenhower/react
 
+Published on npm as
+[`@frodobaggins.jr/eisenhower-react`](https://www.npmjs.com/package/@frodobaggins.jr/eisenhower-react)
+(`bun add @frodobaggins.jr/eisenhower-react`, with `react` and `react-dom`;
+its stylesheet is `@frodobaggins.jr/eisenhower-react/style.css`); in the
+workspace it is `@eisenhower/react`.
+
 The views (`<Board>`, `<Timeline>` and `<TimelineEditor>`, `<Gantt>`,
 `<TodoList>`) and what they share: the strings, the theme, the keys and the
 controls. See

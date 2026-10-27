@@ -1,5 +1,11 @@
 # @eisenhower/tauri
 
+Published on npm as
+[`@frodobaggins.jr/eisenhower-tauri`](https://www.npmjs.com/package/@frodobaggins.jr/eisenhower-tauri)
+(`bun add @frodobaggins.jr/eisenhower-tauri`, with the plugin from crates.io:
+`tauri-plugin-eisenhower = "0.1"`); in the workspace it is
+`@eisenhower/tauri`.
+
 The typed client of [`tauri-plugin-eisenhower`](../../crates/tauri-plugin/README.md),
 for a Tauri 2 app that keeps Eisenhower's documents in files, and a
 `StorageAdapter` on it. It depends on `@tauri-apps/api` and

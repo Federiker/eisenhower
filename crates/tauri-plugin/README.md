@@ -1,5 +1,9 @@
 # tauri-plugin-eisenhower
 
+On crates.io as `tauri-plugin-eisenhower` (`tauri-plugin-eisenhower = "0.1"`
+in the app's `src-tauri/Cargo.toml`); its client on npm is
+`@frodobaggins.jr/eisenhower-tauri`.
+
 Eisenhower's Tauri 2 plugin: documents (a board, a timeline, a gantt chart, a
 todo list, as `@eisenhower/model` writes them) read and written on disk, with
 a hash guard so a save never overwrites a file another program changed. Its
