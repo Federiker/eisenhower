@@ -165,6 +165,29 @@ g[data-selected="true"] .eh-timeline-bar {
   outline: 2px solid var(--eh-focus);
   outline-offset: 1px;
 }
+/* Dragging an entry: the strips over its mark (its ends resize a span), and the preview of where it goes. */
+.eh-timeline-grip {
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.eh-timeline-grip[data-part="start"],
+.eh-timeline-grip[data-part="end"] {
+  cursor: ew-resize;
+}
+.eh-timeline .eh-timeline-label[data-dragging] {
+  cursor: grabbing;
+  opacity: 0.6;
+}
+.eh-timeline-plane .eh-timeline-preview {
+  pointer-events: none;
+}
+.eh-timeline-preview-when {
+  fill: var(--eh-ink);
+  stroke: none;
+  font: 600 11px var(--eh-font);
+}
 
 /* The drawing as a list in a narrow space. */
 .eh-timeline-narrow h4 {

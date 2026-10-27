@@ -14,7 +14,7 @@ export const timeline = {
   "timeline.drawingEmpty": "Nothing to draw yet: add an entry.",
   "timeline.drawingNoSteps": "Nothing to draw yet: add steps, then entries.",
   "timeline.drawingHelp":
-    "Ctrl+wheel or Ctrl+= and Ctrl+- also zoom. Double-click an empty spot on a lane to add an entry there; the arrow keys move between entries, and Alt with an arrow moves one.",
+    "Ctrl+wheel or Ctrl+= and Ctrl+- also zoom. Double-click an empty spot on a lane to add an entry there; the arrow keys move between entries, and Alt with an arrow moves one. Drag an entry to move it in time or to another lane, or a span's end to change its length; Escape cancels a drag.",
   "timeline.drawingHelpReadOnly": "Ctrl+wheel or Ctrl+= and Ctrl+- also zoom; the arrow keys move between entries.",
   "timeline.zoom": "Zoom",
   "timeline.zoomIn": "Zoom in",
@@ -24,6 +24,8 @@ export const timeline = {
   "timeline.span": "{start} to {end}",
   "timeline.spanTo": "to {end}",
   "timeline.movedTo": "{title}: moved to {place}",
+  "timeline.movedToLaneAt": "{title}: moved to {category}, {when}",
+  "timeline.resizedTo": "{title}: now {when}",
   "timeline.entryMenu": "Entry actions: {name}",
   "timeline.deleteEntryNamed": "Delete {name}? The entry is deleted from the timeline.",
   "timeline.deleteEntry": "Delete entry",

@@ -1,4 +1,11 @@
-import { moveEntryToLane, shiftEntry, type Timeline, type TimelineEntry, type TimelinePoint } from "@eisenhower/model";
+import {
+  dragEntry,
+  type EntryDrag,
+  moveEntryToLane,
+  shiftEntry,
+  type Timeline,
+  type TimelineEntry,
+} from "@eisenhower/model";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -18,17 +25,10 @@ import { axisOf } from "./axis";
 import { type TimelineView, useTimelineView } from "./context";
 import { type DateWords, formatPoint, formatWhen } from "./format";
 import { CategorySwatch } from "./labels";
-import {
-  LABEL_HEIGHT,
-  type Lane,
-  LANE_PADDING,
-  lanesOf,
-  MARK_Y,
-  MAX_LABEL_WIDTH,
-  type PlacedEntry,
-  ROW_HEIGHT,
-} from "./layout";
+import { type Lane, LANE_PADDING, lanesOf, MARK_Y, MAX_LABEL_WIDTH, ROW_HEIGHT } from "./layout";
+import { DASHES, MARGIN, Mark } from "./marks";
 import { pointAt, type Scale, scaleOf, valueAt, xOf } from "./scale";
+import { EntryLabel } from "./TimelineEntryLabel";
 import { TimelineNarrowList } from "./TimelineNarrowList";
 
 /** Below this width the drawing becomes a list. */
@@ -36,10 +36,8 @@ const NARROW = 600;
 /** The column of lane names beside the drawing. */
 const NAMES_WIDTH = 140;
 const AXIS_HEIGHT = 44;
-const MARGIN = 24;
 /** How much each zoom step multiplies or divides by. */
 export const ZOOM_STEP = 1.5;
-const DASHES = { solid: undefined, dashed: "8 5", dotted: "2 5" } as const;
 const KEYS = shortcutsIn("timeline");
 
 /** The width of an element, followed as it changes; a fallback where it cannot be measured. */
@@ -120,59 +118,17 @@ function Axis({
   );
 }
 
-/** An entry's mark: a dot (hollow and dashed when approximate) or a bar, and the faint period of a partial date. */
-function Mark({ placed, top, scale, selected }: { placed: PlacedEntry; top: number; scale: Scale; selected: boolean }) {
-  const y = top + MARK_Y;
-  const { entry, extent } = placed;
-  const approximate = (point: TimelinePoint | null) => point !== null && "approximate" in point && point.approximate;
-  const band =
-    extent.band && xOf(scale, extent.band[1]) - xOf(scale, extent.band[0]) >= 4 ? (
-      <rect
-        className="eh-timeline-band"
-        x={xOf(scale, extent.band[0]) + MARGIN}
-        y={y - 7}
-        width={xOf(scale, extent.band[1]) - xOf(scale, extent.band[0])}
-        height={14}
-      />
-    ) : null;
-  if (extent.marker !== null) {
-    return (
-      <g data-selected={selected ? "true" : undefined}>
-        {band}
-        <circle
-          className={approximate(entry.start) ? "eh-timeline-dot eh-timeline-approximate" : "eh-timeline-dot"}
-          cx={placed.x1 + MARGIN}
-          cy={y}
-          r={5}
-        />
-      </g>
-    );
-  }
-  return (
-    <g data-selected={selected ? "true" : undefined}>
-      <line
-        className="eh-timeline-bar"
-        x1={placed.x1 + MARGIN}
-        x2={Math.max(placed.x2, placed.x1 + 2) + MARGIN}
-        y1={y}
-        y2={y}
-      />
-      {approximate(entry.start) && (
-        <circle className="eh-timeline-dot eh-timeline-approximate" cx={placed.x1 + MARGIN} cy={y} r={5} />
-      )}
-      {approximate(entry.end) && (
-        <circle className="eh-timeline-dot eh-timeline-approximate" cx={placed.x2 + MARGIN} cy={y} r={5} />
-      )}
-    </g>
-  );
-}
+/** Whether two entries are at the same points of time. */
+const sameTime = (a: TimelineEntry, b: TimelineEntry) =>
+  JSON.stringify([a.start, a.end]) === JSON.stringify([b.start, b.end]);
 
 /**
  * A timeline drawn (jerome's drawing): time left to right (to scale in Dates, with long empty stretches
  * collapsed; one column per step in a Sequence), a lane per category in its colour and line, each entry a
  * dot or a bar with its title above it. Titles are buttons in time order: the arrow keys, Home and End move
  * between them, Enter opens one, Alt and an arrow moves it (a lane up or down, a step or a year, month or day
- * earlier or later), Delete deletes it after asking, and the Menu key or a right-click opens its menu.
+ * earlier or later), Delete deletes it after asking, and the Menu key or a right-click opens its menu. The
+ * pointer drags an entry along the axis and between lanes, and a span's ends to resize it.
  * Double-clicking an empty spot on a lane starts an entry there, as New entry does. It zooms with its
  * buttons, Ctrl+wheel and the zoom keys, and becomes a list in a narrow space.
  */
@@ -276,6 +232,28 @@ export function TimelineDrawing() {
         ? (tried.value.categories.find((category) => category.id === moved.categoryId)?.name ?? "")
         : formatWhen(moved, tried.value, showCe, words);
     view.announce(t("timeline.movedTo", { title: moved.title, place }));
+  }
+
+  /** Drops an entry dragged with the pointer, and says where it went. */
+  function drop(entry: TimelineEntry, drag: EntryDrag) {
+    const tried = dragEntry(timeline, entry.id, drag);
+    const moved = tried.ok ? tried.value.entries.find((each) => each.id === entry.id) : undefined;
+    const lane = moved?.categoryId !== entry.categoryId;
+    if (!tried.ok || !moved || (!lane && sameTime(entry, moved))) return;
+    moving.current = entry.id;
+    if (!view.change((now) => dragEntry(now, entry.id, drag))) return;
+    const { title } = moved;
+    const when = formatWhen(moved, tried.value, showCe, words);
+    const category = tried.value.categories.find((each) => each.id === moved.categoryId)?.name ?? "";
+    view.announce(
+      drag.part !== "whole"
+        ? t("timeline.resizedTo", { title, when })
+        : !lane
+          ? t("timeline.movedTo", { title, place: when })
+          : sameTime(entry, moved)
+            ? t("timeline.movedTo", { title, place: category })
+            : t("timeline.movedToLaneAt", { title, category, when }),
+    );
   }
 
   function key(event: KeyboardEvent<HTMLButtonElement>, entry: TimelineEntry, index: number) {
@@ -414,34 +392,33 @@ export function TimelineDrawing() {
               />
             ))}
             {ordered.map(({ placed, lane }, index) => (
-              <Button
+              <EntryLabel
                 key={placed.entry.id}
-                variant="quiet"
-                className="eh-timeline-label"
-                data-entry={placed.entry.id}
-                ref={(element) => {
+                placed={placed}
+                lane={lane}
+                lanes={lanes}
+                scale={scale}
+                timeline={timeline}
+                plane={plane}
+                width={planeWidth}
+                height={height}
+                readOnly={readOnly}
+                selected={placed.entry.id === selectedId}
+                name={accessibleName(placed.entry, lane, view)}
+                shortcuts={shortcuts}
+                when={(entry) => formatWhen(entry, timeline, showCe, words)}
+                register={(element) => {
                   if (element) buttons.current.set(placed.entry.id, element);
                   else buttons.current.delete(placed.entry.id);
                 }}
-                aria-label={accessibleName(placed.entry, lane, view)}
-                aria-keyshortcuts={shortcuts}
-                title={placed.entry.title}
-                aria-current={placed.entry.id === selectedId ? "true" : undefined}
-                style={{
-                  left: Math.max(placed.labelX + MARGIN, 0),
-                  top: lane.top + LANE_PADDING + placed.row * ROW_HEIGHT,
-                  maxWidth: placed.labelWidth,
-                  height: LABEL_HEIGHT,
-                }}
-                onClick={(event) => view.openEntry(placed.entry.id, event.currentTarget)}
-                onContextMenu={(event) => {
+                onOpen={(from) => view.openEntry(placed.entry.id, from)}
+                onMenu={(event) => {
                   event.preventDefault();
                   view.openMenu(placed.entry.id, { left: event.clientX, top: event.clientY }, event.currentTarget);
                 }}
-                onKeyDown={(event) => key(event, placed.entry, index)}
-              >
-                {placed.entry.title}
-              </Button>
+                onKey={(event) => key(event, placed.entry, index)}
+                onDrop={(drag) => drop(placed.entry, drag)}
+              />
             ))}
           </div>
         </div>

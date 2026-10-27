@@ -238,7 +238,8 @@ function TimelineBody({
 /**
  * A timeline drawn (decision 16, jerome's drawing): its lanes, entries and axis, zoomed with its buttons, the
  * keys or Ctrl+wheel, a list in a narrow space; entries open in a dialog (or the host's editor), have a menu
- * (Edit, Delete), and move with Alt and an arrow. New entry, or a double-click on a lane, starts one. Steps
+ * (Edit, Delete), and move with Alt and an arrow or with the pointer (along the axis, between lanes, or a span's
+ * ends). New entry, or a double-click on a lane, starts one. Steps
  * and categories are edited in `<TimelineEditor>`, or by the host.
  */
 export function Timeline({ strings, t, locale, theme, className, ...props }: TimelineProps) {

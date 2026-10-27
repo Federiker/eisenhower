@@ -51,10 +51,14 @@ The first round (owner decisions, 27 October 2026; see
     entry), menu, entry dialog and narrow layout.
   - [x] `<TimelineEditor>`: the entries' table, the steps and categories
     lists.
-  - [ ] The owner's word on the choices in
-    [its decisions](docs/features/timeline.md#decisions) (moving entries
-    with Alt+arrows, New entry beside the zoom, Ctrl+0, no timeline
-    title).
+  - [x] The owner's word on moving entries (27 October 2026): the
+    Alt+arrow moves stay, and entries are dragged with the pointer along
+    the axis, between lanes and by a span's ends.
+  - [ ] The owner's word on the other choices in
+    [its decisions](docs/features/timeline.md#decisions) (New entry beside
+    the zoom, Ctrl+0, no timeline title).
+  - [ ] A Playwright test of dragging entries in a real browser, on the
+    demo app's timeline page (the unit tests' DOM has no layout).
 - [ ] The gantt chart (decision 17; see [its document](docs/features/gantt.md)):
   - [x] The model: groups, tasks, milestones, progress, dependencies and
     their conflicts, the edit operations and the document, with tests.
