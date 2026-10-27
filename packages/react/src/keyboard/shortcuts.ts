@@ -7,9 +7,10 @@
  */
 import type { MessageKey } from "../strings/en-GB";
 import { COMMON_SHORTCUTS } from "./common";
+import { TIMELINE_SHORTCUTS } from "./timeline";
 
 /** Where a shortcut applies: in every view (`common`), or in one view. */
-export type ShortcutArea = "common";
+export type ShortcutArea = "common" | "timeline";
 
 /**
  * A key as `KeyboardEvent.key` names it (letters in either case), or a physical key by `KeyboardEvent.code`
@@ -32,7 +33,7 @@ export type ShortcutDefinition = {
   readonly alt?: boolean;
 };
 
-export const SHORTCUTS = [...COMMON_SHORTCUTS] as const satisfies readonly ShortcutDefinition[];
+export const SHORTCUTS = [...COMMON_SHORTCUTS, ...TIMELINE_SHORTCUTS] as const satisfies readonly ShortcutDefinition[];
 
 export type ShortcutAction = (typeof SHORTCUTS)[number]["action"];
 
