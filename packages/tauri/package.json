@@ -1,0 +1,25 @@
+{
+  "name": "@eisenhower/tauri",
+  "private": true,
+  "type": "module",
+  "license": "CC0-1.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eisenhower/model": "workspace:*",
+    "@tauri-apps/api": "catalog:"
+  },
+  "devDependencies": {
+    "@eisenhower/tooling": "workspace:*",
+    "happy-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "zod": "catalog:"
+  }
+}
