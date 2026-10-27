@@ -1,8 +1,11 @@
 # tauri-plugin-eisenhower
 
-On crates.io as `tauri-plugin-eisenhower` (`tauri-plugin-eisenhower = "0.1"`
-in the app's `src-tauri/Cargo.toml`); its client on npm is
-`@frodobaggins.jr/eisenhower-tauri`.
+Not on crates.io: an app takes it by git at a release's tag, in its
+`src-tauri/Cargo.toml`:
+
+```toml
+tauri-plugin-eisenhower = { git = "https://github.com/Federiker/eisenhower", tag = "v0.1.0" }
+```
 
 Eisenhower's Tauri 2 plugin: documents (a board, a timeline, a gantt chart, a
 todo list, as `@eisenhower/model` writes them) read and written on disk, with

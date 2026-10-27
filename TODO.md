@@ -23,6 +23,12 @@ four views, the Tauri plugin and client, the demo app and its end-to-end
 tests, each described in [docs/features/](docs/README.md). What is left
 is under **Verification** and **Awaiting owner decisions**.
 
+- [ ] The first release, v0.1.0 (decision 11; see the README's Releasing):
+  - [ ] `mise run release` tags v0.1.0 at HEAD; push `main` and `v0.1.0`.
+  - [ ] `mise run release` again: the GitHub release and its three tarballs.
+  - [ ] A throwaway host installs the three tarballs by URL (`bun add`) and
+    the plugin by git at the tag, and builds.
+
 ## Verification
 
 - [ ] The demo app's window (`mise run tauri:dev`), clicked through: each

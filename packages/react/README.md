@@ -1,10 +1,13 @@
 # @eisenhower/react
 
-Published on npm as
-[`@frodobaggins.jr/eisenhower-react`](https://www.npmjs.com/package/@frodobaggins.jr/eisenhower-react)
-(`bun add @frodobaggins.jr/eisenhower-react`, with `react` and `react-dom`;
-its stylesheet is `@frodobaggins.jr/eisenhower-react/style.css`); in the
-workspace it is `@eisenhower/react`.
+A tarball on each [GitHub release](https://github.com/Federiker/eisenhower/releases),
+installed by URL with `react` and `react-dom` (it brings
+`@eisenhower/model` from the same release); its stylesheet is
+`@eisenhower/react/style.css`:
+
+```sh
+bun add https://github.com/Federiker/eisenhower/releases/download/v0.1.0/eisenhower-react-0.1.0.tgz
+```
 
 The views (`<Board>`, `<Timeline>` and `<TimelineEditor>`, `<Gantt>`,
 `<TodoList>`) and what they share: the strings, the theme, the keys and the

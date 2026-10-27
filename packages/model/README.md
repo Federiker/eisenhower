@@ -1,17 +1,16 @@
 # @eisenhower/model
 
-Published on npm as
-[`@frodobaggins.jr/eisenhower-model`](https://www.npmjs.com/package/@frodobaggins.jr/eisenhower-model);
-in the workspace it is `@eisenhower/model`.
-
 The data of Eisenhower's four views (a board, a timeline, a gantt chart and
 a todo list), with their schemas (zod), their edit operations and the
 storage of their documents. Plain TypeScript, no React: each edit is a pure
 function that returns a new value or a problem code, and never throws for a
 user's input. See [the models](../../docs/features/model.md).
 
+A tarball on each [GitHub release](https://github.com/Federiker/eisenhower/releases),
+installed by URL:
+
 ```sh
-bun add @frodobaggins.jr/eisenhower-model
+bun add https://github.com/Federiker/eisenhower/releases/download/v0.1.0/eisenhower-model-0.1.0.tgz
 ```
 
 - `src/board/`, `src/timeline/`, `src/gantt/`, `src/todo/`: each view's

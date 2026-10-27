@@ -56,17 +56,20 @@ like), checked by `mise run audit`; see
 
 ## Use it in an app
 
-The packages are on npm under the owner's scope, the Tauri plugin on
-crates.io (in this repository they are `@eisenhower/*`):
+The packages are tarballs on each
+[GitHub release](https://github.com/Federiker/eisenhower/releases),
+installed by URL; the Tauri plugin is taken by git at the release's tag:
 
 ```sh
-bun add @frodobaggins.jr/eisenhower-react @frodobaggins.jr/eisenhower-model
-bun add @frodobaggins.jr/eisenhower-tauri   # in a Tauri app, with the plugin
+bun add https://github.com/Federiker/eisenhower/releases/download/v0.1.0/eisenhower-react-0.1.0.tgz \
+        https://github.com/Federiker/eisenhower/releases/download/v0.1.0/eisenhower-model-0.1.0.tgz
+# in a Tauri app, with the plugin:
+bun add https://github.com/Federiker/eisenhower/releases/download/v0.1.0/eisenhower-tauri-0.1.0.tgz
 ```
 
 ```toml
 # src-tauri/Cargo.toml, in a Tauri app
-tauri-plugin-eisenhower = "0.1"
+tauri-plugin-eisenhower = { git = "https://github.com/Federiker/eisenhower", tag = "v0.1.0" }
 ```
 
 Each view takes its data as `value` and gives every change back as the
@@ -74,9 +77,9 @@ whole new value; `useHistory` adds undo and redo, and `EisenhowerProvider`
 sets the theme, the locale and the strings of every view inside it:
 
 ```tsx
-import { emptyBoard } from "@frodobaggins.jr/eisenhower-model";
-import { Board, EisenhowerProvider, Gantt, TimelineEditor, TodoList, useHistory } from "@frodobaggins.jr/eisenhower-react";
-import "@frodobaggins.jr/eisenhower-react/style.css";
+import { emptyBoard } from "@eisenhower/model";
+import { Board, EisenhowerProvider, Gantt, TimelineEditor, TodoList, useHistory } from "@eisenhower/react";
+import "@eisenhower/react/style.css";
 
 const board = useHistory(emptyBoard());
 <EisenhowerProvider theme="system" locale="en-GB">
@@ -93,14 +96,14 @@ through a storage adapter, with its view's `DocumentKind` (`boardDocument`,
 read, so a save never overwrites a change made elsewhere unseen:
 
 ```ts
-import { boardDocument, loadDocument, localStorageAdapter, saveDocument } from "@frodobaggins.jr/eisenhower-model";
+import { boardDocument, loadDocument, localStorageAdapter, saveDocument } from "@eisenhower/model";
 
-const storage = localStorageAdapter("my-app:"); // or memoryStorage(), or tauriStorage() from …-tauri
+const storage = localStorageAdapter("my-app:"); // or memoryStorage(), or tauriStorage() from @eisenhower/tauri
 const loaded = await loadDocument(storage, "board", boardDocument); // null when nothing is stored
 const revision = await saveDocument(storage, "board", boardDocument, board.value, loaded?.revision);
 ```
 
-In a Tauri app, `tauri-plugin-eisenhower` and `@frodobaggins.jr/eisenhower-tauri` keep the
+In a Tauri app, `tauri-plugin-eisenhower` and `@eisenhower/tauri` keep the
 documents in files with a hash guard; the demo app in
 [packages/app](packages/app/README.md) shows the whole integration, in the
 browser and as a window. See [docs/features/](docs/README.md) for each view
@@ -144,26 +147,32 @@ needed. It is disposable local developer data, not a required build input.
 Do not stage it or depend on another developer having its contents; keep
 durable findings in tracked documentation.
 
-### Publishing
+### Releasing
 
 `@eisenhower/model`, `@eisenhower/react` and `@eisenhower/tauri` are
-published to npm as `@frodobaggins.jr/eisenhower-model`, `-react` and
-`-tauri`, built (`dist/index.js`, declarations and, for the views,
-`style.css`); `tauri-plugin-eisenhower` to crates.io. Everything takes the
-version in the root `Cargo.toml` (`[workspace.package]`). See
-[decision 11](docs/development.md#decisions).
+released as tarballs on the GitHub release of the tag `v<version>`, built
+(`dist/index.js`, declarations and, for the views, `style.css`); there is
+no npm registry. `tauri-plugin-eisenhower` is not published: hosts take it
+by git at the tag. Everything takes the version in the root `Cargo.toml`
+(`[workspace.package]`). See [decision 11](docs/development.md#decisions).
 
 ```sh
-mise run publish:dry   # the checks, the builds in tmp/publish, then npm's and cargo's dry runs
-mise run publish       # the same on a clean tree, then publishes for real
+mise run release:dry   # the checks, the tarballs in tmp/release, a consumer of them, the plan and the notes
+mise run release       # on a clean tree: tags v<version> and stops for you to push, then (run again) releases
 ```
 
-`mise run publish:dry --allow-dirty` dry-runs with uncommitted changes and
-`--skip-checks` without the type-check, the tests and Clippy. Publishing
-needs the tokens in the gitignored `.env` (copy [.env.example](.env.example)):
-`NPM_TOKEN` for the frodobaggins.jr npm account and `CRATES_IO_TOKEN`. A
-version a registry already has is skipped, so a publish that stopped half
-way is run again as it is.
+To release: bump the version in `Cargo.toml` and commit; `mise run release`
+creates the annotated tag `v<version>` at HEAD and says what to push
+(`git push origin main v<version>`); push; then `mise run release` again
+makes the release and uploads the tarballs. A tarball the release has
+already is skipped, so a release that stopped half way is run again as it
+is. The release's notes are made by
+[scripts/release/notes.ts](scripts/release/notes.ts).
+`mise run release:dry --allow-dirty` dry-runs with uncommitted changes and
+`--skip-checks` without the type-check, the tests and Clippy. Releasing
+needs `GITHUB_TOKEN` in the gitignored `.env` (copy
+[.env.example](.env.example)): a fine-grained token with Contents: read and
+write on the repository.
 
 ### Commands
 
@@ -174,8 +183,8 @@ way is run again as it is.
 | `mise run dev` | The demo app in the browser (Vite) |
 | `mise run tauri:dev` | The demo app as a native window |
 | `mise run build` | The demo app's production build |
-| `mise run publish:dry` | Check, build and dry-run publishing to npm and crates.io |
-| `mise run publish` | The same, then publish for real (tokens in `.env`) |
+| `mise run release:dry` | Check, build and verify the release's tarballs; list what releasing does |
+| `mise run release` | Tag `v<version>`, then (once pushed) the GitHub release and its tarballs |
 | `mise run test` | The TypeScript tests (Vitest) |
 | `mise run coverage` | The same, failing below 80% |
 | `mise run rust:test` | The Rust tests (nextest when installed) |
@@ -205,9 +214,9 @@ Bun's caches from Microsoft Defender, or working on a Dev Drive, helps further.
 | [crates/tauri-plugin](crates/tauri-plugin) | `tauri-plugin-eisenhower` | The Tauri plugin: documents on disk with a hash guard |
 | [tests/e2e](tests/e2e) | `@eisenhower/e2e` | Playwright tests of the demo app |
 
-Model, react and tauri are published to npm as
-`@frodobaggins.jr/eisenhower-<name>`, the plugin to crates.io under its own
-name ([Publishing](#publishing)); the others stay private.
+Model, react and tauri are released as tarballs on GitHub releases, under
+these names; the plugin is taken by git at a release's tag
+([Releasing](#releasing)). The others stay private.
 
 ## Checks
 

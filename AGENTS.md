@@ -69,7 +69,7 @@ timelines, and usable by any app. Read [README.md](README.md) for setup,
 - Prefer native and Bun tooling; do not add Docker or Python to the build,
   the checks or the scripts.
 - The version is set once, in the root `Cargo.toml` (`[workspace.package]`);
-  the packages follow it when they are published.
+  the packages follow it when they are released.
 
 ## Assistant conduct
 

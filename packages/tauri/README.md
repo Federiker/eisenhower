@@ -1,10 +1,16 @@
 # @eisenhower/tauri
 
-Published on npm as
-[`@frodobaggins.jr/eisenhower-tauri`](https://www.npmjs.com/package/@frodobaggins.jr/eisenhower-tauri)
-(`bun add @frodobaggins.jr/eisenhower-tauri`, with the plugin from crates.io:
-`tauri-plugin-eisenhower = "0.1"`); in the workspace it is
-`@eisenhower/tauri`.
+A tarball on each [GitHub release](https://github.com/Federiker/eisenhower/releases),
+installed by URL, with the plugin by git at the same release's tag:
+
+```sh
+bun add https://github.com/Federiker/eisenhower/releases/download/v0.1.0/eisenhower-tauri-0.1.0.tgz
+```
+
+```toml
+# src-tauri/Cargo.toml
+tauri-plugin-eisenhower = { git = "https://github.com/Federiker/eisenhower", tag = "v0.1.0" }
+```
 
 The typed client of [`tauri-plugin-eisenhower`](../../crates/tauri-plugin/README.md),
 for a Tauri 2 app that keeps Eisenhower's documents in files, and a
