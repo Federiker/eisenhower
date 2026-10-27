@@ -40,9 +40,19 @@ The first round (owner decisions, 27 October 2026; see
 - [ ] The timeline (decision 16), from jerome's timelines: the model (steps,
   dates, categories, entries), the drawing with its scale and zoom, the
   lists, the entry dialog, the narrow layout, with jerome's tests.
-- [ ] The gantt chart (decision 17): the model, bars on the scales, moving
-  and resizing with the pointer and keys, dependencies and their warning,
-  milestones and progress, collapsible groups.
+- [ ] The gantt chart (decision 17; see [its document](docs/features/gantt.md)):
+  - [x] The model: groups, tasks, milestones, progress, dependencies and
+    their conflicts, the edit operations and the document, with tests.
+  - [x] `<Gantt>`: the tree grid, bars, milestones and summary rows on the
+    day, week and month scales, weekends and today, the header in the
+    locale.
+  - [x] Moving and resizing with the pointer and the keys, the menus, the
+    questions, the task dialog, the scale keys.
+  - [x] Dependencies as arrows, their warning in words and on the drawing.
+  - [ ] The owner's answers to the decisions listed in its document
+    (Alt+arrow steps on the week and month scales, the limits…).
+  - [ ] The demo app's page and a Playwright test of dragging in a real
+    browser (the unit tests' DOM has no layout).
 - [ ] The todo list (decision 18): the model, the list with due dates,
   subtasks, tags and notes, the tag filter, the matrix layout.
 - [ ] Rust and the Tauri client (decisions 9 and 10):
