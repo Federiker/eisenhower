@@ -62,6 +62,18 @@ describe("timeline dates", () => {
     expect(shiftDate(date(999_999), "year", 1)).toBeNull();
     expect(shiftDate(date(-999_998, 1, 1), "day", -1)).toBeNull();
   });
+
+  it("move by many days at once, across leap years, centuries and BCE", () => {
+    // 1 January 1970 and 146 097 days, 400 Gregorian years, later.
+    expect(shiftDate(date(1970, 1, 1), "day", 146_097)).toEqual(date(2370, 1, 1));
+    expect(shiftDate(date(2000, 2, 28), "day", 366)).toEqual(date(2001, 2, 28));
+    expect(shiftDate(date(1900, 2, 28), "day", 1)).toEqual(date(1900, 3, 1));
+    expect(shiftDate(date(1, 1, 1, true), "day", -1)).toEqual(date(0, 12, 31, true));
+    // Astronomical −400 (401 BCE) is a leap year, −500 is not.
+    expect(shiftDate(date(-400, 3, 1), "day", -1)).toEqual(date(-400, 2, 29));
+    expect(shiftDate(date(-500, 3, 1), "day", -1)).toEqual(date(-500, 2, 28));
+    expect(shiftDate(date(-999_998, 1, 1), "day", 146_097 * 2)).toEqual(date(-999_198, 1, 1));
+  });
 });
 
 describe("timelines", () => {

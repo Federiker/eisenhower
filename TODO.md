@@ -51,10 +51,14 @@ The first round (owner decisions, 27 October 2026; see
     entry), menu, entry dialog and narrow layout.
   - [x] `<TimelineEditor>`: the entries' table, the steps and categories
     lists.
-  - [ ] The owner's word on the choices in
-    [its decisions](docs/features/timeline.md#decisions) (moving entries
-    with Alt+arrows, New entry beside the zoom, Ctrl+0, no timeline
-    title).
+  - [x] The owner's word on moving entries (27 October 2026): the
+    Alt+arrow moves stay, and entries are dragged with the pointer along
+    the axis, between lanes and by a span's ends.
+  - [ ] The owner's word on the other choices in
+    [its decisions](docs/features/timeline.md#decisions) (New entry beside
+    the zoom, Ctrl+0, no timeline title).
+  - [ ] A Playwright test of dragging entries in a real browser, on the
+    demo app's timeline page (the unit tests' DOM has no layout).
 - [ ] The gantt chart (decision 17; see [its document](docs/features/gantt.md)):
   - [x] The model: groups, tasks, milestones, progress, dependencies and
     their conflicts, the edit operations and the document, with tests.
@@ -64,9 +68,19 @@ The first round (owner decisions, 27 October 2026; see
   - [x] Moving and resizing with the pointer and the keys, the menus, the
     questions, the task dialog, the scale keys.
   - [x] Dependencies as arrows, their warning in words and on the drawing.
+<<<<<<< HEAD
   - [ ] The owner's answers to the decisions listed in its document
     (Alt+arrow steps on the week and month scales, the limits…).
   - [x] The demo app's page and a Playwright test of dragging in a real
+=======
+  - [x] The owner's answers on the keys' step (a day on every scale), the
+    default scale and the limits (27 October 2026).
+  - [ ] The owner's answers on the other decisions listed in
+    [its document](docs/features/gantt.md#decisions-to-confirm) (a
+    milestone on its predecessor's last day, today's colour, Alt+↑ ↓
+    across groups, the stored fold).
+  - [ ] The demo app's page and a Playwright test of dragging in a real
+>>>>>>> worktree-agent-a400c9a4952b8ac02
     browser (the unit tests' DOM has no layout).
   - [ ] The header clips a month's name when little of that month is
     drawn (the first month of the range reads "Septer" on the week scale,

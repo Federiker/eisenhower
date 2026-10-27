@@ -49,6 +49,35 @@ export function precisionOfDate(date: TimelineDate): DatePrecision {
 
 const remainder = (value: number, divisor: number) => ((value % divisor) + divisor) % divisor;
 
+/** Days from 1 January 1970 in the proleptic Gregorian calendar, astronomical years (Howard Hinnant's method). */
+function dayCount(year: number, month: number, day: number): number {
+  const y = month <= 2 ? year - 1 : year;
+  const era = Math.floor(y / 400);
+  const yearOfEra = y - era * 400;
+  const dayOfYear = Math.floor((153 * (month + (month > 2 ? -3 : 9)) + 2) / 5) + day - 1;
+  return (
+    era * 146_097 + yearOfEra * 365 + Math.floor(yearOfEra / 4) - Math.floor(yearOfEra / 100) + dayOfYear - 719_468
+  );
+}
+
+/** The day a {@link dayCount} falls on. */
+function dayOfCount(count: number): { year: number; month: number; day: number } {
+  const z = count + 719_468;
+  const era = Math.floor(z / 146_097);
+  const dayOfEra = z - era * 146_097;
+  const yearOfEra = Math.floor(
+    (dayOfEra - Math.floor(dayOfEra / 1460) + Math.floor(dayOfEra / 36_524) - Math.floor(dayOfEra / 146_096)) / 365,
+  );
+  const dayOfYear = dayOfEra - (365 * yearOfEra + Math.floor(yearOfEra / 4) - Math.floor(yearOfEra / 100));
+  const shifted = Math.floor((5 * dayOfYear + 2) / 153);
+  const month = shifted + (shifted < 10 ? 3 : -9);
+  return {
+    year: yearOfEra + era * 400 + (month <= 2 ? 1 : 0),
+    month,
+    day: dayOfYear - Math.floor((153 * shifted + 2) / 5) + 1,
+  };
+}
+
 /**
  * The date `by` years, months or days later (earlier when negative), keeping its precision and whether
  * it is approximate; a day past the end of the new month comes back to its last day (31 January and a
@@ -64,33 +93,8 @@ export function shiftDate(date: TimelineDate, unit: DatePrecision, by: number): 
     month = remainder(index, 12) + 1;
   } else {
     if (month === null || day === null) return null;
-    // Day by day through month ends; a timeline's moves are a day at a time, so this stays short.
-    let left = by;
-    while (left !== 0) {
-      if (left > 0) {
-        day += 1;
-        if (day > daysInMonth(year, month)) {
-          day = 1;
-          month += 1;
-          if (month > 12) {
-            month = 1;
-            year += 1;
-          }
-        }
-        left -= 1;
-      } else {
-        day -= 1;
-        if (day < 1) {
-          month -= 1;
-          if (month < 1) {
-            month = 12;
-            year -= 1;
-          }
-          day = daysInMonth(year, month);
-        }
-        left += 1;
-      }
-    }
+    // Through day numbers, so a long drag across the years costs no more than a day's move.
+    ({ year, month, day } = dayOfCount(dayCount(year, month, day) + by));
   }
   if (year < EARLIEST_TIMELINE_YEAR || year > LATEST_TIMELINE_YEAR) return null;
   if (month !== null && day !== null) day = Math.min(day, daysInMonth(year, month));

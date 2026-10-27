@@ -226,7 +226,19 @@ export {
   type StepDisposal,
   updateCategory,
 } from "./timeline/edit";
-export { deleteEntry, moveEntryToLane, putEntry, shiftEntry, shiftUnit, sortedEntries } from "./timeline/entries";
+export {
+  deleteEntry,
+  dragEntry,
+  draggedEntry,
+  type EntryDrag,
+  type EntryPart,
+  moveEntryToLane,
+  partUnit,
+  putEntry,
+  shiftEntry,
+  shiftUnit,
+  sortedEntries,
+} from "./timeline/entries";
 export {
   compareTimelinePoints,
   emptyTimeline,

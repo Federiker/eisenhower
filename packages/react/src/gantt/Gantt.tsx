@@ -47,7 +47,7 @@ import { type EisenhowerSettings, ViewRoot } from "../theme/EisenhowerProvider";
 import { formatDay, formatLength, formatSpan } from "./format";
 import { GanttArrows, GanttBackdrop, GanttHeader } from "./GanttDrawing";
 import { type DragMode, GroupRow, ROW_HEIGHT, type RowBridge, TaskRow } from "./GanttRows";
-import { type GanttScale, geometryOf, KEY_STEP, xOfDay, zoomed } from "./scale";
+import { type GanttScale, geometryOf, xOfDay, zoomed } from "./scale";
 import { TaskDialog } from "./TaskDialog";
 
 /** The name column's width, in pixels (the stylesheet's `--eh-gantt-name-width` is set from it). */
@@ -382,7 +382,6 @@ function GanttView({
     const index = rowKeys.indexOf(rowKey);
     const id = idOf(rowKey);
     const task = rowKey.startsWith("task:") ? taskOf(id) : undefined;
-    const step = KEY_STEP[scale];
     event.preventDefault();
     switch (action) {
       case "focusUp":
@@ -410,11 +409,11 @@ function GanttView({
         break;
       case "moveLeft":
       case "moveRight":
-        if (task) moveDays(id, "move", action === "moveLeft" ? -step : step);
+        if (task) moveDays(id, "move", action === "moveLeft" ? -1 : 1);
         break;
       case "shortenTask":
       case "lengthenTask":
-        if (task) moveDays(id, "end", action === "shortenTask" ? -step : step);
+        if (task) moveDays(id, "end", action === "shortenTask" ? -1 : 1);
         break;
       case "moveUp":
       case "moveDown":

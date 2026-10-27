@@ -1,6 +1,8 @@
 import {
   deleteEntry,
   draftOf,
+  dragEntry,
+  draggedEntry,
   type EditResult,
   type EntryDraft,
   entryFromDraft,
@@ -8,6 +10,7 @@ import {
   MAX_TIMELINE_ENTRIES,
   moveEntryToLane,
   newDraft,
+  partUnit,
   putEntry,
   shiftEntry,
   shiftUnit,
@@ -176,5 +179,76 @@ describe("moving an entry with the keys", () => {
     expect(ok(shiftEntry(timeline, id(22), 1)).entries[2]).toMatchObject({ start: date(1067, 1, 1) });
     const edge = dated([entry(20, date(-999_998), date(999_999))]);
     expect(shiftEntry(edge, id(20), 1)).toEqual({ ok: false, reason: "limit" });
+  });
+});
+
+describe("dragging an entry with the pointer", () => {
+  const dragged = (result: EditResult<TimelineEntry>): TimelineEntry => {
+    if (!result.ok) throw new Error(result.reason);
+    return result.value;
+  };
+
+  it("moves a point or a whole span by steps, to another lane, stopping at the first or last step", () => {
+    const timeline = acts([entry(20, step(1), step(2)), entry(21, step(3))]);
+    const moved = ok(dragEntry(timeline, id(20), { part: "whole", by: 1, categoryId: id(11) }));
+    expect(moved.entries[0]).toMatchObject({ start: step(2), end: step(3), categoryId: id(11) });
+    // Further than the steps go, it stops at the last one; before the first, at the first.
+    expect(dragged(draggedEntry(timeline, id(20), { part: "whole", by: 5, categoryId: id(10) }))).toMatchObject({
+      start: step(2),
+      end: step(3),
+    });
+    expect(dragged(draggedEntry(timeline, id(21), { part: "whole", by: -7, categoryId: id(10) }))).toMatchObject({
+      start: step(1),
+      end: null,
+    });
+    // No move and the same lane give the entry back as it is.
+    expect(dragged(draggedEntry(timeline, id(21), { part: "whole", by: 0, categoryId: id(10) }))).toEqual(
+      timeline.entries[1],
+    );
+  });
+
+  it("resizes a span by either end, never to or past the other", () => {
+    const timeline = acts([entry(20, step(1), step(2))]);
+    const end = (by: number) => dragged(draggedEntry(timeline, id(20), { part: "end", by, categoryId: id(10) }));
+    const start = (by: number) => dragged(draggedEntry(timeline, id(20), { part: "start", by, categoryId: id(10) }));
+    expect(end(1)).toMatchObject({ start: step(1), end: step(3) });
+    expect(end(-4)).toMatchObject({ start: step(1), end: step(2) });
+    expect(start(3)).toMatchObject({ start: step(1), end: step(2) });
+    expect(
+      ok(dragEntry(acts([entry(20, step(1), step(3))]), id(20), { part: "start", by: 9, categoryId: id(10) })),
+    ).toMatchObject({ entries: [{ start: step(2), end: step(3) }] });
+  });
+
+  it("moves dates by the entry's precision and resizes an end by its own, within the timeline's years", () => {
+    const span = entry(20, date(1066, 10, 14), date(1087));
+    const timeline = dated([span, entry(21, date(1066, 10)), entry(22, date(999_990, 12, 30))]);
+    const drag = (n: number, part: "whole" | "start" | "end", by: number) =>
+      dragged(draggedEntry(timeline, id(n), { part, by, categoryId: id(10) }));
+    expect([partUnit(span, "whole"), partUnit(span, "start"), partUnit(span, "end")]).toEqual(["year", "day", "year"]);
+    expect(partUnit(timeline.entries[1]!, "end")).toBe("month");
+    expect(drag(20, "whole", 3)).toMatchObject({ start: date(1069, 10, 14), end: date(1090) });
+    expect(drag(20, "start", 80)).toMatchObject({ start: date(1067, 1, 2), end: date(1087) });
+    // The start stops on the last day before the year it ends in.
+    expect(drag(20, "start", 1_000_000)).toMatchObject({ start: date(1086, 12, 31) });
+    expect(drag(20, "end", -100)).toMatchObject({ end: date(1067) });
+    expect(drag(21, "whole", -14)).toMatchObject({ start: date(1065, 8), end: null });
+    // A day 36 500 later would be past 999 999 CE: it stops on that year's last day.
+    expect(drag(22, "whole", 36_500)).toMatchObject({ start: date(999_999, 12, 31) });
+  });
+
+  it("refuses an entry or a lane that is not there, and an end of an entry at one point", () => {
+    const timeline = acts([entry(21, step(3))]);
+    expect(draggedEntry(timeline, id(99), { part: "whole", by: 1, categoryId: id(10) })).toEqual({
+      ok: false,
+      reason: "missing",
+    });
+    expect(dragEntry(timeline, id(21), { part: "whole", by: 1, categoryId: id(99) })).toEqual({
+      ok: false,
+      reason: "missing",
+    });
+    expect(dragEntry(timeline, id(21), { part: "end", by: 1, categoryId: id(10) })).toEqual({
+      ok: false,
+      reason: "invalid",
+    });
   });
 });

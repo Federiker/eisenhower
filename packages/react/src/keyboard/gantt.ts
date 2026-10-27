@@ -2,9 +2,9 @@ import type { ShortcutDefinition } from "./shortcuts";
 
 /**
  * The gantt chart's own keys (decision 8), beside the common ones it gives a meaning of its own: Alt+← and
- * Alt+→ (`moveLeft`, `moveRight`) move the focused task earlier or later, by a day on the day scale and by a
- * week on the week and month scales; ← and → fold and unfold a group, or go from a task to its group.
- * Alt+Shift+← and Alt+Shift+→ move the task's end by the same step; Ctrl+= (or Ctrl++) and Ctrl+- change the
+ * Alt+→ (`moveLeft`, `moveRight`) move the focused task a day earlier or later on every scale (the owner's
+ * decision of 27 October 2026); ← and → fold and unfold a group, or go from a task to its group. Alt+Shift+←
+ * and Alt+Shift+→ move the task's end by a day; Ctrl+= (or Ctrl++) and Ctrl+- change the
  * scale, as jerome's timeline zooms.
  */
 export const GANTT_SHORTCUTS = [

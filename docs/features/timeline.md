@@ -77,7 +77,12 @@ dotted), `updateCategory`, `moveCategory`, `deleteCategory` (its entries
 move to another category, or go with it), `putEntry`, `deleteEntry`,
 `sortedEntries`, and for the keys `moveEntryToLane` and `shiftEntry` (a
 step at a time, or a year, month or day by the coarsest precision of the
-entry's dates, both ends of a span together). The entry dialog's form is
+entry's dates, both ends of a span together). For the pointer,
+`draggedEntry` gives the entry as a drag leaves it (`{ part, by,
+categoryId }`: the whole entry moved, or one end of a span, by steps or by
+`partUnit`, in a lane), going as far towards `by` as it can (the first or
+last step, the years a timeline holds, the last place before the other
+end), and `dragEntry` drops it. The entry dialog's form is
 `draftOf`, `newDraft` and `entryFromDraft`, which gives every reason an
 entry cannot be saved yet, so a host's own editor may use it too.
 
@@ -115,6 +120,32 @@ The view never stores anything: jerome kept each drawing's zoom in
 width, zoom, words)` (the whole drawing as an image) give text the host
 saves where it likes; `formatTimelineDate`, `formatTimelinePoint` and
 `formatTimelineWhen` write dates as the view does.
+
+## The pointer
+
+A click on an entry's title opens it, a right-click opens its menu. In a
+timeline that may be edited, the pointer drags entries (owner decision, 27
+October 2026):
+
+- **Along the axis**, by its title or its mark: a point moves, and a span
+  moves whole, keeping its length. A span's two ends resize it, never to or
+  past the other end.
+- **Up and down**, while moving an entry whole: it goes to the lane it is
+  dropped on (above the lanes, the first; below them, the last). Resizing
+  keeps its lane.
+- **Snapping**: to steps in a Sequence; in Dates, to the entry's precision,
+  as Alt+← → move it (a year, month or day: the coarsest of its dates for
+  the whole entry, an end's own for a resize), never outside the years a
+  timeline holds. A part moves once its middle has crossed into the next
+  step, year, month or day.
+- A drag starts once the pointer has moved 4 pixels, so a click still
+  opens the entry; the click that ends a drag opens nothing. While
+  dragging, the new place is drawn over the drawing with its date or step
+  in words (the title's tooltip says it too); only the dragged entry draws
+  again until the drop. Escape, or a cancelled pointer, drops nothing.
+- The drop is announced as a key move is ("Storm: moved to Harbour, Act
+  2", "Fleet sails: now Act 1 – Act 3"), and the entry's title takes the
+  focus.
 
 ## Keys
 
@@ -162,8 +193,10 @@ where its entries go) and the Menu key opens its menu.
   notes file stay in jerome, which keeps them by entry id.
 - Moving an entry with Alt and the arrows is new: jerome's drawing had no
   key to move an entry, and decision 8 wants one. Past the first or last
-  lane or step nothing happens, as in a list. Entries are not dragged with
-  the pointer, as in jerome.
+  lane or step nothing happens, as in a list. The owner's decision, 27
+  October 2026: keep the Alt+arrow moves, and drag entries with the
+  pointer now too ([the pointer](#the-pointer)); jerome's entries were not
+  dragged.
 - New entry is beside the zoom buttons, so `<Timeline>` alone can add
   entries; jerome had it under the entries' table.
 - Ctrl+0 (fit) is new; jerome had only the Fit button.

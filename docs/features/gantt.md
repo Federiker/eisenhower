@@ -161,8 +161,8 @@ Ctrl+wheel changes the scale.
 | ↑ ↓, Home, End | The row above or below, the first or last | The same |
 | ← | Its group's row | Fold the group |
 | → | | Unfold the group, or its first task |
-| Alt+← Alt+→ | Move it a step earlier or later | |
-| Alt+Shift+← Alt+Shift+→ | Move its end a step earlier or later | |
+| Alt+← Alt+→ | Move it a day earlier or later | |
+| Alt+Shift+← Alt+Shift+→ | Move its end a day earlier or later | |
 | Alt+↑ Alt+↓ | Move it up or down the rows, across groups | Move the group up or down |
 | Enter | Open it | Fold or unfold |
 | F2 | Rename it in place | Rename it in place |
@@ -170,8 +170,7 @@ Ctrl+wheel changes the scale.
 | Menu, Shift+F10 | Its menu | Its menu |
 | Ctrl+= (or Ctrl++), Ctrl+- | A finer or coarser scale | The same |
 
-A **step** is a day on the day scale and a week (seven days) on the week
-and month scales, so a move shows on the scale drawn; the pointer always
+The keys move a task, or its end, by a day on every scale, as the pointer
 snaps to days. An end goes no further than the other: shortening stops at
 one day, and shortening a one-day task says it cannot. Alt+↑ at the top of a group takes the
 task to the end of the section above (the group before, or the tasks
@@ -197,18 +196,25 @@ bars and diamonds take the text colour and their done parts the highlight.
 A read-only chart moves nothing, offers only Open and folding, and folds
 its groups for itself without changing the chart.
 
+## Decisions
+
+The owner's decisions of 27 October 2026:
+
+- Alt+← → move a task by a day, and Alt+Shift+← → resize it by a day, on
+  every scale, as the pointer snaps to days (the first slice stepped a week
+  on the week and month scales).
+- The default scale is weeks.
+- The limits stay: 2000 tasks, 200 groups, 50 dependencies a task, and
+  names of 1 to 120 characters.
+
 ## Decisions to confirm
 
 Made for the first slice, to be put to the owner:
 
-- Alt+← → move by a week on the week and month scales (a day on the day
-  scale); the pointer snaps to days everywhere.
 - A milestone that depends on a task may not be on that task's last day
   (the same rule as for any task).
-- The default scale is weeks; the header labels today in the problem
-  colour.
+- The header labels today in the problem colour.
 - Alt+↑ ↓ cross group boundaries (unlike the board, where Alt+← → change
   the column), since Alt+← → move tasks in time here.
-- The limits: 2000 tasks, 200 groups, 50 dependencies a task.
 - The fold of a group is stored in the chart (`collapsed`), as the brief
   says; a read-only view folds for itself.

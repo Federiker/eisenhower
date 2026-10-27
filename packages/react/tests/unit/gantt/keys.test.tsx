@@ -49,16 +49,19 @@ describe("moving the focus", () => {
 });
 
 describe("moving a task with the keys", () => {
-  it("moves it a week earlier or later on the week scale, and a day on the day scale", () => {
+  it("moves it a day earlier or later on every scale", () => {
     setup();
     act(() => bar(/^Sketch/).focus());
     press(bar(/^Sketch/), "ArrowRight", { altKey: true });
-    expect(taskOf("sketch")).toMatchObject({ start: "2026-11-11", end: "2026-11-13" });
-    expect(announced()).toBe("Sketch: moved to 11 Nov 2026 to 13 Nov 2026");
+    expect(taskOf("sketch")).toMatchObject({ start: "2026-11-05", end: "2026-11-07" });
+    expect(announced()).toBe("Sketch: moved to 5 Nov 2026 to 7 Nov 2026");
     expect(bar(/^Sketch/)).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: t("gantt.scaleMonth") }));
+    press(bar(/^Sketch/), "ArrowRight", { altKey: true });
+    expect(taskOf("sketch")).toMatchObject({ start: "2026-11-06", end: "2026-11-08" });
     fireEvent.click(screen.getByRole("button", { name: t("gantt.scaleDay") }));
     press(bar(/^Sketch/), "ArrowLeft", { altKey: true });
-    expect(taskOf("sketch")).toMatchObject({ start: "2026-11-10", end: "2026-11-12" });
+    expect(taskOf("sketch")).toMatchObject({ start: "2026-11-05", end: "2026-11-07" });
   });
 
   it("changes its end with Alt+Shift and the arrows, never before its start", () => {
@@ -77,16 +80,20 @@ describe("moving a task with the keys", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("shortens a long task to one day at most on the week scale, and never resizes a milestone", () => {
+  it("resizes by a day on the week and month scales too, and never resizes a milestone", () => {
     setup();
     act(() => bar(/^Frame/).focus());
     press(bar(/^Frame/), "ArrowLeft", { altKey: true, shiftKey: true });
-    expect(taskOf("frame")).toMatchObject({ start: "2026-11-09", end: "2026-11-09" });
+    expect(taskOf("frame")).toMatchObject({ start: "2026-11-09", end: "2026-11-12" });
+    fireEvent.click(screen.getByRole("button", { name: t("gantt.scaleMonth") }));
+    press(bar(/^Frame/), "ArrowRight", { altKey: true, shiftKey: true });
+    press(bar(/^Frame/), "ArrowRight", { altKey: true, shiftKey: true });
+    expect(taskOf("frame")).toMatchObject({ start: "2026-11-09", end: "2026-11-14" });
     act(() => bar(/^Release/).focus());
     press(bar(/^Release/), "ArrowRight", { altKey: true, shiftKey: true });
     expect(screen.getByRole("alert")).toHaveTextContent(t("gantt.problem.milestone"));
     press(bar(/^Release/), "ArrowRight", { altKey: true });
-    expect(taskOf("release")).toMatchObject({ start: "2026-11-30", end: "2026-11-30" });
+    expect(taskOf("release")).toMatchObject({ start: "2026-11-24", end: "2026-11-24" });
   });
 
   it("moves it up and down the rows, across groups, unfolding the group it goes into", () => {
