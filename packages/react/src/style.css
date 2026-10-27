@@ -10,4 +10,5 @@
 @import "./controls/styles/menu.css";
 @import "./controls/styles/dialog.css";
 
+@import "./board/board.css";
 @import "./todo/todo.css";

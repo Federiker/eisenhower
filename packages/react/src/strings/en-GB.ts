@@ -1,3 +1,4 @@
+import { board } from "./en-GB/board";
 import { common } from "./en-GB/common";
 import { todo } from "./en-GB/todo";
 
@@ -11,6 +12,7 @@ import { todo } from "./en-GB/todo";
  */
 export const enGB = {
   ...common,
+  ...board,
   ...todo,
 } as const;
 
