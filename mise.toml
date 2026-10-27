@@ -119,10 +119,15 @@ run = "vitest run --coverage --testTimeout=60000"
 description = "Playwright tests of the demo app (install the browser once with e2e:browser)"
 run = "bun run --filter @eisenhower/e2e test"
 
+[tasks.screenshots]
+description = "The demo app's pictures in docs/screenshots (the README shows them; Git LFS keeps them)"
+run = "bun run --filter @eisenhower/e2e screenshots"
+
 [tasks."e2e:browser"]
 description = "Install Playwright's browser (--with-deps adds its Linux system packages)"
 dir = "tests/e2e"
-run = "playwright install chromium"
+# Playwright is the e2e package's own dependency, not on the root's path: `bun x` finds it from here.
+run = "bun x playwright install chromium"
 
 [tasks."rust:test"]
 description = "The Rust tests, with nextest when installed"
