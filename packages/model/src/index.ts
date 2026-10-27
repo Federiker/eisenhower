@@ -50,3 +50,69 @@ export {
 } from "./storage/document";
 export { localStorageAdapter } from "./storage/local";
 export { memoryStorage } from "./storage/memory";
+// The timeline (decision 16).
+export {
+  compareTimelineDates,
+  type DatePrecision,
+  EARLIEST_TIMELINE_YEAR,
+  LATEST_TIMELINE_YEAR,
+  precisionOfDate,
+  shiftDate,
+  type TimelineDate,
+  timelineDateSchema,
+  writtenYear,
+} from "./timeline/date";
+export {
+  type DateDraft,
+  draftOf,
+  type EntryDraft,
+  type EntryPreset,
+  type EntryProblem,
+  entryFromDraft,
+  newDraft,
+  type PointDraft,
+} from "./timeline/draft";
+export {
+  addCategory,
+  addStep,
+  checkedTimeline,
+  deleteCategory,
+  deleteStep,
+  entriesAtStep,
+  entriesInCategory,
+  moveCategory,
+  moveStep,
+  nextLook,
+  renameStep,
+  type StepDisposal,
+  updateCategory,
+} from "./timeline/edit";
+export { deleteEntry, moveEntryToLane, putEntry, shiftEntry, shiftUnit, sortedEntries } from "./timeline/entries";
+export {
+  compareTimelinePoints,
+  emptyTimeline,
+  isValidTimeline,
+  MAX_ENTRY_TITLE_LENGTH,
+  MAX_TIMELINE_CATEGORIES,
+  MAX_TIMELINE_ENTRIES,
+  MAX_TIMELINE_STEPS,
+  type StepPoint,
+  stepPointSchema,
+  TIMELINE_LINES,
+  type Timeline,
+  type TimelineCategory,
+  type TimelineEntry,
+  type TimelineKind,
+  type TimelineLine,
+  type TimelinePoint,
+  type TimelineStep,
+  timelineCategorySchema,
+  timelineDocument,
+  timelineEntrySchema,
+  timelineKindSchema,
+  timelineLineSchema,
+  timelinePointSchema,
+  timelineProblems,
+  timelineSchema,
+  timelineStepSchema,
+} from "./timeline/timeline";
