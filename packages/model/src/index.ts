@@ -1,3 +1,43 @@
+export { boardDocument } from "./board/document";
+export {
+  addCard,
+  addCardAt,
+  addColumn,
+  type BoardGroup,
+  blankCard,
+  boardGroups,
+  type CardPlace,
+  type CardSpot,
+  type CardStep,
+  type CardTarget,
+  cardPlace,
+  cardStepTarget,
+  cardsInColumn,
+  checkedBoard,
+  type ColumnDisposal,
+  deleteCard,
+  deleteColumn,
+  editCard,
+  moveCard,
+  moveColumn,
+  newCardSpot,
+  placeBefore,
+  renameColumn,
+  stepCard,
+} from "./board/edit";
+export { type BoardDirection, boardNeighbour } from "./board/neighbours";
+export {
+  type Board,
+  type BoardCard,
+  type BoardColumn,
+  boardCardSchema,
+  boardColumnSchema,
+  boardProblems,
+  boardSchema,
+  emptyBoard,
+  MAX_BOARD_CARDS,
+  MAX_BOARD_COLUMNS,
+} from "./board/schema";
 export {
   addDays,
   addMonths,
