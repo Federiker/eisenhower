@@ -14,3 +14,5 @@ what they share: the strings, the theme, the keys and the controls. See
   components.
 - `src/hooks/`: the live region (`useAnnouncer`) and `useHistory`.
 - `src/style.css`: the one stylesheet, themed by `--eh-*` variables.
+- `src/timeline/`: `<Timeline>` and `<TimelineEditor>` ([the
+  timeline](../../docs/features/timeline.md)).
