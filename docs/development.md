@@ -113,9 +113,19 @@ Owner decisions, 27 October 2026, on the views:
     dependencies drawn as arrows, with a warning when a task starts before a
     predecessor ends; milestones (no length) and a percentage done; tasks
     grouped under collapsible summary rows that span their tasks. Dates are
-    calendar days (`YYYY-MM-DD`).
+    calendar days (`YYYY-MM-DD`), and lengths count calendar days: the day
+    scale shades Saturdays and Sundays and marks today (working calendars
+    may come later).
 18. **The todo list**: items with an optional due date (overdue shown), one
     level of subtasks, tags the view filters by, and notes of up to 250
     characters. The same list has a second layout, the **Eisenhower
     matrix**: items flagged urgent and important fall into its four
-    quadrants, and moving an item between quadrants changes its flags.
+    quadrants, and moving an item between quadrants changes its flags. The
+    quadrants are headed **Do**, **Schedule**, **Delegate** and **Drop**,
+    each described ("Urgent and important"…); hosts may rename them. A
+    ticked item keeps its place, struck through; a **Hide done** switch hides
+    ticked items, and the matrix hides them unless they are shown.
+
+Owner decision, 27 October 2026: after a card is dropped in the "No column"
+column offered at the end of the board, that column has cards and so moves
+to first place, exactly as jerome's 6cece75 does (decision 15).
