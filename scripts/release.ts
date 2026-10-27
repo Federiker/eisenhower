@@ -3,9 +3,9 @@
 // Tauri plugin is taken by git at that tag, so it needs nothing more. By default a dry run
 // (`mise run release:dry`): the tag's checks reported, the checks, the build and its verification in
 // tmp/release, the release's notes and the GitHub calls it would make. With --release
-// (`mise run release`), on a clean tree:
+// (`mise run release`, which `mise run tag` runs once it has pushed the tag), on a clean tree:
 //
-//   1. the tag here: created at HEAD when missing, then the script stops for the owner to push it;
+//   1. the tag here at HEAD, else it stops (`mise run tag` makes it);
 //   2. the tag on origin at HEAD, and HEAD on origin's main, else it stops saying what to push;
 //   3. the checks, the build and its verification;
 //   4. the release made when GitHub has none for the tag, then each tarball uploaded, skipping one
@@ -24,7 +24,7 @@ import { calls, createRelease, type Release, releaseByTag, repositoryStatus, upl
 import { releaseName, releaseNotes } from "./release/notes";
 import { assetName, assetUrl, crateDependency, repository, tag, version } from "./release/packages";
 import { fail, root, run, step } from "./release/run";
-import { createTag, localTag, remoteProblems, short } from "./release/tag";
+import { localTag, remoteProblems, short } from "./release/git";
 import { verifyPackages } from "./release/verify";
 
 const options = new Set(["--release", "--allow-dirty", "--skip-checks"]);
@@ -75,16 +75,7 @@ function stopOrReport(...reasons: string[]) {
 step(`The tag ${tag} here`);
 const local = localTag(tag);
 if (local.kind === "missing") {
-  const push = `git push origin main ${tag}`;
-  if (real) {
-    createTag(tag, releaseName);
-    console.log(`\nCreated the annotated tag ${tag} at HEAD (${short(local.head)}), here only. Push it with main:\n`);
-    console.log(`  ${push}\n\nthen run \`mise run release\` again.`);
-    process.exit(0);
-  }
-  console.log(`There is no ${tag}: \`mise run release\` would create it at HEAD (${short(local.head)}), annotated,`);
-  console.log(`and stop for the owner to run \`${push}\`.`);
-  stops.push(`it creates ${tag} at HEAD, then stops for \`${push}\`.`);
+  stopOrReport(`there is no ${tag}: \`mise run tag\` sets the version, commits it, tags it and pushes both.`);
 } else if (local.kind === "elsewhere") {
   stopOrReport(
     `${tag} is at ${short(local.tagged)}, not at HEAD (${short(local.head)}): check out the tagged commit, or release a new version.`,

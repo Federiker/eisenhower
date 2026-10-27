@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fail, releaseFolder, root } from "./run";
+import { tagOf, workspaceVersion } from "./version";
 
 export interface Package {
   /** Its name, in the workspace and in its tarball. */
@@ -30,17 +31,12 @@ export const repository = { owner: "Federiker", name: "eisenhower" };
 export const repositoryUrl = `https://github.com/${repository.owner}/${repository.name}`;
 
 /** The version of everything released: the root Cargo.toml's `[workspace.package]` version. */
-export const version = workspaceVersion();
+export const version =
+  workspaceVersion(readFileSync(join(root, "Cargo.toml"), "utf8")) ??
+  fail("No version in the root Cargo.toml's [workspace.package].");
 
 /** The release's tag. */
-export const tag = `v${version}`;
-
-function workspaceVersion(): string {
-  const cargo = readFileSync(join(root, "Cargo.toml"), "utf8");
-  const section = cargo.split(/^\[/m).find((part) => part.startsWith("workspace.package]"));
-  const found = section?.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
-  return found ?? fail("No version in the root Cargo.toml's [workspace.package].");
-}
+export const tag = tagOf(version);
 
 /** A package's tarball, as `npm pack` names it: `eisenhower-model-0.1.0.tgz` for `@eisenhower/model`. */
 export function assetName(pkg: Package): string {
