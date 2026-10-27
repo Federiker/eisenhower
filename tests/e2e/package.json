@@ -4,7 +4,8 @@
   "type": "module",
   "license": "CC0-1.0",
   "scripts": {
-    "test": "playwright test",
+    "test": "playwright test --project=chromium",
+    "screenshots": "playwright test --project=screenshots",
     "typecheck": "tsc --noEmit -p ."
   },
   "devDependencies": {
