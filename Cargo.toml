@@ -1,0 +1,60 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/*",
+  "packages/app/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+license = "CC0-1.0"
+repository = "https://github.com/Federiker/eisenhower"
+# Not on crates.io yet (owner decision, 27 October 2026; see docs/development.md, decision 11).
+publish = false
+
+[workspace.dependencies]
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+sha2 = "0.10.9"
+tauri = { version = "2", features = [] }
+# The demo app's build script: its context, capabilities and Windows resources.
+tauri-build = { version = "2", features = [] }
+# The plugin's build script: its permissions from the command list (with the "build" feature).
+tauri-plugin = "2"
+# The demo app's open and save dialogs (MIT OR Apache-2.0).
+tauri-plugin-dialog = "2"
+tauri-plugin-eisenhower = { path = "crates/tauri-plugin" }
+# Atomic writes (a temporary file beside the target, then renamed over it) and the tests' folders.
+tempfile = "3.23.0"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Panics outside tests are explicit (`#[expect(..., reason = ...)]`); tests may unwrap (clippy.toml).
+unwrap_used = "warn"
+expect_used = "warn"
+assert_is_empty = "allow"
+
+# Less debug info in dev builds and tests: line tables for our crates (enough
+# for backtraces), none for dependencies. Smaller files, faster linking.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+# Full debug info for Eisenhower's crates in debugger sessions (`cargo build
+# --profile debugging`, used by .vscode/launch.json); line tables only for
+# dependencies. Kept in target/debugging so it never invalidates the everyday
+# dev build.
+[profile.debugging]
+inherits = "dev"
+debug = true
+
+[profile.debugging.package."*"]
+debug = "line-tables-only"

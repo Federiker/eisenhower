@@ -1,0 +1,5 @@
+{
+  "extends": "@eisenhower/tooling/tsconfig/base.json",
+  "files": [],
+  "references": [{ "path": "./scripts" }]
+}
