@@ -13,6 +13,8 @@ export { InlineRename } from "./controls/InlineRename";
 export { LabelledField } from "./controls/LabelledField";
 export { MoveToDialog, type MoveTarget } from "./controls/MoveToDialog";
 export { NameField } from "./controls/NameField";
+export { Gantt, type GanttProps } from "./gantt/Gantt";
+export type { GanttScale } from "./gantt/scale";
 export { Notice } from "./controls/Notice";
 export { ReorderList } from "./controls/ReorderList";
 export { Select, type SelectProps } from "./controls/Select";

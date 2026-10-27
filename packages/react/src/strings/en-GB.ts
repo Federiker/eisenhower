@@ -1,4 +1,5 @@
 import { common } from "./en-GB/common";
+import { gantt } from "./en-GB/gantt";
 
 /**
  * The interface text in UK English (decision 6), one message a key. Placeholders are written `{name}`;
@@ -10,6 +11,7 @@ import { common } from "./en-GB/common";
  */
 export const enGB = {
   ...common,
+  ...gantt,
 } as const;
 
 export type MessageKey = keyof typeof enGB;

@@ -191,6 +191,9 @@ describe("tasks", () => {
       ["Launch", "brief"],
     ]);
     expect(taskOf(across, "brief").groupId).toBe("launch");
+    // The tasks that did not change are the same objects, so a view draws again only the one that did.
+    expect(taskOf(across, "sketch")).toBe(taskOf(CHART, "sketch"));
+    expect(taskOf(value(shiftTask(CHART, "brief", 1)), "frame")).toBe(taskOf(CHART, "frame"));
     expect(reason(moveGanttTask(CHART, "nowhere", null, 0))).toBe("missing");
     expect(reason(moveGanttTask(CHART, "brief", "nowhere", 0))).toBe("missing");
   });

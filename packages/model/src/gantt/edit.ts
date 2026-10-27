@@ -34,7 +34,9 @@ function checked(gantt: Gantt): GanttResult {
 function fromSections(gantt: Gantt, sections: readonly GanttSection[]): Gantt {
   return {
     ...gantt,
-    tasks: sections.flatMap((section) => section.tasks.map((task) => ({ ...task, groupId: section.groupId }))),
+    tasks: sections.flatMap((section) =>
+      section.tasks.map((task) => (task.groupId === section.groupId ? task : { ...task, groupId: section.groupId })),
+    ),
   };
 }
 
