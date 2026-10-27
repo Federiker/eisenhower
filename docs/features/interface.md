@@ -171,6 +171,11 @@ never trigger a shortcut.
 | Delete | Delete the item (asking first where the view does) |
 | Menu, Shift+F10 | Open the item's menu |
 | Esc | Close the menu or dialogue, or cancel the edit |
+| Space | Tick or untick the item (the todo list) |
+
+In the todo list, Alt+← and Alt+→ make an item a top-level item or a
+subtask of the one above, as an outliner does; in its matrix they move the
+item to the quadrant that way ([the todo list](todo.md#keys)).
 
 In an open menu, ↑ ↓, Home and End move between its items, Enter or an
 item's underlined letter chooses one, and Esc or Tab closes it. In a

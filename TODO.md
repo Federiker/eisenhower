@@ -43,8 +43,17 @@ The first round (owner decisions, 27 October 2026; see
 - [ ] The gantt chart (decision 17): the model, bars on the scales, moving
   and resizing with the pointer and keys, dependencies and their warning,
   milestones and progress, collapsible groups.
-- [ ] The todo list (decision 18): the model, the list with due dates,
-  subtasks, tags and notes, the tag filter, the matrix layout.
+- [ ] The todo list (decision 18), in [todo.md](docs/features/todo.md):
+  - [x] The model: items, subtasks, tags, notes, due days, quadrants, the
+    edits and the document.
+  - [x] `<TodoList>`'s list: check boxes, titles in place, due days and
+    Overdue, tags, notes, subtasks, adding, the details dialog, the tag
+    filter, Hide done, drag and drop, the keys and the menu.
+  - [x] The matrix layout: the four quadrants, moving between them by
+    dragging and by keys, adding to a quadrant.
+  - [ ] The owner's answers on the decisions listed in
+    [todo.md](docs/features/todo.md#decisions-taken-with-the-view).
+  - [ ] The demo app's todo page and its end-to-end tests.
 - [x] Rust and the Tauri client (decisions 9 and 10):
   - [x] `tauri-plugin-eisenhower`: read and write with the hash guard,
     atomic writes, permissions.

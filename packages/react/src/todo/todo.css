@@ -1,0 +1,217 @@
+/*
+ * The todo list and its Eisenhower matrix (decision 18): the toolbar, the items (from jerome's plot list),
+ * the quadrants (from jerome's plot board's columns), the field that adds an item and the details dialog.
+ */
+.eh-todo-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-2);
+  container-type: inline-size;
+}
+
+/* The toolbar: the layout switch, Hide done and the tag filter. */
+.eh-todo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--eh-space-2) var(--eh-space-4);
+}
+.eh-todo-layouts {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+}
+.eh-todo-layouts .eh-button {
+  border-color: transparent;
+}
+.eh-todo-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--eh-space-1);
+}
+.eh-todo-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-1);
+}
+.eh-todo-filter .eh-button {
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* The list: items in order, subtasks indented under their parent. */
+.eh-todo-body {
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: var(--eh-radius);
+}
+.eh-todo-body[data-drop="inside"],
+.eh-todo-quadrant[data-drop="inside"] {
+  border-color: var(--eh-accent);
+}
+.eh-todo-items,
+.eh-todo-subtasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eh-todo-subtasks {
+  padding-inline-start: 24px;
+}
+.eh-todo-item {
+  border-top: 2px solid transparent;
+  border-radius: 3px;
+}
+.eh-todo-item[data-drop="before"] {
+  border-top-color: var(--eh-accent);
+}
+.eh-todo-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 2px var(--eh-space-2);
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+.eh-todo-row:hover {
+  background: var(--eh-selected);
+}
+.eh-todo-check {
+  flex-shrink: 0;
+  margin: 4px 0 0;
+}
+.eh-todo-title {
+  flex: 1 1 12em;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.eh-todo-item[data-done] > .eh-todo-row .eh-todo-title .eh-editable-text {
+  text-decoration: line-through;
+  color: var(--eh-muted);
+}
+.eh-todo-about {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--eh-space-2);
+  padding-top: 2px;
+  color: var(--eh-muted);
+  font-size: 12px;
+}
+.eh-todo-due[data-overdue] {
+  color: var(--eh-problem);
+  font-weight: 600;
+}
+.eh-todo-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.eh-todo-tag {
+  padding: 0 6px;
+  border: 1px solid var(--eh-line);
+  border-radius: 999px;
+  color: var(--eh-ink);
+}
+.eh-todo-more {
+  flex-shrink: 0;
+}
+.eh-todo-notes {
+  margin: 0 6px 4px 30px;
+  color: var(--eh-muted);
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.eh-todo-item .eh-question {
+  margin: 4px 6px 4px 30px;
+}
+
+/* The field that adds an item. */
+.eh-todo-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-1);
+}
+.eh-todo-add .eh-field {
+  flex: 1 1 12em;
+}
+.eh-todo-add .eh-problem {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* The matrix: four quadrants in a 2×2 grid, urgent on the left and important at the top; one column when
+   narrow, in the same order. */
+.eh-todo-matrix {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--eh-space-3);
+}
+@container (max-width: 480px) {
+  .eh-todo-matrix {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.eh-todo-quadrant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-1);
+  min-width: 0;
+  padding: 6px;
+  background: var(--eh-panel);
+  border: 2px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+}
+.eh-todo-quadrant-heading {
+  margin: 0;
+  font-size: 14px;
+}
+.eh-todo-quadrant-about {
+  margin: 0 0 var(--eh-space-1);
+  color: var(--eh-muted);
+  font-size: 12px;
+}
+.eh-todo-quadrant .eh-todo-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-1);
+}
+.eh-todo-quadrant .eh-todo-item {
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-line);
+}
+.eh-todo-quadrant .eh-todo-item[data-drop="before"] {
+  box-shadow: 0 -3px 0 var(--eh-accent);
+}
+
+/* The details dialog. */
+.eh-todo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.eh-todo-dialog .eh-note,
+.eh-todo-dialog .eh-problem {
+  margin: -6px 0 0;
+}
+.eh-todo-flags {
+  display: flex;
+  gap: var(--eh-space-4);
+}
+.eh-todo-flags span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--eh-space-1);
+}
+
+@media (forced-colors: active) {
+  .eh-todo-due[data-overdue] {
+    text-decoration: underline;
+  }
+}
