@@ -1,0 +1,143 @@
+/*
+ * The demo app's own layout. Its colours are the views' theme (--eh-*): the whole page is inside the
+ * EisenhowerProvider, so the theme chosen in the header colours the page too.
+ */
+body {
+  margin: 0;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-3) var(--eh-space-4);
+  align-items: center;
+  padding: var(--eh-space-3) var(--eh-space-4);
+  background: var(--eh-panel);
+  border-bottom: 1px solid var(--eh-line);
+}
+
+.app-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-title h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.app-subtitle {
+  color: var(--eh-muted);
+}
+
+.app-tabs {
+  display: flex;
+  gap: var(--eh-space-1);
+}
+
+.app-tab {
+  font: inherit;
+  font-size: 1rem;
+  padding: 6px 14px;
+  color: var(--eh-muted);
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+
+.app-tab[aria-selected="true"] {
+  color: var(--eh-ink);
+  border-bottom-color: var(--eh-accent);
+  font-weight: 600;
+}
+
+.app-tab:hover {
+  color: var(--eh-ink);
+}
+
+.app-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-3);
+  margin-inline-start: auto;
+}
+
+.app-settings label {
+  display: inline-flex;
+  gap: var(--eh-space-2);
+  align-items: center;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--eh-space-3) var(--eh-space-4);
+}
+
+.app-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2);
+  align-items: center;
+  margin-bottom: var(--eh-space-3);
+}
+
+.app-choice {
+  display: inline-flex;
+  gap: var(--eh-space-1);
+  margin-inline-start: var(--eh-space-3);
+}
+
+.app-document {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2);
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.app-file {
+  font-weight: 600;
+}
+
+.app-save-state {
+  color: var(--eh-muted);
+}
+
+.app-dirty {
+  color: var(--eh-warning);
+}
+
+.app-footer {
+  padding: 0 var(--eh-space-4) var(--eh-space-3);
+  min-height: 1.5em;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+.app-error {
+  color: var(--eh-problem);
+}
+
+/* The focus ring of the theme on the tabs (the views and their controls draw their own). */
+.app-tab:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .app-tab[aria-selected="true"] {
+    border-bottom-color: Highlight;
+  }
+}

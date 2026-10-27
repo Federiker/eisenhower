@@ -12,7 +12,11 @@
     "icons": "tauri icon src/assets/logo.svg --output src-tauri/icons"
   },
   "dependencies": {
+    "@eisenhower/model": "workspace:*",
     "@eisenhower/react": "workspace:*",
+    "@eisenhower/tauri": "workspace:*",
+    "@tauri-apps/api": "catalog:",
+    "@tauri-apps/plugin-dialog": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
