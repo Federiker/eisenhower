@@ -27,7 +27,8 @@ is under **Verification** and **Awaiting owner decisions**.
 
 - [ ] The demo app's window (`mise run tauri:dev`), clicked through: each
   view's document saved, reopened, changed on disk by another program and
-  saved again (the hash guard).
+  saved again (the hash guard), and closed with unsaved changes (Save,
+  Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
   names, roles and the announcements of moves.
 
