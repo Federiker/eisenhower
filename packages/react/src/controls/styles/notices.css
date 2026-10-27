@@ -1,0 +1,11 @@
+/* Notices: a muted note, and a problem (an error the reader can put right). */
+.eh-note {
+  margin: 6px 0;
+  font-size: 11px;
+  color: var(--eh-muted);
+}
+.eh-problem {
+  margin: 6px 0;
+  font-size: 12px;
+  color: var(--eh-problem);
+}

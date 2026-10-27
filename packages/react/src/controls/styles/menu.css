@@ -1,0 +1,84 @@
+/* ContextMenu: the views' right-click menu, opened at the pointer or below its item. */
+.eh-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+.eh-menu {
+  position: fixed;
+  z-index: 41;
+  min-width: 200px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  background: var(--eh-panel);
+  color: var(--eh-ink);
+  border: 1px solid var(--eh-muted);
+  border-radius: var(--eh-radius);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 20%);
+  font: 13px / 1.4 var(--eh-font);
+}
+.eh-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.eh-menu button:hover:not(:disabled),
+.eh-menu button:focus-visible {
+  background: var(--eh-selected);
+  outline: none;
+}
+.eh-menu button:disabled {
+  color: var(--eh-muted);
+  cursor: default;
+}
+/* An item's access letter: underlined in its label, or shown at its end when the label has none. */
+.eh-menu-access {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.eh-menu-access-key {
+  float: right;
+  margin-inline-start: 16px;
+  color: var(--eh-muted);
+  font: inherit;
+}
+/* An item that is on or off: a tick before it where it is on (screen readers say its state instead). */
+.eh-menu button[role="menuitemcheckbox"] {
+  padding-inline-start: 24px;
+  position: relative;
+}
+/* In a menu with ticked items, the others line up with them. */
+.eh-menu:has(button[role="menuitemcheckbox"]) button[role="menuitem"] {
+  padding-inline-start: 24px;
+}
+.eh-menu button[aria-checked="true"]::before {
+  content: "✓" / "";
+  position: absolute;
+  left: 8px;
+}
+.eh-menu-separator {
+  height: 1px;
+  margin: 4px 6px;
+  border: 0;
+  background: var(--eh-line);
+}
+.eh-menu-problem {
+  margin: 6px 10px;
+  max-width: 240px;
+  font-size: 12px;
+}
+/* Forced colours: the focused item is drawn as the system draws a highlighted one. */
+@media (forced-colors: active) {
+  .eh-menu button:hover:not(:disabled),
+  .eh-menu button:focus-visible {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

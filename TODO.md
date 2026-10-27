@@ -23,10 +23,10 @@ The first round (owner decisions, 27 October 2026; see
 - [x] Foundation: the workspaces, the tools and hooks, CI, the docs, the
   licence.
 - [ ] The shared parts:
-  - [ ] `@eisenhower/model`: ids, names and one-line texts with their
+  - [x] `@eisenhower/model`: ids, names and one-line texts with their
     limits, calendar days, the palette, problems as codes, the document and
     the `StorageAdapter` with the memory and `localStorage` adapters.
-  - [ ] `@eisenhower/react`: the strings and their override, the theme
+  - [x] `@eisenhower/react`: the strings and their override, the theme
     (`--eh-*`, light, dark, forced colours, the palette), the controls
     copied from jerome's components, the keys' list, the live region,
     `useHistory`.
@@ -51,7 +51,7 @@ The first round (owner decisions, 27 October 2026; see
   - [ ] `@eisenhower/tauri`: the typed client and its `StorageAdapter`.
 - [ ] The demo app (decision 14): every view in the browser, the Tauri
   window saving through the plugin, Playwright tests.
-- [ ] The Claude workflow: the `eisenhower-` skills and the implementer
+- [x] The Claude workflow: the `eisenhower-` skills and the implementer
   agent.
 
 ## Verification

@@ -1,0 +1,11 @@
+/* Eisenhower's one stylesheet (decision 5): the theme, then the controls, then each view's styles. */
+@import "./theme/theme.css";
+
+@import "./controls/styles/buttons.css";
+@import "./controls/styles/fields.css";
+@import "./controls/styles/group.css";
+@import "./controls/styles/notices.css";
+@import "./controls/styles/question.css";
+@import "./controls/styles/editing.css";
+@import "./controls/styles/menu.css";
+@import "./controls/styles/dialog.css";

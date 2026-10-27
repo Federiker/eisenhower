@@ -1,0 +1,13 @@
+/* InlineQuestion: a question asked in place ("Discard / Keep editing", "Delete asks first"). */
+.eh-question {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--eh-muted);
+  border-radius: var(--eh-radius);
+}
+.eh-question-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}

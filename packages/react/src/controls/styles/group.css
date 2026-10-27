@@ -1,0 +1,12 @@
+/*
+ * A group of controls (a toolbar, a set of options, a question's buttons) as a <fieldset> that looks like the
+ * plain box it replaced: no frame, padding or margin, and a div's minimum width and bidi isolation. Weak, like the
+ * buttons, so a feature's own rules for the group win.
+ */
+:where(.eh-group) {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-inline-size: auto;
+  unicode-bidi: isolate;
+}

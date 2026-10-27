@@ -1,0 +1,104 @@
+/* Editing in place: InlineRename, EditableText (text with a pencil button that becomes a field) and LabelledField. */
+.eh-inline-rename {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid var(--eh-accent);
+  border-radius: 4px;
+  background: var(--eh-surface);
+  color: var(--eh-ink);
+}
+.eh-editable-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 22px;
+}
+.eh-editable-text {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+  white-space: pre-wrap;
+}
+.eh-editable-edit {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--eh-muted);
+}
+.eh-editable-edit:focus-visible {
+  color: var(--eh-ink);
+}
+.eh-editable-field {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.eh-editable .eh-problem {
+  margin: 4px 0 0;
+}
+.eh-editable-empty {
+  color: var(--eh-muted);
+}
+.eh-editable-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--eh-muted);
+}
+
+/* LabelledField: a page's field that reads as text, its muted label above. The pencil follows the text (on a wide
+   page, at the far edge it would lose its text), and the open field takes the shared field look. */
+.eh-labelled-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.eh-labelled-field-label {
+  padding: 0;
+  margin-bottom: 2px;
+  font-size: 12px;
+  color: var(--eh-muted);
+}
+.eh-labelled-field .eh-editable-text {
+  flex: 0 1 auto;
+}
+.eh-labelled-field:hover .eh-editable-edit {
+  color: var(--eh-ink);
+}
+.eh-labelled-field .eh-editable-field {
+  font: inherit;
+  padding: 6px 8px;
+  color: var(--eh-ink);
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+  min-width: 0;
+}
+/* A list's label on its own line, with the pencil beside it (EditableText's caption); the same line, without the
+   pencil, stays above the open field so that nothing moves. */
+.eh-editable-caption {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  font-size: 12px;
+  color: var(--eh-muted);
+}
+.eh-editable[data-editing] > .eh-editable-caption {
+  margin-bottom: 2px;
+}
+/* pencilVisible="onHover": the pencil keeps its place but shows only while the pointer is over the field. */
+.eh-editable[data-pencil="hover"] .eh-editable-edit {
+  visibility: hidden;
+}
+.eh-editable[data-pencil="hover"]:hover .eh-editable-edit {
+  visibility: visible;
+}

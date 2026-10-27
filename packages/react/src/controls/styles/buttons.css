@@ -1,0 +1,39 @@
+/*
+ * Button and IconButton: the plain outlined button of the views, and its variants. The rules sit in :where(),
+ * as weak as element rules, so a view's own rules for its buttons win.
+ */
+:where(.eh-button) {
+  font: inherit;
+  padding: 6px 10px;
+  color: var(--eh-ink);
+  background: transparent;
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+  cursor: pointer;
+}
+:where(.eh-button):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+:where(.eh-button[data-variant="primary"]) {
+  border-color: var(--eh-accent);
+  color: var(--eh-accent);
+}
+:where(.eh-button[data-variant="danger"]) {
+  border-color: var(--eh-problem);
+  color: var(--eh-problem);
+}
+:where(.eh-button[data-variant="quiet"]) {
+  border: 0;
+  color: var(--eh-muted);
+}
+:where(.eh-button[aria-pressed="true"]) {
+  background: var(--eh-selected);
+  color: var(--eh-accent);
+}
+:where(.eh-icon-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}

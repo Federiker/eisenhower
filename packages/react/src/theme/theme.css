@@ -1,0 +1,149 @@
+/*
+ * The theme (decision 5): every colour, size and font the views draw with, as --eh-* custom properties on
+ * .eh-root (the element EisenhowerProvider and each view draw around themselves), so a host's own page is
+ * not restyled. A host overrides any of them on .eh-root, or on an element of its own inside it.
+ *
+ * Light by default; dark when the system prefers it, unless data-theme="light"; dark with data-theme="dark".
+ * The colours are jerome's workspace colours; the palette is the Okabe–Ito colours, each in a tone for light
+ * and one for dark (jerome's timeline palette), every one readable in its theme.
+ */
+.eh-root {
+  --eh-background: #f5f6f3;
+  --eh-panel: #f7f8f5;
+  --eh-surface: #fcfbf7;
+  --eh-ink: #28342d;
+  --eh-muted: #59675d;
+  --eh-line: #dce2d9;
+  --eh-accent: #446b4a;
+  --eh-selected: #e1eadc;
+  --eh-focus: #28342d;
+  --eh-good: #3c8a4b;
+  --eh-warning: #c06f0c;
+  --eh-problem: #b3261e;
+
+  --eh-colour-0: #b97500;
+  --eh-colour-1: #288dc0;
+  --eh-colour-2: #00966c;
+  --eh-colour-3: #938500;
+  --eh-colour-4: #0072b2;
+  --eh-colour-5: #d55e00;
+  --eh-colour-6: #bb6a98;
+  --eh-colour-7: #000000;
+
+  --eh-radius: 6px;
+  --eh-space-1: 4px;
+  --eh-space-2: 8px;
+  --eh-space-3: 12px;
+  --eh-space-4: 16px;
+  --eh-font: system-ui, sans-serif;
+  --eh-font-size: 13px;
+
+  color-scheme: light;
+  background: var(--eh-background);
+  color: var(--eh-ink);
+  font-family: var(--eh-font);
+  font-size: var(--eh-font-size);
+  line-height: 1.4;
+}
+
+@media (prefers-color-scheme: dark) {
+  .eh-root:not([data-theme="light"]) {
+    --eh-background: #202722;
+    --eh-panel: #222a24;
+    --eh-surface: #262d27;
+    --eh-ink: #e1e7dc;
+    --eh-muted: #a5b0a3;
+    --eh-line: #3b453c;
+    --eh-accent: #afcba2;
+    --eh-selected: #374a36;
+    --eh-focus: #afcba2;
+    --eh-good: #8fcf8a;
+    --eh-warning: #f0b35a;
+    --eh-problem: #f28b82;
+
+    --eh-colour-0: #e69f00;
+    --eh-colour-1: #56b4e9;
+    --eh-colour-2: #16a479;
+    --eh-colour-3: #f0e442;
+    --eh-colour-4: #3b97da;
+    --eh-colour-5: #e66e22;
+    --eh-colour-6: #cc79a7;
+    --eh-colour-7: #9a9a9a;
+
+    color-scheme: dark;
+  }
+}
+
+.eh-root[data-theme="dark"] {
+  --eh-background: #202722;
+  --eh-panel: #222a24;
+  --eh-surface: #262d27;
+  --eh-ink: #e1e7dc;
+  --eh-muted: #a5b0a3;
+  --eh-line: #3b453c;
+  --eh-accent: #afcba2;
+  --eh-selected: #374a36;
+  --eh-focus: #afcba2;
+  --eh-good: #8fcf8a;
+  --eh-warning: #f0b35a;
+  --eh-problem: #f28b82;
+
+  --eh-colour-0: #e69f00;
+  --eh-colour-1: #56b4e9;
+  --eh-colour-2: #16a479;
+  --eh-colour-3: #f0e442;
+  --eh-colour-4: #3b97da;
+  --eh-colour-5: #e66e22;
+  --eh-colour-6: #cc79a7;
+  --eh-colour-7: #9a9a9a;
+
+  color-scheme: dark;
+}
+
+/* Forced colours (Windows' contrast themes): the system's colours, whichever theme was chosen. The palette's
+   colours all become the text colour, so a view never tells things apart by colour alone. */
+@media (forced-colors: active) {
+  .eh-root,
+  .eh-root[data-theme] {
+    --eh-background: Canvas;
+    --eh-panel: Canvas;
+    --eh-surface: Field;
+    --eh-ink: CanvasText;
+    --eh-muted: GrayText;
+    --eh-line: CanvasText;
+    --eh-accent: LinkText;
+    --eh-selected: Highlight;
+    --eh-focus: Highlight;
+    --eh-good: CanvasText;
+    --eh-warning: CanvasText;
+    --eh-problem: CanvasText;
+
+    --eh-colour-0: CanvasText;
+    --eh-colour-1: CanvasText;
+    --eh-colour-2: CanvasText;
+    --eh-colour-3: CanvasText;
+    --eh-colour-4: CanvasText;
+    --eh-colour-5: CanvasText;
+    --eh-colour-6: CanvasText;
+    --eh-colour-7: CanvasText;
+  }
+}
+
+/* The focus ring, as weak as an element rule so a view's own ring wins. */
+:where(.eh-root) :focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: 2px;
+}
+
+/* Named for assistive technology only: a captioned LabelledField's legend, the live region. */
+.eh-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

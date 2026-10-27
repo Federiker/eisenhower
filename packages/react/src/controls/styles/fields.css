@@ -1,0 +1,13 @@
+/* TextField, TextArea, Select and Checkbox: the fields of the views' dialogues. Weak, like the buttons. */
+:where(.eh-field) {
+  font: inherit;
+  padding: 6px 8px;
+  color: var(--eh-ink);
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+  min-width: 0;
+}
+:where(.eh-checkbox) {
+  accent-color: var(--eh-accent);
+}
