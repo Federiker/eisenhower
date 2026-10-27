@@ -90,9 +90,9 @@ export function allTags(list: TodoList): string[] {
   return [...seen.values()].sort((first, second) => first.localeCompare(second, "en", { sensitivity: "base" }));
 }
 
-/** The items that have every one of the tags (ignoring case); all of them when no tag is given. */
+/** The items that have any one of the tags (ignoring case; owner decision, 27 October 2026); all of them when no tag is given. */
 export function filterByTags(items: readonly TodoItem[], tags: readonly string[]): TodoItem[] {
-  return items.filter((item) => tags.every((tag) => hasTag(item, tag)));
+  return tags.length === 0 ? [...items] : items.filter((item) => tags.some((tag) => hasTag(item, tag)));
 }
 
 /** Whether an item is past its due day: not done, and due before `today`. */
@@ -101,7 +101,7 @@ export function isOverdue(item: Pick<TodoItem, "done" | "due">, today: CalendarD
 }
 
 /**
- * The items a view shows, in outline order: those with every tag of `tags` and, with `hideDone`, not done;
+ * The items a view shows, in outline order: those with any tag of `tags` and, with `hideDone`, not done;
  * and the parent of any subtask shown, so that a subtask is never shown without its parent.
  */
 export function shownItems(list: TodoList, options: { tags?: readonly string[]; hideDone?: boolean } = {}): TodoItem[] {

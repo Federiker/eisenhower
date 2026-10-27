@@ -82,9 +82,10 @@ describe("tags", () => {
     expect(hasTag({ tags: ["Home"] }, "Homes")).toBe(false);
   });
 
-  it("keeps the items that have every tag given", () => {
+  it("keeps the items that have any of the tags given", () => {
     expect(ids(filterByTags(LIST.items, ["weekend"]))).toEqual(["a2", "c"]);
-    expect(ids(filterByTags(LIST.items, ["weekend", "HOME"]))).toEqual(["a2"]);
+    expect(ids(filterByTags(LIST.items, ["weekend", "HOME"]))).toEqual(["a", "a2", "c"]);
+    expect(ids(filterByTags(LIST.items, ["Travel", "leisure"]))).toEqual(["b", "c"]);
     expect(ids(filterByTags(LIST.items, []))).toEqual(ids(LIST.items));
   });
 });

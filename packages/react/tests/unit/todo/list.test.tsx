@@ -292,7 +292,7 @@ describe("adding to the todo list", () => {
 });
 
 describe("the tag filter", () => {
-  it("shows the items with every tag pressed, with the parent of a subtask shown", () => {
+  it("shows the items with any tag pressed (pressing more widens), with the parent of a subtask shown", () => {
     show();
     const filter = screen.getByRole("group", { name: t("todo.filter") });
     expect(
@@ -307,9 +307,9 @@ describe("the tag filter", () => {
         .getAllByRole("checkbox")
         .map((one) => one.getAttribute("aria-label")),
     ).toEqual(["Paint the shed", "Sand the walls", "Read a novel"]);
-    fireEvent.click(within(filter).getByRole("button", { name: "Leisure" }));
-    expect(within(items()).getAllByRole("checkbox")).toHaveLength(1);
-    fireEvent.click(within(filter).getByRole("button", { name: "Leisure" }));
+    fireEvent.click(within(filter).getByRole("button", { name: "Travel" }));
+    expect(within(items()).getAllByRole("checkbox")).toHaveLength(4);
+    fireEvent.click(within(filter).getByRole("button", { name: "Travel" }));
     expect(within(items()).getAllByRole("checkbox")).toHaveLength(3);
     fireEvent.click(within(filter).getByRole("button", { name: t("todo.filterClear") }));
     expect(within(items()).getAllByRole("checkbox")).toHaveLength(5);

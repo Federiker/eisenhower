@@ -154,7 +154,9 @@ the drop line is a border. Nothing animates.
   others while a card is dragged; first once a card is dropped there), from
   jerome's 6cece75, checked case by case in
   `packages/react/tests/unit/board/no-column.test.tsx`.
-- Proposed here, for the owner: the board layout is the default; the dialog
+- The board layout is the default when the host passes no `layout` (owner
+  decision, 27 October 2026; jerome's own default was the list).
+- Proposed here, for the owner: the dialog
   keeps a card's column beside its title, summary and colour; a column's
   heading also moves with Alt+← and Alt+→ (the board lays columns out
   sideways); F2 renames a card in place; with `onOpenCard`, New card adds the

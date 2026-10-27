@@ -13,7 +13,8 @@ A toolbar, then one of two layouts:
 
 - **The toolbar**: **List** and **Matrix** (toggle buttons), the **Hide
   done** switch, and the tag filter: **All tags**, then a toggle button a
-  tag. An item is shown when it has every tag pressed (ignoring case).
+  tag. An item is shown when it has any tag pressed (ignoring case), so
+  pressing more tags widens the list.
 - **The list**: the items in the user's order, each with its check box, its
   title (renamed in place: the pencil on hover, a double-click or F2), how
   many of its subtasks are done ("1 of 2 done"), its due day in the locale
@@ -141,18 +142,21 @@ other quadrant, and Delete.
 
 ## Decisions taken with the view
 
+Owner decisions, 27 October 2026:
+
+- An item is shown when it has **any** of the tags pressed (pressing more
+  widens the list); a subtask that matches brings its parent along.
+- Ticking a parent ticks only the parent; its count shows how many of its
+  subtasks are done.
+- In the matrix, subtasks are placed by their own flags (flattened), each
+  saying "Subtask of …"; a new subtask starts with its parent's flags.
+
 These change what the user sees and are open to the owner:
 
 - A title has the names' limit, 120 characters.
 - Notes may have several lines; the 250 characters count the line breaks.
-- Ticking a parent ticks only the parent; its count shows how many of its
-  subtasks are done.
-- An item's tags must all match the filter's (pressing more tags narrows);
-  a subtask that matches brings its parent along.
 - A new item (from a field or Add a subtask) takes the filter's tags, so
   that it stays in sight.
-- In the matrix, subtasks are placed by their own flags (flattened), each
-  saying "Subtask of …"; a new subtask starts with its parent's flags.
 - In the matrix, the order within a quadrant is the list's: dragging and
   Alt+arrows only change the quadrant.
 - Outdenting puts the item after its parent's other subtasks.
