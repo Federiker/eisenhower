@@ -1,0 +1,8 @@
+{
+  "extends": "@eisenhower/tooling/tsconfig/library.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "types": ["vitest/globals"]
+  },
+  "include": ["src", "tests"]
+}
