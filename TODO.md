@@ -66,8 +66,12 @@ The first round (owner decisions, 27 October 2026; see
   - [x] Dependencies as arrows, their warning in words and on the drawing.
   - [ ] The owner's answers to the decisions listed in its document
     (Alt+arrow steps on the week and month scales, the limits…).
-  - [ ] The demo app's page and a Playwright test of dragging in a real
+  - [x] The demo app's page and a Playwright test of dragging in a real
     browser (the unit tests' DOM has no layout).
+  - [ ] The header clips a month's name when little of that month is
+    drawn (the first month of the range reads "Septer" on the week scale,
+    the last "December 20"): shorten it, end it with an ellipsis or leave
+    it out (seen in the demo app; a look the owner may want to choose).
 - [ ] The todo list (decision 18), in [todo.md](docs/features/todo.md):
   - [x] The model: items, subtasks, tags, notes, due days, quadrants, the
     edits and the document.
@@ -78,13 +82,25 @@ The first round (owner decisions, 27 October 2026; see
     dragging and by keys, adding to a quadrant.
   - [ ] The owner's answers on the decisions listed in
     [todo.md](docs/features/todo.md#decisions-taken-with-the-view).
-  - [ ] The demo app's todo page and its end-to-end tests.
+  - [x] The demo app's todo page and its end-to-end tests.
 - [x] Rust and the Tauri client (decisions 9 and 10):
   - [x] `tauri-plugin-eisenhower`: read and write with the hash guard,
     atomic writes, permissions.
   - [x] `@eisenhower/tauri`: the typed client and its `StorageAdapter`.
-- [ ] The demo app (decision 14): every view in the browser, the Tauri
-  window saving through the plugin, Playwright tests.
+- [ ] The demo app (decision 14), in [packages/app](packages/app/README.md):
+  - [x] Every view on an invented sample, in tabs, with the theme, the
+    locale, undo and redo, and the board's and timeline's switches.
+  - [x] The browser host: documents in `localStorage`, saved as they change
+    with the revision guard, Reset to the sample.
+  - [x] The Tauri host: Open…, Save (the hash guard, asking before an
+    overwrite) and Save as… through `tauriStorage`, tested with Tauri's IPC
+    mocks.
+  - [x] Playwright tests of every view in Chromium (dragging, the keys,
+    the theme, persistence) and the README's screenshots.
+  - [ ] The window clicked through (under Verification).
+  - [ ] The owner's word on the app's choices: saving as it changes in the
+    browser, `.json` files in the window, the samples and the locales
+    offered, Ctrl+Z and Ctrl+Y as the app's keys.
 - [x] The Claude workflow: the `eisenhower-` skills and the implementer
   agent.
 
