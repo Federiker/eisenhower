@@ -99,10 +99,10 @@ Bun's caches from Microsoft Defender, or working on a Dev Drive, helps further.
 | --- | --- | --- |
 | `packages/model` | `@eisenhower/model` | Each view's data: schema, edit operations, storage interface |
 | `packages/react` | `@eisenhower/react` | `<Board>`, `<Timeline>`, `<Gantt>`, `<TodoList>`: strings, keys, styles |
-| `packages/tauri` | `@eisenhower/tauri` | The typed client of the Tauri plugin and its storage adapter |
+| [packages/tauri](packages/tauri) | `@eisenhower/tauri` | The typed client of the Tauri plugin and its storage adapter |
 | `packages/app` | `@eisenhower/app` | The demo app, browser and Tauri |
 | [packages/tooling](packages/tooling) | `@eisenhower/tooling` | Shared TypeScript settings |
-| `crates/tauri-plugin` | `tauri-plugin-eisenhower` | The Tauri plugin: documents on disk with a hash guard |
+| [crates/tauri-plugin](crates/tauri-plugin) | `tauri-plugin-eisenhower` | The Tauri plugin: documents on disk with a hash guard |
 | `tests/e2e` | `@eisenhower/e2e` | Playwright tests of the demo app |
 
 ## Checks
