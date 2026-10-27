@@ -7,7 +7,7 @@ locale = "en-gb"
 [default.extend-words]
 # Names other software fixes: serde's Serialize, CSS and the DOM (`color`, `center`, `behavior`), HTML's
 # <dialog>, Bun's `catalog`, GitHub's upload-artifact action, the sha2 crate's `finalize`, the DOM's
-# `Intl.DateTimeFormat` options and Tauri's `maximized`.
+# `Intl.DateTimeFormat` options, Tauri's `maximized` and HTTP's `Authorization` header.
 serialize = "serialize"
 serializer = "serializer"
 serializes = "serializes"
@@ -22,6 +22,7 @@ catalog = "catalog"
 artifact = "artifact"
 finalize = "finalize"
 maximized = "maximized"
+authorization = "authorization"
 
 [files]
 extend-exclude = [

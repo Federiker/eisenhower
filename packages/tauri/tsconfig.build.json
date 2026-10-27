@@ -1,5 +1,5 @@
 {
-  // The published declarations (scripts/publish.ts): the sources only, into the folder the script names.
+  // The published declarations (scripts/release.ts): the sources only, into the folder the script names.
   "extends": "@eisenhower/tooling/tsconfig/base.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM"],

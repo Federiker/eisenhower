@@ -45,14 +45,14 @@ run = "bun run --filter @eisenhower/app build"
 description = "Remove build outputs"
 run = "bun scripts/clean.ts"
 
-# Publish (decision 11): the npm packages under @frodobaggins.jr and the plugin on crates.io.
-[tasks."publish:dry"]
-description = "Check, build and dry-run publishing the npm packages and the plugin (--allow-dirty, --skip-checks)"
-run = "bun scripts/publish.ts"
+# Release (decision 11): the packages' tarballs on a GitHub release; the plugin is taken by git at its tag.
+[tasks."release:dry"]
+description = "Check, build and verify the release's tarballs and list what releasing does (--allow-dirty, --skip-checks)"
+run = "bun scripts/release.ts"
 
-[tasks.publish]
-description = "The same, then publish them for real (NPM_TOKEN and CRATES_IO_TOKEN in .env)"
-run = "bun scripts/publish.ts --publish"
+[tasks.release]
+description = "Release for real: tag v<version> (then push it), the GitHub release and its tarballs (GITHUB_TOKEN in .env)"
+run = "bun scripts/release.ts --release"
 
 # Check.
 [tasks.check]

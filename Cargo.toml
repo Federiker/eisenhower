@@ -11,8 +11,8 @@ edition = "2024"
 rust-version = "1.99"
 license = "CC0-1.0"
 repository = "https://github.com/Federiker/eisenhower"
-# Unpublished, except tauri-plugin-eisenhower, which sets its own (owner decision, 27 October 2026;
-# see docs/development.md, decision 11).
+# Not on crates.io: hosts take tauri-plugin-eisenhower by git, pinned to a release tag (owner
+# decision, 27 October 2026; see docs/development.md, decision 11).
 publish = false
 
 [workspace.dependencies]

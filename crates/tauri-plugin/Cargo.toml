@@ -6,12 +6,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-readme = "README.md"
-keywords = ["tauri", "tauri-plugin", "planning", "documents", "files"]
-categories = ["gui", "filesystem"]
-# On crates.io, unlike the workspace's other crates (owner decision, 27 October 2026; see
-# docs/development.md, decision 11): `mise run publish` publishes it.
-publish = true
+publish.workspace = true
 # Tauri passes the plugin's permissions to the app's build through this.
 links = "tauri-plugin-eisenhower"
 

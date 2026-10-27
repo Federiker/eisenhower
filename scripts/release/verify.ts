@@ -1,12 +1,12 @@
-// Checks the staged packages before anything reaches a registry: every import of the built files is
-// a declared dependency and no workspace name is left, then a consumer in tmp/publish/consumer
-// installs the packed tarballs (as an app installs them from npm), imports each with Node and
-// type-checks a file using them with `moduleResolution: "nodenext"`.
+// Checks the packages before they reach a release: every import of the built files is a declared
+// dependency, then a consumer in tmp/release/consumer installs the three tarballs together (as a host
+// installs them from the release), imports each with Node and type-checks a file using them with
+// `moduleResolution: "nodenext"`.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { filesIn, runTsc } from "./build";
+import { join, relative } from "node:path";
+import { filesIn, runTsc, type Tarball } from "./build";
 import { catalog, type Package, packages, stageOf } from "./packages";
-import { fail, publishFolder, run, shown, step } from "./run";
+import { fail, releaseFolder, run, shown, step } from "./run";
 
 /** `import … from "x"` and `export … from "x"`, `import "x"`, and `import("x")` (in code or in a type). */
 const specifiers = [
@@ -39,17 +39,16 @@ function checkImports(pkg: Package) {
   for (const file of filesIn(join(stage, "dist"))) {
     if (!file.endsWith(".js") && !file.endsWith(".d.ts")) continue;
     const text = readFileSync(file, "utf8");
-    if (text.includes("@eisenhower/")) fail(`${shown(file)} still names a workspace package (@eisenhower/…).`);
     for (const specifier of bareSpecifiers(text)) imported.add(packageName(specifier));
   }
   const undeclared = [...imported].filter((name) => !declared.has(name));
-  if (undeclared.length > 0) fail(`${pkg.published} imports ${undeclared.join(", ")} without declaring it.`);
-  console.log(`${pkg.published} imports ${[...imported].sort().join(", ") || "nothing"}: all declared.`);
+  if (undeclared.length > 0) fail(`${pkg.name} imports ${undeclared.join(", ")} without declaring it.`);
+  console.log(`${pkg.name} imports ${[...imported].sort().join(", ") || "nothing"}: all declared.`);
 }
 
-const consumerSource = `import { boardDocument, emptyBoard, memoryStorage, saveDocument } from "@frodobaggins.jr/eisenhower-model";
-import { Board, EisenhowerProvider } from "@frodobaggins.jr/eisenhower-react";
-import { tauriStorage } from "@frodobaggins.jr/eisenhower-tauri";
+const consumerSource = `import { boardDocument, emptyBoard, memoryStorage, saveDocument } from "@eisenhower/model";
+import { Board, EisenhowerProvider } from "@eisenhower/react";
+import { tauriStorage } from "@eisenhower/tauri";
 
 const board = emptyBoard();
 export const view = (
@@ -64,13 +63,13 @@ export const storage = tauriStorage();
 const consumerImports = `import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-for (const name of ${JSON.stringify(packages.map((pkg) => pkg.published))}) {
+for (const name of ${JSON.stringify(packages.map((pkg) => pkg.name))}) {
   const module = await import(name);
   console.log(\`\${name}: \${Object.keys(module).length} exports\`);
 }
-const stylesheet = fileURLToPath(import.meta.resolve("@frodobaggins.jr/eisenhower-react/style.css"));
+const stylesheet = fileURLToPath(import.meta.resolve("@eisenhower/react/style.css"));
 if (!existsSync(stylesheet)) throw new Error(\`No stylesheet at \${stylesheet}\`);
-console.log("@frodobaggins.jr/eisenhower-react/style.css resolves.");
+console.log("@eisenhower/react/style.css resolves.");
 `;
 
 const consumerConfig = {
@@ -88,31 +87,28 @@ const consumerConfig = {
   files: ["consumer.tsx"],
 };
 
-/** Installs the packed tarballs in a fresh consumer, then imports and type-checks them there. */
-function checkConsumer() {
-  const consumer = join(publishFolder, "consumer");
-  step(`A consumer of the packed tarballs, in ${shown(consumer)}`);
+/** Installs the tarballs in a fresh consumer, then imports and type-checks them there. */
+function checkConsumer(tarballs: readonly Tarball[]) {
+  const consumer = join(releaseFolder, "consumer");
+  step(`A consumer of the tarballs, in ${shown(consumer)}`);
   rmSync(consumer, { recursive: true, force: true });
   mkdirSync(consumer, { recursive: true });
-  const tarballs: Record<string, string> = {};
-  for (const pkg of packages) {
-    const packed = run("npm", ["pack", stageOf(pkg), "--pack-destination", consumer, "--json", "--silent"], {
-      capture: true,
-    });
-    tarballs[pkg.published] = `file:./${JSON.parse(packed)[0].filename}`;
-  }
+  const local = Object.fromEntries(
+    tarballs.map((tarball) => [tarball.pkg.name, `file:${relative(consumer, tarball.file).replaceAll("\\", "/")}`]),
+  );
   const manifest = {
     name: "eisenhower-consumer",
     private: true,
     type: "module",
     dependencies: {
-      ...tarballs,
+      ...local,
       react: catalog.react,
       "react-dom": catalog["react-dom"],
       "@types/react": catalog["@types/react"],
     },
-    // The siblings' own `^<version>` dependencies are met by the tarballs, not the registry.
-    overrides: Object.fromEntries(Object.keys(tarballs).map((name) => [name, `$${name}`])),
+    // The siblings' dependencies on each other are the release's URLs, which exist only once it is
+    // made: here they are met by the local tarballs.
+    overrides: Object.fromEntries(Object.keys(local).map((name) => [name, `$${name}`])),
   };
   writeFileSync(join(consumer, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   writeFileSync(join(consumer, "tsconfig.json"), `${JSON.stringify(consumerConfig, null, 2)}\n`);
@@ -124,8 +120,8 @@ function checkConsumer() {
   console.log("The consumer type-checks with moduleResolution nodenext.");
 }
 
-export function verifyPackages() {
+export function verifyPackages(tarballs: readonly Tarball[]) {
   step("Imports of the built files");
   for (const pkg of packages) checkImports(pkg);
-  checkConsumer();
+  checkConsumer(tarballs);
 }
