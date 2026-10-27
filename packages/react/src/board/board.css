@@ -1,0 +1,343 @@
+/*
+ * The board (decision 15): jerome's plot board and list (research.css, .plot-*), made generic. The list is the
+ * groups one under another, each card a row; the board is a column of cards per group, side by side, that
+ * scrolls sideways. Nothing moves by animation, so reduced motion needs nothing more.
+ */
+.eh-board-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-2);
+  container-type: inline-size;
+}
+.eh-board-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2);
+}
+.eh-board-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-2);
+}
+.eh-board-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: var(--eh-radius);
+}
+.eh-board-group[data-drop="inside"] {
+  border-color: var(--eh-accent);
+}
+.eh-board-group-heading {
+  margin: 4px 0;
+  font-size: inherit;
+}
+
+/* A column's heading: its name as text with its pencil (a field while it is edited), the count, the menu. */
+.eh-board-column-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 4px 6px;
+  border-top: 2px solid transparent;
+  border-bottom: 1px solid var(--eh-line);
+  font-weight: 600;
+}
+.eh-board-column-heading[data-drop="before"] {
+  border-top-color: var(--eh-accent);
+}
+.eh-board-column-heading .eh-board-column-name {
+  flex: 0 1 auto;
+  min-width: 4em;
+}
+.eh-board-column-name h3 {
+  margin: 0;
+  font-size: inherit;
+  overflow-wrap: anywhere;
+}
+.eh-board-column-heading .eh-board-column-name[data-editing] {
+  flex: 1 1 12em;
+}
+.eh-board-column-heading:hover .eh-editable-edit,
+.eh-board-column-heading:focus-within .eh-editable-edit {
+  color: var(--eh-ink);
+}
+.eh-board-column-heading .eh-note {
+  margin: 0;
+  font-weight: normal;
+}
+.eh-board-column-heading .eh-question,
+.eh-board-row .eh-question {
+  flex-basis: 100%;
+  font-weight: normal;
+}
+
+/* The list: a row a card. */
+.eh-board-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eh-board-row {
+  display: grid;
+  grid-template-columns: minmax(7em, 10em) minmax(0, max-content) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 3px 6px;
+  border-top: 2px solid transparent;
+  border-radius: 3px;
+}
+.eh-board-row:hover,
+.eh-board-row[data-selected="true"] {
+  background: var(--eh-selected);
+}
+.eh-board-row[data-drop="before"] {
+  border-top-color: var(--eh-accent);
+}
+.eh-board-row .eh-question {
+  grid-column: 1 / -1;
+}
+.eh-board-row-details {
+  display: flex;
+  align-items: center;
+  gap: 4px 10px;
+  min-width: 0;
+}
+.eh-board-row-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--eh-muted);
+  font-size: 12px;
+}
+/* A narrow list: the title takes the row's width beside its menu; the colour and the details go below. */
+@container (max-width: 480px) {
+  .eh-board-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .eh-board-row > .eh-board-card-title,
+  .eh-board-row > .eh-board-rename {
+    grid-row: 1;
+    grid-column: 1 / 3;
+  }
+  .eh-board-row > .eh-board-more {
+    grid-row: 1;
+    grid-column: 3;
+  }
+  .eh-board-row > .eh-board-colour {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .eh-board-row > .eh-board-row-details {
+    grid-row: 2;
+    grid-column: 2 / 4;
+  }
+}
+
+.eh-board-colour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--eh-muted);
+  font-size: 12px;
+}
+.eh-board-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--eh-line);
+}
+.eh-board-swatch[data-none="true"] {
+  background: transparent;
+  border-style: dashed;
+}
+.eh-board-badge {
+  color: var(--eh-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.eh-board-view .eh-board-card-title {
+  justify-self: start;
+  max-width: 100%;
+  padding: 2px 4px;
+  border: 0;
+  color: var(--eh-ink);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.eh-board-view .eh-board-card-title[aria-current="true"] {
+  color: var(--eh-accent);
+  font-weight: 600;
+}
+.eh-board-view .eh-board-more {
+  padding: 4px;
+  border: 0;
+}
+.eh-board-view .eh-board-more:hover {
+  background: var(--eh-selected);
+}
+
+/* The board: a column of cards per group, 15rem wide, scrolling sideways inside the board. */
+.eh-board-columns {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--eh-space-3);
+  overflow-x: auto;
+  padding-bottom: var(--eh-space-2);
+}
+.eh-board-column {
+  flex: 0 0 15rem;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 6px;
+  background: var(--eh-panel);
+}
+.eh-board-column .eh-board-column-heading {
+  padding: 2px 2px 6px;
+  border-bottom: 0;
+}
+.eh-board-column .eh-board-column-heading .eh-board-column-name[data-editing] {
+  flex: 1 1 100%;
+}
+.eh-board-column .eh-board-group-heading {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  margin: 0;
+  padding: 2px 2px 6px;
+  border-top: 2px solid transparent;
+}
+.eh-board-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.eh-board-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px 8px 14px;
+  overflow: hidden;
+  background: var(--eh-surface);
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+}
+.eh-board-card[data-selected="true"] {
+  border-color: var(--eh-accent);
+}
+.eh-board-card[data-drop="before"] {
+  box-shadow: 0 -3px 0 var(--eh-accent);
+  overflow: visible;
+}
+.eh-board-card-stripe {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+}
+.eh-board-card-stripe[data-none="true"] {
+  background: transparent;
+}
+.eh-board-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.eh-board-card .eh-board-card-title {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font-weight: 600;
+}
+.eh-board-card .eh-board-rename {
+  flex: 1;
+}
+.eh-board-card-summary {
+  margin: 0;
+  color: var(--eh-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.eh-board-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  font-size: 12px;
+}
+.eh-board-card-meta .eh-board-badge {
+  margin-inline-start: auto;
+}
+.eh-board-card .eh-question {
+  margin-top: 4px;
+}
+.eh-board-view .eh-board-rename {
+  min-width: 0;
+  font: inherit;
+  padding: 2px 4px;
+  border: 1px solid var(--eh-accent);
+  border-radius: 4px;
+  background: var(--eh-surface);
+  color: var(--eh-ink);
+}
+
+/* The card dialog: its fields scroll between the title and the actions. */
+.eh-dialog.eh-board-dialog {
+  width: min(560px, calc(100vw - 32px));
+}
+.eh-board-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-3);
+}
+.eh-board-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.eh-board-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-3);
+}
+.eh-board-field-row .eh-board-field {
+  flex: 1 1 12em;
+}
+.eh-board-colour-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.eh-board-colour-choice select {
+  flex: 1;
+}
+.eh-board-dialog .eh-dialog-actions .eh-board-dialog-delete {
+  margin-inline-end: auto;
+}
+
+/* Forced colours draw no shadows: the place a dragged card would go is a line drawn as a border instead. */
+@media (forced-colors: active) {
+  .eh-board-card[data-drop="before"] {
+    border-top: 3px solid Highlight;
+  }
+  .eh-board-card-stripe {
+    display: none;
+  }
+}

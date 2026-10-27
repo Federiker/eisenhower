@@ -1,3 +1,4 @@
+import { board } from "./en-GB/board";
 import { common } from "./en-GB/common";
 
 /**
@@ -10,6 +11,7 @@ import { common } from "./en-GB/common";
  */
 export const enGB = {
   ...common,
+  ...board,
 } as const;
 
 export type MessageKey = keyof typeof enGB;
