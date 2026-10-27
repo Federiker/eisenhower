@@ -52,4 +52,4 @@ export {
   formatPoint as formatTimelinePoint,
   formatWhen as formatTimelineWhen,
 } from "./timeline/format";
-export { Timeline, type TimelineProps } from "./timeline/Timeline";
+export { Timeline, TimelineEditor, type TimelineProps } from "./timeline/Timeline";

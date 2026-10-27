@@ -19,8 +19,11 @@ import { type EisenhowerSettings, ViewRoot } from "../theme/EisenhowerProvider";
 import { type TimelineView, TimelineViewProvider } from "./context";
 import { hasBce } from "./format";
 import { PROBLEM_LABELS } from "./labels";
+import { TimelineCategoriesList } from "./TimelineCategoriesList";
 import { TimelineDrawing } from "./TimelineDrawing";
+import { TimelineEntriesList } from "./TimelineEntriesList";
 import { TimelineEntryDialog } from "./TimelineEntryDialog";
+import { TimelineStepsList } from "./TimelineStepsList";
 
 /**
  * The props of `<Timeline>` and `<TimelineEditor>` (decisions 6 to 8 and 16): the timeline (`value`) and
@@ -50,7 +53,7 @@ export type TimelineProps = EisenhowerSettings & {
   className?: string;
 };
 
-type BodyProps = Omit<TimelineProps, keyof EisenhowerSettings | "className">;
+type BodyProps = Omit<TimelineProps, keyof EisenhowerSettings | "className"> & { editor: boolean };
 
 /** Finds an entry's button, in an area first. */
 function entryButton(root: HTMLElement | null, id: string, area: string | null): HTMLElement | null {
@@ -71,6 +74,7 @@ function TimelineBody({
   zoom: zoomProp,
   defaultZoom = 1,
   onZoomChange,
+  editor,
 }: BodyProps) {
   const t = useTranslate();
   const locale = useLocale();
@@ -195,6 +199,13 @@ function TimelineBody({
           />
         )}
         {!dialog && problem && <Notice tone="problem">{t(PROBLEM_LABELS[problem])}</Notice>}
+        {editor && (
+          <>
+            <TimelineEntriesList />
+            {value.kind === "sequence" && <TimelineStepsList />}
+            <TimelineCategoriesList />
+          </>
+        )}
         {dialog && (
           <TimelineEntryDialog key={dialog.id} entryId={dialog.id} preset={dialog.preset} onClose={closeDialog} />
         )}
@@ -233,7 +244,26 @@ function TimelineBody({
 export function Timeline({ strings, t, locale, theme, className, ...props }: TimelineProps) {
   return (
     <ViewRoot strings={strings} t={t} locale={locale} theme={theme} className={classNames("eh-timeline", className)}>
-      <TimelineBody {...props} />
+      <TimelineBody {...props} editor={false} />
+    </ViewRoot>
+  );
+}
+
+/**
+ * A timeline with everything to edit it (jerome's timeline page): the drawing of `<Timeline>`, then its
+ * entries as a table in time order, its steps (a Sequence) and its categories, each list reordered by
+ * dragging, Alt+↑ ↓ or its menu.
+ */
+export function TimelineEditor({ strings, t, locale, theme, className, ...props }: TimelineProps) {
+  return (
+    <ViewRoot
+      strings={strings}
+      t={t}
+      locale={locale}
+      theme={theme}
+      className={classNames("eh-timeline eh-timeline-editor", className)}
+    >
+      <TimelineBody {...props} editor />
     </ViewRoot>
   );
 }

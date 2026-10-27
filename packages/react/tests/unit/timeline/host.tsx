@@ -1,16 +1,20 @@
 import type { Timeline as TimelineValue } from "@eisenhower/model";
 import { useState } from "react";
 
-import { Timeline, type TimelineProps } from "../../../src";
+import { Timeline, TimelineEditor, type TimelineProps } from "../../../src";
 
 /** The timeline the host holds now, after every change the view reported. */
 export const held: { value: TimelineValue | null } = { value: null };
 
 /** A host that keeps the timeline in its state, as an app would. */
-export function Host({ initial, ...props }: Omit<TimelineProps, "value"> & { initial: TimelineValue }) {
+export function Host({
+  initial,
+  editor = false,
+  ...props
+}: Omit<TimelineProps, "value"> & { initial: TimelineValue; editor?: boolean }) {
   const [value, setValue] = useState(initial);
   held.value = value;
-  const View = Timeline;
+  const View = editor ? TimelineEditor : Timeline;
   return (
     <View
       {...props}
