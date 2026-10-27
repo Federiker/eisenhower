@@ -18,105 +18,16 @@ Sections: **Now**, **Verification**, **Later**, **Awaiting owner decisions**.
 ## Now
 
 The first round (owner decisions, 27 October 2026; see
-[development.md](docs/development.md#decisions)), in order:
+[development.md](docs/development.md#decisions)) is built: the models, the
+four views, the Tauri plugin and client, the demo app and its end-to-end
+tests, each described in [docs/features/](docs/README.md). What is left:
 
-- [x] Foundation: the workspaces, the tools and hooks, CI, the docs, the
-  licence.
-- [ ] The shared parts:
-  - [x] `@eisenhower/model`: ids, names and one-line texts with their
-    limits, calendar days, the palette, problems as codes, the document and
-    the `StorageAdapter` with the memory and `localStorage` adapters.
-  - [x] `@eisenhower/react`: the strings and their override, the theme
-    (`--eh-*`, light, dark, forced colours, the palette), the controls
-    copied from jerome's components, the keys' list, the live region,
-    `useHistory`.
-- [ ] The board (decision 15), from jerome's plot board and list:
-  - [x] The model: columns and cards, their edit operations and the
-    neighbours for the keys, with jerome's tests.
-  - [x] `<Board>`: columns, cards, drag and drop, the keys, the menus, the
-    list layout, the card's badge and `renderCard`.
-  - [x] The "No column" column after the others while a card is dragged
-    (jerome 6cece75), checked and tested: it worked as copied.
-  - [ ] The owner's answers on the choices proposed in
-    [the board's decisions](docs/features/board.md#decisions) (the default
-    layout, the dialog's column, Alt+← → on a column, F2 on a card, New
-    card with `onOpenCard`, the narrow-page fallback).
-- [ ] The timeline (decision 16), from jerome's timelines (see
-  [the timeline](docs/features/timeline.md)):
-  - [x] The model: steps, dates, categories and entries, their checks,
-    edit operations and the entry form, `timelineDocument`, with jerome's
-    tests.
-  - [x] The scale, axis, lanes, dates as shown and the CSV and SVG exports.
-  - [x] `<Timeline>`: the drawing with its zoom, keys (Alt+arrows move an
-    entry), menu, entry dialog and narrow layout.
-  - [x] `<TimelineEditor>`: the entries' table, the steps and categories
-    lists.
-  - [x] The owner's word on moving entries (27 October 2026): the
-    Alt+arrow moves stay, and entries are dragged with the pointer along
-    the axis, between lanes and by a span's ends.
-  - [ ] The owner's word on the other choices in
-    [its decisions](docs/features/timeline.md#decisions) (New entry beside
-    the zoom, Ctrl+0, no timeline title).
-  - [ ] A Playwright test of dragging entries in a real browser, on the
-    demo app's timeline page (the unit tests' DOM has no layout).
-- [ ] The gantt chart (decision 17; see [its document](docs/features/gantt.md)):
-  - [x] The model: groups, tasks, milestones, progress, dependencies and
-    their conflicts, the edit operations and the document, with tests.
-  - [x] `<Gantt>`: the tree grid, bars, milestones and summary rows on the
-    day, week and month scales, weekends and today, the header in the
-    locale.
-  - [x] Moving and resizing with the pointer and the keys, the menus, the
-    questions, the task dialog, the scale keys.
-  - [x] Dependencies as arrows, their warning in words and on the drawing.
-<<<<<<< HEAD
-  - [ ] The owner's answers to the decisions listed in its document
-    (Alt+arrow steps on the week and month scales, the limits…).
-  - [x] The demo app's page and a Playwright test of dragging in a real
-=======
-  - [x] The owner's answers on the keys' step (a day on every scale), the
-    default scale and the limits (27 October 2026).
-  - [ ] The owner's answers on the other decisions listed in
-    [its document](docs/features/gantt.md#decisions-to-confirm) (a
-    milestone on its predecessor's last day, today's colour, Alt+↑ ↓
-    across groups, the stored fold).
-  - [ ] The demo app's page and a Playwright test of dragging in a real
->>>>>>> worktree-agent-a400c9a4952b8ac02
-    browser (the unit tests' DOM has no layout).
-  - [ ] The header clips a month's name when little of that month is
-    drawn (the first month of the range reads "Septer" on the week scale,
-    the last "December 20"): shorten it, end it with an ellipsis or leave
-    it out (seen in the demo app; a look the owner may want to choose).
-- [ ] The todo list (decision 18), in [todo.md](docs/features/todo.md):
-  - [x] The model: items, subtasks, tags, notes, due days, quadrants, the
-    edits and the document.
-  - [x] `<TodoList>`'s list: check boxes, titles in place, due days and
-    Overdue, tags, notes, subtasks, adding, the details dialog, the tag
-    filter, Hide done, drag and drop, the keys and the menu.
-  - [x] The matrix layout: the four quadrants, moving between them by
-    dragging and by keys, adding to a quadrant.
-  - [ ] The owner's answers on the decisions listed in
-    [todo.md](docs/features/todo.md#decisions-taken-with-the-view).
-  - [x] The demo app's todo page and its end-to-end tests.
-- [x] Rust and the Tauri client (decisions 9 and 10):
-  - [x] `tauri-plugin-eisenhower`: read and write with the hash guard,
-    atomic writes, permissions.
-  - [x] `@eisenhower/tauri`: the typed client and its `StorageAdapter`.
-- [ ] The demo app (decision 14), in [packages/app](packages/app/README.md):
-  - [x] Every view on an invented sample, in tabs, with the theme, the
-    locale, undo and redo, and the board's and timeline's switches.
-  - [x] The browser host: documents in `localStorage`, saved as they change
-    with the revision guard, Reset to the sample.
-  - [x] The Tauri host: Open…, Save (the hash guard, asking before an
-    overwrite) and Save as… through `tauriStorage`, tested with Tauri's IPC
-    mocks.
-  - [x] Playwright tests of every view in Chromium (dragging, the keys,
-    the theme, persistence) and the README's screenshots.
-  - [ ] The window clicked through (under Verification).
-  - [ ] The owner's word on the app's choices: saving as it changes in the
-    browser, `.json` files in the window, the samples and the locales
-    offered, Ctrl+Z and Ctrl+Y as the app's keys.
-- [x] The Claude workflow: the `eisenhower-` skills and the implementer
-  agent.
+- [ ] A Playwright test of dragging timeline entries in a real browser, on
+  the demo app's timeline page (the unit tests' DOM has no layout).
+- [ ] The gantt header clips a month's name when little of that month is
+  drawn (the first month of the range reads "Septer" on the week scale,
+  the last "December 20"): shorten it, end it with an ellipsis or leave it
+  out (seen in the demo app; see **Awaiting owner decisions**).
 
 ## Verification
 
@@ -130,7 +41,25 @@ The first round (owner decisions, 27 October 2026; see
 
 - Publishing to npm and crates.io (decision 11).
 - Replacing jerome's plot board and timelines with Eisenhower's views.
+- Working calendars for the gantt chart (decision 17).
 
 ## Awaiting owner decisions
 
-None at present.
+Choices made while building the views, each listed in its document; they
+stand until the owner says otherwise:
+
+- The board: [its proposed choices](docs/features/board.md#decisions) (the
+  dialog's column, Alt+← → on a column, F2 on a card, New card with
+  `onOpenCard`, the narrow-page fallback left to the host).
+- The timeline: [its decisions](docs/features/timeline.md#decisions) (New
+  entry beside the zoom, Ctrl+0, no timeline title, how a drag snaps and
+  where a resize leaves the entry).
+- The gantt chart: [its decisions to confirm](docs/features/gantt.md#decisions-to-confirm)
+  (a milestone on its predecessor's last day, today's colour, Alt+↑ ↓ across
+  groups, the stored fold), and how the header shows a clipped month.
+- The todo list: [its open choices](docs/features/todo.md#decisions-taken-with-the-view)
+  (the title's limit, notes on several lines, new items taking the filter's
+  tags, the order in a quadrant, outdenting, Hide done's start).
+- The demo app: saving as it changes in the browser, `.json` files in the
+  window, the samples and the locales offered, Ctrl+Z and Ctrl+Y as the
+  app's keys, no warning when the window closes with unsaved changes.
