@@ -44,3 +44,11 @@ export {
 } from "./strings/translate";
 export { type EisenhowerSettings, EisenhowerProvider, type Theme, ViewRoot } from "./theme/EisenhowerProvider";
 export { colourVar, PALETTE, type PaletteColour } from "./theme/palette";
+// The timeline (decision 16).
+export { sortablePoint, timelineCsv, timelineSvg } from "./timeline/export";
+export {
+  type DateWords,
+  formatDate as formatTimelineDate,
+  formatPoint as formatTimelinePoint,
+  formatWhen as formatTimelineWhen,
+} from "./timeline/format";
