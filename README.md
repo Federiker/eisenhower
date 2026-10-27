@@ -158,15 +158,19 @@ by git at the tag. Everything takes the version in the root `Cargo.toml`
 
 ```sh
 mise run release:dry   # the checks, the tarballs in tmp/release, a consumer of them, the plan and the notes
-mise run release       # on a clean tree: tags v<version> and stops for you to push, then (run again) releases
+mise run tag           # asks the version, commits it, tags v<version>, pushes, then offers to release
+mise run release       # releases the pushed tag: the GitHub release and its tarballs
 ```
 
-To release: bump the version in `Cargo.toml` and commit; `mise run release`
-creates the annotated tag `v<version>` at HEAD and says what to push
-(`git push origin main v<version>`); push; then `mise run release` again
-makes the release and uploads the tarballs. A tarball the release has
-already is skipped, so a release that stopped half way is run again as it
-is. The release's notes are made by
+To release, run `mise run tag` on `main` with everything committed. It asks
+the new version (Enter for the next patch, or the current one when it was
+never tagged), writes it to `Cargo.toml` and `Cargo.lock` and commits those
+alone, tags `v<version>`, asks before
+`git push --atomic origin main v<version>`, then asks before releasing. If
+you stop before pushing, it says how to push later and how to undo it
+here. `mise run release` makes the release of a pushed tag, and is run
+again as it is if it stopped half way: a tarball the release has already is
+skipped. The release's notes are made by
 [scripts/release/notes.ts](scripts/release/notes.ts).
 `mise run release:dry --allow-dirty` dry-runs with uncommitted changes and
 `--skip-checks` without the type-check, the tests and Clippy. Releasing
@@ -184,7 +188,8 @@ write on the repository.
 | `mise run tauri:dev` | The demo app as a native window |
 | `mise run build` | The demo app's production build |
 | `mise run release:dry` | Check, build and verify the release's tarballs; list what releasing does |
-| `mise run release` | Tag `v<version>`, then (once pushed) the GitHub release and its tarballs |
+| `mise run tag` | Set the version, commit, tag `v<version>`, push and release, asking at each step |
+| `mise run release` | The GitHub release of the pushed tag `v<version>`, with its tarballs |
 | `mise run test` | The TypeScript tests (Vitest) |
 | `mise run coverage` | The same, failing below 80% |
 | `mise run rust:test` | The Rust tests (nextest when installed) |

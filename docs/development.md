@@ -97,15 +97,28 @@ Owner decisions, 27 October 2026, for the first round (slices in the
     installs the three tarballs together in a throwaway consumer (the
     siblings' URLs overridden by the local tarballs; imported with Node,
     type-checked with `nodenext`) and lists what releasing would do: the
-    tag's checks, the calls to GitHub and the release's notes. To release:
-    bump the version in `Cargo.toml` and commit; `mise run release`, on a
-    clean tree, creates the annotated tag `v<version>` at HEAD and stops,
-    saying what to push (`git push origin main v<version>`); push; then
-    `mise run release` again checks the tag is on origin at HEAD and HEAD on
-    origin's main, runs the checks and the build, creates the release when
-    there is none (its notes from `scripts/release/notes.ts`) and uploads
-    each tarball, skipping one already there, so a release that stopped
-    half way is run again as it is. The token (`GITHUB_TOKEN`, fine-grained,
+    tag's checks, the calls to GitHub and the release's notes.
+
+    To release, `mise run tag` (`scripts/tag.ts`) asks at each step, Enter
+    taking the default. On `main`, with nothing uncommitted or untracked and
+    nothing on origin's main this one lacks, it asks the new version (the
+    next patch; the current one when it was never tagged, as for 0.1.0;
+    `x.y.z` or a pre-release such as `0.2.0-alpha.1`, after the current one,
+    its tag not taken here or on origin), writes it to the root
+    `Cargo.toml` and `Cargo.lock` (only the workspace's own crates' lines),
+    commits those two files alone (`[release] Eisenhower <version>`, the
+    hooks run, no trailer: the owner's commit), makes the annotated tag
+    `v<version>`, shows what goes to origin and asks before
+    `git push --atomic origin main v<version>`, then asks before running the
+    release. Ctrl+C or the end of the input at a question changes nothing
+    before the commit; after it, the script says what it has done and the
+    commands that undo it here (`git tag -d`, `git reset --hard HEAD~1`),
+    printed, never run. `mise run release` releases a pushed tag: it stops
+    unless `v<version>` is at HEAD here and on origin with HEAD on origin's
+    main, runs the checks and the build, creates the release when there is
+    none (its notes from `scripts/release/notes.ts`) and uploads each
+    tarball, skipping one already there, so a release that stopped half way
+    is run again as it is. The token (`GITHUB_TOKEN`, fine-grained,
     Contents: read and write) is in the gitignored `.env`
     ([.env.example](../.env.example)) and goes only in the requests to
     GitHub's API. jerome may install the released tarballs instead of

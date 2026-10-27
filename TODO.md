@@ -24,8 +24,10 @@ tests, each described in [docs/features/](docs/README.md). What is left
 is under **Verification** and **Awaiting owner decisions**.
 
 - [ ] The first release, v0.1.0 (decision 11; see the README's Releasing):
-  - [ ] `mise run release` tags v0.1.0 at HEAD; push `main` and `v0.1.0`.
-  - [ ] `mise run release` again: the GitHub release and its three tarballs.
+  - [ ] `mise run tag`: 0.1.0 (never tagged, so no commit), the tag on
+    HEAD, `main` and `v0.1.0` pushed.
+  - [ ] Its release (or `mise run release`): the GitHub release and its
+    three tarballs.
   - [ ] A throwaway host installs the three tarballs by URL (`bun add`) and
     the plugin by git at the tag, and builds.
 
