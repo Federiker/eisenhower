@@ -31,12 +31,16 @@ The first round (owner decisions, 27 October 2026; see
     copied from jerome's components, the keys' list, the live region,
     `useHistory`.
 - [ ] The board (decision 15), from jerome's plot board and list:
-  - [ ] The model: columns and cards, their edit operations and the
+  - [x] The model: columns and cards, their edit operations and the
     neighbours for the keys, with jerome's tests.
-  - [ ] `<Board>`: columns, cards, drag and drop, the keys, the menus, the
+  - [x] `<Board>`: columns, cards, drag and drop, the keys, the menus, the
     list layout, the card's badge and `renderCard`.
-  - [ ] The "No column" column after the others while a card is dragged
-    (jerome 6cece75), checked and tested.
+  - [x] The "No column" column after the others while a card is dragged
+    (jerome 6cece75), checked and tested: it worked as copied.
+  - [ ] The owner's answers on the choices proposed in
+    [the board's decisions](docs/features/board.md#decisions) (the default
+    layout, the dialog's column, Alt+← → on a column, F2 on a card, New
+    card with `onOpenCard`, the narrow-page fallback).
 - [ ] The timeline (decision 16), from jerome's timelines: the model (steps,
   dates, categories, entries), the drawing with its scale and zoom, the
   lists, the entry dialog, the narrow layout, with jerome's tests.
