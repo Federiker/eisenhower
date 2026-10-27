@@ -20,7 +20,8 @@ host writes around the views. One Vite app runs in two places, and
 - **As a Tauri window** (`mise run tauri:dev`): documents are files,
   opened with **Open…**, written with **Save** and **Save as…** through
   `tauriStorage` and the plugin's hash guard, and chosen with Tauri's dialog
-  plugin (`host/tauri.ts`); see
+  plugin (`host/tauri.ts`). Closing the window while any document has
+  unsaved changes asks first: **Save**, **Don't save** or **Cancel**; see
   [the demo app](../../docs/features/tauri.md#the-demo-app) for how it uses
   them.
 
@@ -74,12 +75,26 @@ adds its own, which are not the library's:
 Undo and redo are left to a text field (its own undo) and to a dialogue
 (whose changes are not made yet).
 
+## Decisions
+
+The owner's decisions of 27 October 2026:
+
+- In the browser, documents are saved as they change (a moment after the
+  last change), with no Save button.
+- In the window, documents are plain `.json` files (the dialogues' filter
+  "Eisenhower documents", `*.json`), with no extension of their own.
+- The window asks before closing while any document has unsaved changes:
+  Save (each in turn, with Save as… for one that has no file yet; the
+  window stays open if any is not saved), Don't save, or Cancel.
+
 ## The native side
 
 `src-tauri/` is the crate `eisenhower_app` (a member of the root Cargo
 workspace): it registers `tauri_plugin_eisenhower::init()` and Tauri's
 dialog plugin, and its capability (`capabilities/main.json`) grants
-`core:default`, `dialog:default` and `eisenhower:default`. `tauri dev`
+`core:default`, `core:window:allow-destroy` (the window closes itself once
+it has asked about unsaved changes), `dialog:default` and
+`eisenhower:default`. `tauri dev`
 starts Vite (`bun run dev`) and opens the window on it; `cargo build -p
 eisenhower_app` builds the native side alone.
 
@@ -90,8 +105,9 @@ from it in `src-tauri/icons` (PNG, ICO and ICNS, kept in Git LFS).
 ## Tests
 
 `tests/` (`bun run --filter @eisenhower/app test`): the Tauri host with
-Tauri's IPC mocks standing in for the window (`tests/ipc.ts`), the browser
-host on happy-dom's `localStorage`, the undo keys, and the samples, which
-must be valid documents that read back as written. The app as a whole is
+Tauri's IPC mocks standing in for the window (`tests/ipc.ts`), with the
+question as the window closes; the browser host on happy-dom's
+`localStorage`, the undo keys, and the samples, which must be valid
+documents that read back as written. The app as a whole is
 tested end to end in the browser ([tests/e2e](../../tests/e2e)), and is
 left out of the coverage measure.

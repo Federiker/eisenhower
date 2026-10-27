@@ -59,6 +59,13 @@ export const appStrings = {
   discardTitle: "Unsaved changes",
   discard: "{name} has changes that are not saved. Discard them?",
   discardOk: "Discard",
+  closeTitle: "Unsaved changes",
+  closeOne: "{name} has changes that are not saved. Save them before closing?",
+  closeMany: "{names} have changes that are not saved. Save them before closing?",
+  closeSave: "Save",
+  closeDiscard: "Don't save",
+  closeFailed: "The window could not ask about the unsaved changes, so it stays open. Save them, then close it.",
+  closeUnguarded: "The window will not ask about unsaved changes when it closes; save them before closing it.",
 
   // Failures, in words; the systems' own details go to the console, never here.
   openFailed: "{name} could not be opened.",

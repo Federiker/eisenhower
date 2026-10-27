@@ -199,8 +199,9 @@ tauri::Builder::default()
     .plugin(tauri_plugin_eisenhower::init())
 ```
 
-with `core:default`, `dialog:default` and `eisenhower:default` in its one
-capability. Its content security policy allows the app's own scripts,
+with `core:default`, `core:window:allow-destroy` (the window closes itself
+once it has asked about unsaved changes), `dialog:default` and
+`eisenhower:default` in its one capability. Its content security policy allows the app's own scripts,
 inline styles (the views place bars and lanes with them), `data:` and
 `blob:` images and Tauri's IPC (`ipc:`, `http://ipc.localhost`), nothing
 from elsewhere.
@@ -231,6 +232,14 @@ on no file. The Tauri host:
   keeps the new revision for the next.
 - **Open the sample** puts the tab's sample back, on no file (asking first
   when there are unsaved changes).
+- **Closing the window** while any document has unsaved changes asks
+  first (`getCurrentWindow().onCloseRequested`, and the dialog's `message`
+  with three buttons), naming them: **Save** saves each in turn, with Save
+  as… for one that has no file yet, and closes once all are saved; the
+  first one not saved (Save as… cancelled, or a failure, shown as for any
+  save) keeps the window open. **Don't save** closes; **Cancel**, or
+  closing the question, stays. A question that cannot be asked keeps the
+  window open and says so.
 
 Failures are shown under the view from the app's strings
 (`src/host/messages.ts`, `src/strings.ts`): the plugin's code when there is
@@ -239,6 +248,9 @@ one (kept as the `StorageError`'s cause), else the `StorageError`'s or
 the browser the same app keeps the documents in `localStorage`
 (`localStorageAdapter("eisenhower-demo:")`), saved automatically a moment
 after each change, with the same revision guarding against another tab.
+The owner's decisions of 27 October 2026: the browser saves as the
+documents change; the window's documents are plain `.json` files; and the
+window asks before closing with unsaved changes.
 `packages/app/tests` checks the Tauri host with Tauri's IPC mocks; the
 window itself is clicked through by hand (see the
 [TODO](../../TODO.md#verification)).

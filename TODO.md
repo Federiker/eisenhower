@@ -56,6 +56,5 @@ stand until the owner says otherwise:
 - The todo list: [its open choices](docs/features/todo.md#decisions-taken-with-the-view)
   (the title's limit, notes on several lines, new items taking the filter's
   tags, the order in a quadrant, outdenting, Hide done's start).
-- The demo app: saving as it changes in the browser, `.json` files in the
-  window, the samples and the locales offered, Ctrl+Z and Ctrl+Y as the
-  app's keys, no warning when the window closes with unsaved changes.
+- The demo app: the samples and the locales offered, Ctrl+Z and Ctrl+Y as
+  the app's keys.

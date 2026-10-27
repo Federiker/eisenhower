@@ -43,5 +43,6 @@ export function browserHost(): Host {
     save,
     saveAs: undefined,
     ask,
+    guardClose: undefined,
   };
 }

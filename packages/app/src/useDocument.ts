@@ -26,8 +26,9 @@ export type DemoDocument<T> = {
   autosave: boolean;
   /** Opens a file in its place (the window), asking first when there are unsaved changes. */
   open: () => Promise<void>;
-  save: () => Promise<void>;
-  saveAs: () => Promise<void>;
+  /** Saves it (Save as… when it has no file yet); resolves false when it was not saved (cancelled or failed). */
+  save: () => Promise<boolean>;
+  saveAs: () => Promise<boolean>;
   /** The browser: the sample again, as a change that can be undone. The window: the sample, on no file. */
   reset: () => Promise<void>;
 };
@@ -101,32 +102,37 @@ export function useDemoDocument<T>(
     };
   }, [host, key, kind, initial, take, report, setMeta]);
 
-  /** Saves the value as it is when its turn comes: one save at a time, each quoting the last one's revision. */
+  /**
+   * Saves the value as it is when its turn comes: one save at a time, each quoting the last one's revision.
+   * Resolves whether it is stored.
+   */
   const store = useCallback(
     (how: "save" | "saveAs") => {
       const run = async () => {
         const write = how === "saveAs" ? host.saveAs : host.save;
-        if (!write) return;
+        if (!write) return false;
         const data = valueRef.current;
         const { name, key: where, revision, saved } = metaRef.current;
-        if (how === "save" && host.kind === "browser" && data === saved) return;
+        if (how === "save" && host.kind === "browser" && data === saved) return true;
         setSaving(true);
         try {
           const stored = await write({ data, name, key: where, revision }, kind);
           setMeta({ name: stored.name, key: stored.key, revision: stored.revision, saved: data });
           if (host.kind === "tauri") report(fill(text.saved, { name: stored.name }), "status");
+          return true;
         } catch (error) {
           if (error instanceof Cancelled) report(text.notSaved, "status");
           else {
             console.error(error);
             report(messageOf(error, name, text.saveFailed), "error");
           }
+          return false;
         } finally {
           setSaving(false);
         }
       };
       const next = queue.current.then(run);
-      queue.current = next;
+      queue.current = next.then(() => undefined);
       return next;
     },
     [host, kind, report, setMeta],

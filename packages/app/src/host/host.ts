@@ -1,5 +1,7 @@
 import type { DocumentKind } from "@eisenhower/model";
 
+import type { Unsaved } from "./closing";
+
 /**
  * A document the app has open: its data, the name shown, where it is stored (a file's path in the window,
  * a storage key in the browser; none for a sample not saved yet) and the revision it was read or last saved
@@ -38,6 +40,14 @@ export type Host = {
   saveAs: (<T>(document: OpenDocument<T>, kind: DocumentKind<T>) => Promise<OpenDocument<T>>) | undefined;
   /** Asks a question; resolves true for its `ok`. */
   ask: (question: Question) => Promise<boolean>;
+  /**
+   * Asks before the window closes (the window only; the browser saves as the documents change): when
+   * `unsaved()` lists documents with unsaved changes, Save (all of them), Don't save or Cancel. A question
+   * that fails keeps the window open and is given to `failed`. Resolves to a function that stops asking.
+   */
+  guardClose:
+    | ((unsaved: () => readonly Unsaved[], failed: (error: unknown) => void) => Promise<() => void>)
+    | undefined;
 };
 
 /** The user closed a dialogue or said no: nothing was written, and nothing went wrong. */

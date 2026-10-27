@@ -14,9 +14,10 @@ import {
   TodoList,
 } from "@eisenhower/react";
 import { isTauri } from "@tauri-apps/api/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { browserHost } from "./host/browser";
+import type { Unsaved } from "./host/closing";
 import type { Host } from "./host/host";
 import { tauriHost } from "./host/tauri";
 import { boardSample } from "./samples/board";
@@ -91,6 +92,36 @@ export function App() {
   const timeline: DemoDocument<Timeline> = whichTimeline === "dates" ? dates : sequence;
   const current: DocumentControls = { board, timeline, gantt, todo }[tab];
   const { history } = current;
+
+  // The window asks before closing while any document has unsaved changes (the browser saves as they change).
+  const unsaved = useRef<() => Unsaved[]>(() => []);
+  unsaved.current = () =>
+    [board, dates, sequence, gantt, todo].filter((one) => one.dirty).map(({ name, save }) => ({ name, save }));
+  useEffect(() => {
+    if (!HOST.guardClose) return undefined;
+    let stop: (() => void) | undefined;
+    let gone = false;
+    HOST.guardClose(
+      () => unsaved.current(),
+      (error) => {
+        console.error(error);
+        report(text.closeFailed, "error");
+      },
+    ).then(
+      (unlisten) => {
+        if (gone) unlisten();
+        else stop = unlisten;
+      },
+      (error: unknown) => {
+        console.error(error);
+        report(text.closeUnguarded, "error");
+      },
+    );
+    return () => {
+      gone = true;
+      stop?.();
+    };
+  }, [report]);
 
   const chooseTab = useCallback((next: Tab) => {
     setTab(next);
