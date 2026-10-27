@@ -3,7 +3,7 @@
   flex: 1;
   min-width: 0;
   font: inherit;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   padding: 4px 6px;
   border: 1px solid var(--eh-accent);
   border-radius: 4px;
@@ -46,7 +46,7 @@
 }
 .eh-editable-hint {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   color: var(--eh-muted);
 }
 
@@ -64,7 +64,7 @@
 .eh-labelled-field-label {
   padding: 0;
   margin-bottom: 2px;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   color: var(--eh-muted);
 }
 .eh-labelled-field .eh-editable-text {
@@ -89,7 +89,7 @@
   align-items: center;
   gap: 4px;
   min-height: 22px;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   color: var(--eh-muted);
 }
 .eh-editable[data-editing] > .eh-editable-caption {

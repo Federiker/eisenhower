@@ -90,7 +90,7 @@
   border: 1px solid var(--eh-warning);
   border-radius: 4px;
   color: var(--eh-ink);
-  font-size: 11px;
+  font-size: calc(11px * var(--eh-scale));
 }
 .eh-gantt-badge::before {
   content: "! ";
@@ -120,7 +120,7 @@
 .eh-gantt-header {
   position: relative;
   height: 100%;
-  font-size: 11px;
+  font-size: calc(11px * var(--eh-scale));
 }
 .eh-gantt-header-upper,
 .eh-gantt-header-lower {
@@ -154,7 +154,7 @@
   border-radius: 3px;
   background: var(--eh-problem);
   color: var(--eh-surface);
-  font-size: 10px;
+  font-size: calc(10px * var(--eh-scale));
   line-height: 14px;
 }
 

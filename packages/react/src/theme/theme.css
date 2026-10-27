@@ -36,7 +36,10 @@
   --eh-space-3: 12px;
   --eh-space-4: 16px;
   --eh-font: system-ui, sans-serif;
-  --eh-font-size: 13px;
+  /* The text size, a factor of 13px: every font size is written calc(<px> * var(--eh-scale)), so a host
+     scales the views’ text with one variable (jerome sets it to its interface text size). */
+  --eh-scale: 1;
+  --eh-font-size: calc(13px * var(--eh-scale));
 
   color-scheme: light;
   background: var(--eh-background);

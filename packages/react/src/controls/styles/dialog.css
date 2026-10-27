@@ -9,7 +9,7 @@
   background: var(--eh-panel);
   color: var(--eh-ink);
   font: inherit;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   cursor: pointer;
 }
 .eh-dialog-backdrop {
@@ -33,14 +33,14 @@
   background: var(--eh-panel);
   color: var(--eh-ink);
   box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   /* Taller content scrolls inside the dialog, never past its frame; the actions stay in view at its foot. */
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 .eh-dialog h3 {
   margin: 0;
-  font: 600 14px / 1.4 var(--eh-font);
+  font: 600 calc(14px * var(--eh-scale)) / 1.4 var(--eh-font);
   overflow-wrap: anywhere;
 }
 .eh-dialog-list {

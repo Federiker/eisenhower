@@ -98,7 +98,7 @@
   gap: 2px var(--eh-space-2);
   padding-top: 2px;
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
 }
 .eh-todo-due[data-overdue] {
   color: var(--eh-problem);
@@ -124,7 +124,7 @@
 .eh-todo-notes {
   margin: 0 6px 4px 30px;
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -170,12 +170,12 @@
 }
 .eh-todo-quadrant-heading {
   margin: 0;
-  font-size: 14px;
+  font-size: calc(14px * var(--eh-scale));
 }
 .eh-todo-quadrant-about {
   margin: 0 0 var(--eh-space-1);
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
 }
 .eh-todo-quadrant .eh-todo-items {
   display: flex;

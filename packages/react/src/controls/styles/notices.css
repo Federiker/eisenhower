@@ -1,11 +1,11 @@
 /* Notices: a muted note, and a problem (an error the reader can put right). */
 .eh-note {
   margin: 6px 0;
-  font-size: 11px;
+  font-size: calc(11px * var(--eh-scale));
   color: var(--eh-muted);
 }
 .eh-problem {
   margin: 6px 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   color: var(--eh-problem);
 }

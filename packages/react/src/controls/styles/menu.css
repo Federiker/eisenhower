@@ -16,7 +16,7 @@
   border: 1px solid var(--eh-muted);
   border-radius: var(--eh-radius);
   box-shadow: 0 6px 24px rgb(0 0 0 / 20%);
-  font: 13px / 1.4 var(--eh-font);
+  font: calc(13px * var(--eh-scale)) / 1.4 var(--eh-font);
 }
 .eh-menu button {
   width: 100%;
@@ -72,7 +72,7 @@
 .eh-menu-problem {
   margin: 6px 10px;
   max-width: 240px;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
 }
 /* Forced colours: the focused item is drawn as the system draws a highlighted one. */
 @media (forced-colors: active) {

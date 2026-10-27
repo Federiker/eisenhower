@@ -98,7 +98,7 @@
 }
 .eh-timeline-axis text {
   fill: var(--eh-ink);
-  font: 11px var(--eh-font);
+  font: calc(11px * var(--eh-scale)) var(--eh-font);
 }
 .eh-timeline-axis .eh-timeline-axis-context,
 .eh-timeline-break-label text {
@@ -150,7 +150,7 @@ g[data-selected="true"] .eh-timeline-bar {
   border-radius: 3px;
   background: transparent;
   color: var(--eh-ink);
-  font: 12px / 18px var(--eh-font);
+  font: calc(12px * var(--eh-scale)) / 18px var(--eh-font);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -186,7 +186,7 @@ g[data-selected="true"] .eh-timeline-bar {
 .eh-timeline-preview-when {
   fill: var(--eh-ink);
   stroke: none;
-  font: 600 11px var(--eh-font);
+  font: 600 calc(11px * var(--eh-scale)) var(--eh-font);
 }
 
 /* The drawing as a list in a narrow space. */

@@ -113,7 +113,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
 }
 /* A narrow list: the title takes the row's width beside its menu; the colour and the details go below. */
 @container (max-width: 480px) {
@@ -145,7 +145,7 @@
   gap: 6px;
   min-width: 0;
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
 }
 .eh-board-swatch {
   display: inline-block;
@@ -161,7 +161,7 @@
 }
 .eh-board-badge {
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   white-space: nowrap;
 }
 .eh-board-view .eh-board-card-title {
@@ -267,7 +267,7 @@
 .eh-board-card-summary {
   margin: 0;
   color: var(--eh-muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
   overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -279,7 +279,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 2px 10px;
-  font-size: 12px;
+  font-size: calc(12px * var(--eh-scale));
 }
 .eh-board-card-meta .eh-board-badge {
   margin-inline-start: auto;
