@@ -1,5 +1,12 @@
 {
   "name": "@eisenhower/tauri",
+  "description": "The typed client of tauri-plugin-eisenhower and a storage adapter on it: Eisenhower's documents in files, with a hash guard",
+  "keywords": [
+    "tauri",
+    "tauri-plugin",
+    "planning",
+    "storage"
+  ],
   "private": true,
   "type": "module",
   "license": "CC0-1.0",

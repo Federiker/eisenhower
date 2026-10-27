@@ -1,5 +1,13 @@
 {
   "name": "@eisenhower/model",
+  "description": "Planning views' data: a board, a timeline, a gantt chart and a todo list, with their schemas, edit operations and storage adapters",
+  "keywords": [
+    "planning",
+    "kanban",
+    "timeline",
+    "gantt",
+    "eisenhower-matrix"
+  ],
   "private": true,
   "type": "module",
   "license": "CC0-1.0",

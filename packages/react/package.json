@@ -1,5 +1,14 @@
 {
   "name": "@eisenhower/react",
+  "description": "React planning views: a board, a timeline, a gantt chart and a todo list with an Eisenhower matrix",
+  "keywords": [
+    "react",
+    "planning",
+    "kanban",
+    "timeline",
+    "gantt",
+    "eisenhower-matrix"
+  ],
   "private": true,
   "type": "module",
   "license": "CC0-1.0",

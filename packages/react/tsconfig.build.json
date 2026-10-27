@@ -1,0 +1,15 @@
+{
+  // The published declarations (scripts/publish.ts): the sources only, into the folder the script names.
+  "extends": "@eisenhower/tooling/tsconfig/react.json",
+  "compilerOptions": {
+    "types": [],
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": null
+  },
+  "include": ["src"],
+  "references": [{ "path": "../model" }]
+}
