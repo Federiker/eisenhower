@@ -1,0 +1,30 @@
+{
+  "name": "@eisenhower/app",
+  "private": true,
+  "type": "module",
+  "license": "CC0-1.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1440",
+    "build": "vite build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "tauri:dev": "tauri dev",
+    "icons": "tauri icon src/assets/logo.svg --output src-tauri/icons"
+  },
+  "dependencies": {
+    "@eisenhower/react": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@eisenhower/tooling": "workspace:*",
+    "@tauri-apps/cli": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "happy-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

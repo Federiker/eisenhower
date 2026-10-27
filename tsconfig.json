@@ -5,6 +5,7 @@
     { "path": "./packages/model" },
     { "path": "./packages/react" },
     { "path": "./packages/tauri" },
+    { "path": "./packages/app" },
     { "path": "./scripts" }
   ]
 }
