@@ -1,0 +1,31 @@
+[package]
+name = "tauri-plugin-eisenhower"
+description = "Eisenhower's Tauri plugin: documents read and written on disk with a hash guard"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+# Tauri passes the plugin's permissions to the app's build through this.
+links = "tauri-plugin-eisenhower"
+
+[lib]
+name = "tauri_plugin_eisenhower"
+
+[dependencies]
+serde.workspace = true
+sha2.workspace = true
+tauri.workspace = true
+tempfile.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+# The mock runtime, for the commands' tests.
+tauri = { workspace = true, features = ["test"] }
+
+[build-dependencies]
+tauri-plugin = { workspace = true, features = ["build"] }
+
+[lints]
+workspace = true

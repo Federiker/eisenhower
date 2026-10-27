@@ -45,10 +45,10 @@ The first round (owner decisions, 27 October 2026; see
   milestones and progress, collapsible groups.
 - [ ] The todo list (decision 18): the model, the list with due dates,
   subtasks, tags and notes, the tag filter, the matrix layout.
-- [ ] Rust and the Tauri client (decisions 9 and 10):
-  - [ ] `tauri-plugin-eisenhower`: read and write with the hash guard,
+- [x] Rust and the Tauri client (decisions 9 and 10):
+  - [x] `tauri-plugin-eisenhower`: read and write with the hash guard,
     atomic writes, permissions.
-  - [ ] `@eisenhower/tauri`: the typed client and its `StorageAdapter`.
+  - [x] `@eisenhower/tauri`: the typed client and its `StorageAdapter`.
 - [ ] The demo app (decision 14): every view in the browser, the Tauri
   window saving through the plugin, Playwright tests.
 - [x] The Claude workflow: the `eisenhower-` skills and the implementer

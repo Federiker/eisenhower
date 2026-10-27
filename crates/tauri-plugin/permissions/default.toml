@@ -1,0 +1,7 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = """
+Everything Eisenhower's plugin does: reading and writing documents at the paths the app passes.
+"""
+permissions = ["allow-read-document", "allow-write-document"]
