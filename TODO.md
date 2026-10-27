@@ -20,10 +20,8 @@ Sections: **Now**, **Verification**, **Later**, **Awaiting owner decisions**.
 The first round (owner decisions, 27 October 2026; see
 [development.md](docs/development.md#decisions)) is built: the models, the
 four views, the Tauri plugin and client, the demo app and its end-to-end
-tests, each described in [docs/features/](docs/README.md). What is left:
-
-- [ ] A Playwright test of dragging timeline entries in a real browser, on
-  the demo app's timeline page (the unit tests' DOM has no layout).
+tests, each described in [docs/features/](docs/README.md). What is left
+is under **Verification** and **Awaiting owner decisions**.
 
 ## Verification
 

@@ -147,6 +147,12 @@ October 2026):
   2", "Fleet sails: now Act 1 – Act 3"), and the entry's title takes the
   focus.
 
+The unit tests drag on a mocked layout; the end-to-end tests
+(`tests/e2e/tests/timeline-drag.spec.ts`) drag with the mouse on the demo
+app's Dates timeline in Chromium: a point by a year and by a day, an entry
+to another lane, a span's end (stopping a year after its start), and
+Escape.
+
 ## Keys
 
 The common keys ([interface](interface.md#keyboard-shortcuts)) first, on an
