@@ -16,3 +16,5 @@ what they share: the strings, the theme, the keys and the controls. See
 - `src/gantt/`: `<Gantt>`, its scale, rows, drawing and task dialog (see
   [the gantt chart](../../docs/features/gantt.md)).
 - `src/style.css`: the one stylesheet, themed by `--eh-*` variables.
+- `src/timeline/`: `<Timeline>` and `<TimelineEditor>` ([the
+  timeline](../../docs/features/timeline.md)).

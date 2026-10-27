@@ -48,3 +48,12 @@ export {
 export { type EisenhowerSettings, EisenhowerProvider, type Theme, ViewRoot } from "./theme/EisenhowerProvider";
 export { colourVar, PALETTE, type PaletteColour } from "./theme/palette";
 export { type TodoLayout, TodoList, type TodoListProps } from "./todo/TodoList";
+// The timeline (decision 16).
+export { sortablePoint, timelineCsv, timelineSvg } from "./timeline/export";
+export {
+  type DateWords,
+  formatDate as formatTimelineDate,
+  formatPoint as formatTimelinePoint,
+  formatWhen as formatTimelineWhen,
+} from "./timeline/format";
+export { Timeline, TimelineEditor, type TimelineProps } from "./timeline/Timeline";

@@ -9,9 +9,10 @@ import type { MessageKey } from "../strings/en-GB";
 import { COMMON_SHORTCUTS } from "./common";
 import { TODO_SHORTCUTS } from "./todo";
 import { GANTT_SHORTCUTS } from "./gantt";
+import { TIMELINE_SHORTCUTS } from "./timeline";
 
 /** Where a shortcut applies: in every view (`common`), or in one view. */
-export type ShortcutArea = "common" | "todo" | "gantt";
+export type ShortcutArea = "common" | "todo" | "gantt" | "timeline";
 
 /**
  * A key as `KeyboardEvent.key` names it (letters in either case), or a physical key by `KeyboardEvent.code`
@@ -37,6 +38,7 @@ export type ShortcutDefinition = {
 export const SHORTCUTS = [
   ...COMMON_SHORTCUTS,
   ...TODO_SHORTCUTS,
+  ...TIMELINE_SHORTCUTS,
   ...GANTT_SHORTCUTS,
 ] as const satisfies readonly ShortcutDefinition[];
 

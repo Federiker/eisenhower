@@ -41,9 +41,20 @@ The first round (owner decisions, 27 October 2026; see
     [the board's decisions](docs/features/board.md#decisions) (the default
     layout, the dialog's column, Alt+← → on a column, F2 on a card, New
     card with `onOpenCard`, the narrow-page fallback).
-- [ ] The timeline (decision 16), from jerome's timelines: the model (steps,
-  dates, categories, entries), the drawing with its scale and zoom, the
-  lists, the entry dialog, the narrow layout, with jerome's tests.
+- [ ] The timeline (decision 16), from jerome's timelines (see
+  [the timeline](docs/features/timeline.md)):
+  - [x] The model: steps, dates, categories and entries, their checks,
+    edit operations and the entry form, `timelineDocument`, with jerome's
+    tests.
+  - [x] The scale, axis, lanes, dates as shown and the CSV and SVG exports.
+  - [x] `<Timeline>`: the drawing with its zoom, keys (Alt+arrows move an
+    entry), menu, entry dialog and narrow layout.
+  - [x] `<TimelineEditor>`: the entries' table, the steps and categories
+    lists.
+  - [ ] The owner's word on the choices in
+    [its decisions](docs/features/timeline.md#decisions) (moving entries
+    with Alt+arrows, New entry beside the zoom, Ctrl+0, no timeline
+    title).
 - [ ] The gantt chart (decision 17; see [its document](docs/features/gantt.md)):
   - [x] The model: groups, tasks, milestones, progress, dependencies and
     their conflicts, the edit operations and the document, with tests.

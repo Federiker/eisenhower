@@ -190,6 +190,14 @@ In an open menu, ↑ ↓, Home and End move between its items, Enter or an
 item's underlined letter chooses one, and Esc or Tab closes it. In a
 dialogue, Tab and Shift+Tab stay inside it and Esc cancels.
 
+Each view adds its own keys after these:
+
+| View | Keys | Action |
+| --- | --- | --- |
+| [Timeline](timeline.md#keys) | Ctrl+=, Ctrl++ | Zoom in |
+| Timeline | Ctrl+- | Zoom out |
+| Timeline | Ctrl+0 | Fit the drawing to its width |
+
 `actionOf(event, shortcuts)` turns a key press into an action
 (`shortcutsIn("board")` gives a view's list: the common keys and its own);
 `describeShortcut` writes a shortcut for people ("Alt+↑", "⌥↑") and

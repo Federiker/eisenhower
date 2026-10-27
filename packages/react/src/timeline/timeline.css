@@ -1,0 +1,351 @@
+/*
+ * The timeline (decision 16), from jerome's timelines.css: the drawing (lane names beside a sideways-scrolling
+ * plane of SVG marks and HTML labels), the narrow list, the entries' table, the steps and categories lists and
+ * the entry dialog. Lanes take the palette's colours (--eh-colour-N) and keep jerome's solid, dashed and
+ * dotted lines, so they are told apart without colour too.
+ */
+.eh-timeline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.eh-timeline-body h3 {
+  margin: 0 0 var(--eh-space-2);
+  font-size: calc(var(--eh-font-size) + 1px);
+}
+.eh-timeline-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2);
+  align-items: center;
+}
+.eh-timeline-zoom {
+  display: inline-flex;
+  gap: var(--eh-space-1);
+}
+
+/* A category's colour and line, as its lane is drawn. */
+.eh-timeline-swatch {
+  display: inline-block;
+  flex: none;
+  width: 28px;
+  height: 0;
+  border-top-width: 4px;
+}
+.eh-timeline-category {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* The drawing. */
+.eh-timeline-drawing-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.eh-timeline-drawing {
+  display: flex;
+  position: relative;
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+  background: var(--eh-surface);
+}
+.eh-timeline-lane-names {
+  position: relative;
+  flex: none;
+  border-right: 1px solid var(--eh-line);
+}
+.eh-timeline-lane-names > div {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--eh-space-2);
+  border-top: 1px solid var(--eh-line);
+  overflow: hidden;
+}
+.eh-timeline-lane-names span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eh-timeline-scroll {
+  position: relative;
+  flex: 1 1 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.eh-timeline-scroll:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: -2px;
+}
+.eh-timeline-plane {
+  position: relative;
+  min-width: 100%;
+}
+.eh-timeline-plane svg {
+  position: absolute;
+  inset: 0;
+}
+.eh-timeline-axis line {
+  stroke: var(--eh-muted);
+  stroke-width: 1;
+}
+.eh-timeline-axis text {
+  fill: var(--eh-ink);
+  font: 11px var(--eh-font);
+}
+.eh-timeline-axis .eh-timeline-axis-context,
+.eh-timeline-break-label text {
+  fill: var(--eh-muted);
+}
+.eh-timeline-break rect {
+  fill: var(--eh-background);
+  stroke: none;
+}
+.eh-timeline-break path {
+  fill: none;
+  stroke: var(--eh-muted);
+  stroke-width: 1.5;
+}
+.eh-timeline-lane-line {
+  stroke-width: 1.5;
+  opacity: 0.45;
+}
+.eh-timeline-bar {
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.eh-timeline-dot {
+  stroke-width: 2;
+}
+.eh-timeline-approximate {
+  fill: var(--eh-surface);
+  stroke-dasharray: 2 2;
+}
+.eh-timeline-band {
+  opacity: 0.18;
+  stroke: none;
+}
+g[data-selected="true"] .eh-timeline-dot,
+g[data-selected="true"] .eh-timeline-bar {
+  filter: drop-shadow(0 0 2px var(--eh-ink));
+}
+.eh-timeline-lane-hit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--eh-line);
+}
+.eh-timeline .eh-timeline-label {
+  position: absolute;
+  display: block;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--eh-ink);
+  font: 12px / 18px var(--eh-font);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.eh-timeline .eh-timeline-label:hover,
+.eh-timeline .eh-timeline-label[aria-current="true"] {
+  background: var(--eh-selected);
+}
+.eh-timeline .eh-timeline-label:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: 1px;
+}
+
+/* The drawing as a list in a narrow space. */
+.eh-timeline-narrow h4 {
+  margin: var(--eh-space-3) 0 var(--eh-space-1);
+  font-size: var(--eh-font-size);
+}
+.eh-timeline-narrow ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eh-timeline-narrow li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 0;
+}
+.eh-timeline-narrow li .eh-note {
+  margin: 0;
+}
+
+/* An entry's title in the table and the narrow list: a button that reads as a link. */
+.eh-timeline .eh-timeline-entry-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--eh-ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.eh-timeline .eh-timeline-entry-link[aria-current="true"] {
+  font-weight: 600;
+}
+
+/* The entries' table, in time order. */
+.eh-timeline-entries table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--eh-space-2);
+}
+.eh-timeline-entries th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--eh-muted);
+  border-bottom: 1px solid var(--eh-line);
+  padding: 4px 6px;
+}
+.eh-timeline-entries td {
+  vertical-align: top;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--eh-line);
+}
+.eh-timeline-entries td:first-child {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.eh-timeline-entries tr[data-selected="true"] {
+  background: var(--eh-selected);
+}
+
+/* The steps and categories lists. */
+.eh-timeline-list .eh-reorder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.eh-timeline-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--eh-space-2);
+  padding: 4px 6px;
+  border-top: 2px solid transparent;
+  border-radius: 3px;
+}
+.eh-timeline-list li:hover {
+  background: var(--eh-selected);
+}
+.eh-timeline-list li[data-drop="before"] {
+  border-top-color: var(--eh-accent);
+}
+.eh-timeline-list li:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: -2px;
+}
+.eh-timeline-list li .eh-question {
+  flex-basis: 100%;
+}
+.eh-timeline-list li .eh-note {
+  margin: 0;
+}
+.eh-timeline-list-number {
+  min-width: 2ch;
+  text-align: right;
+  color: var(--eh-muted);
+  font-variant-numeric: tabular-nums;
+}
+.eh-timeline-list .eh-timeline-list-name {
+  flex: 0 1 auto;
+  min-width: 4em;
+}
+/* What follows the name (a category's colour and line, the entries count) keeps to the row's end. */
+.eh-timeline-list .eh-timeline-list-name + * {
+  margin-left: auto;
+}
+.eh-timeline-list-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--eh-muted);
+}
+.eh-timeline-list-choice .eh-editable-text {
+  color: var(--eh-ink);
+}
+.eh-timeline-add {
+  display: flex;
+  gap: var(--eh-space-2);
+  margin-top: var(--eh-space-2);
+}
+.eh-timeline-list label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+}
+
+/* The entry dialog: its fields, and the date's fields side by side. */
+.eh-timeline-entry-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 32px));
+}
+.eh-timeline-entry-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.eh-timeline-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.eh-timeline-date {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2) var(--eh-space-3);
+  align-items: end;
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+}
+.eh-timeline-date label,
+.eh-timeline-span {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+}
+.eh-timeline-entry-delete {
+  margin-right: auto;
+}
+
+@media (forced-colors: active) {
+  .eh-timeline-lane-line,
+  .eh-timeline-band {
+    opacity: 1;
+  }
+  .eh-timeline-band {
+    fill: none;
+    stroke: CanvasText;
+    stroke-width: 1;
+  }
+  .eh-timeline .eh-timeline-label[aria-current="true"],
+  .eh-timeline-entries tr[data-selected="true"] {
+    outline: 1px solid Highlight;
+  }
+  g[data-selected="true"] .eh-timeline-dot,
+  g[data-selected="true"] .eh-timeline-bar {
+    filter: none;
+    stroke: Highlight;
+  }
+}
