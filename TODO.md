@@ -64,8 +64,12 @@ The first round (owner decisions, 27 October 2026; see
   - [x] Moving and resizing with the pointer and the keys, the menus, the
     questions, the task dialog, the scale keys.
   - [x] Dependencies as arrows, their warning in words and on the drawing.
-  - [ ] The owner's answers to the decisions listed in its document
-    (Alt+arrow steps on the week and month scales, the limits…).
+  - [x] The owner's answers on the keys' step (a day on every scale), the
+    default scale and the limits (27 October 2026).
+  - [ ] The owner's answers on the other decisions listed in
+    [its document](docs/features/gantt.md#decisions-to-confirm) (a
+    milestone on its predecessor's last day, today's colour, Alt+↑ ↓
+    across groups, the stored fold).
   - [ ] The demo app's page and a Playwright test of dragging in a real
     browser (the unit tests' DOM has no layout).
 - [ ] The todo list (decision 18), in [todo.md](docs/features/todo.md):

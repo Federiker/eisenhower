@@ -17,7 +17,7 @@ export const gantt = {
   "gantt.columnDatesRange": "Dates, {start} to {end}",
   "gantt.empty": "No tasks yet. New task adds one.",
   "gantt.help":
-    "Arrows move between rows. Alt+Left and Alt+Right move a task earlier or later, Alt+Shift+Left and Alt+Shift+Right change its end, Alt+Up and Alt+Down move it in the order. Enter opens a task, F2 renames it, Delete deletes it.",
+    "Arrows move between rows. Alt+Left and Alt+Right move a task a day earlier or later, Alt+Shift+Left and Alt+Shift+Right move its end by a day, Alt+Up and Alt+Down move it in the order. Enter opens a task, F2 renames it, Delete deletes it.",
 
   "gantt.days": { one: "{count} day", other: "{count} days" },
   "gantt.span": "{start} to {end}",
@@ -86,8 +86,8 @@ export const gantt = {
   "gantt.problem.cycle": "A task cannot depend on itself, even through other tasks.",
   "gantt.problem.milestone": "A milestone has no length: move it instead.",
 
-  "gantt.keys.shorten": "Make the task end earlier",
-  "gantt.keys.lengthen": "Make the task end later",
+  "gantt.keys.shorten": "Make the task end a day earlier",
+  "gantt.keys.lengthen": "Make the task end a day later",
   "gantt.keys.zoomIn": "Show a finer scale (months, weeks, days)",
   "gantt.keys.zoomOut": "Show a coarser scale (days, weeks, months)",
 } as const;

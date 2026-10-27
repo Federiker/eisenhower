@@ -21,9 +21,6 @@ export const DAY_WIDTH: Readonly<Record<GanttScale, number>> = { day: 32, week: 
 /** The days left empty before the first task and after the last (or around today), on each scale. */
 const PADDING: Readonly<Record<GanttScale, number>> = { day: 7, week: 14, month: 31 };
 
-/** How far Alt and an arrow move a task, or its end, on each scale (decided for the gantt chart; see its doc). */
-export const KEY_STEP: Readonly<Record<GanttScale, number>> = { day: 1, week: 7, month: 7 };
-
 /**
  * The days the chart draws: from `first` (a day number) for `days` days, on a scale `dayWidth` pixels a day.
  * The range holds every task and today, with some room either side, and starts and ends on whole units of
