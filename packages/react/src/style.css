@@ -9,6 +9,6 @@
 @import "./controls/styles/editing.css";
 @import "./controls/styles/menu.css";
 @import "./controls/styles/dialog.css";
-
 @import "./board/board.css";
 @import "./todo/todo.css";
+@import "./gantt/gantt.css";

@@ -1,6 +1,7 @@
 import { board } from "./en-GB/board";
 import { common } from "./en-GB/common";
 import { todo } from "./en-GB/todo";
+import { gantt } from "./en-GB/gantt";
 
 /**
  * The interface text in UK English (decision 6), one message a key. Placeholders are written `{name}`;
@@ -14,6 +15,7 @@ export const enGB = {
   ...common,
   ...board,
   ...todo,
+  ...gantt,
 } as const;
 
 export type MessageKey = keyof typeof enGB;

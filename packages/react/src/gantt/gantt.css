@@ -1,0 +1,352 @@
+/*
+ * The gantt chart (decision 17): the tools, then a scrolling tree grid with the name column fixed at the left
+ * and the header fixed at the top; behind the rows the weekends and today, over them the dependency arrows.
+ * A bar is outlined in its palette colour and filled as far as it is done; a milestone is a diamond; a task
+ * that starts too early has a dashed warning outline, a "!" and words beside its name.
+ */
+.eh-gantt-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-2);
+  min-width: 0;
+}
+.eh-gantt-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--eh-space-2);
+}
+.eh-gantt-scales {
+  display: inline-flex;
+  gap: 2px;
+}
+.eh-gantt .eh-question,
+.eh-gantt .eh-note,
+.eh-gantt .eh-problem {
+  margin: 0;
+}
+.eh-gantt-scroll {
+  position: relative;
+  overflow: auto;
+  max-height: var(--eh-gantt-height, 70vh);
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius);
+  background: var(--eh-surface);
+}
+.eh-gantt-grid {
+  position: relative;
+  min-width: 100%;
+}
+.eh-gantt-row {
+  display: flex;
+  height: var(--eh-gantt-row);
+  border-bottom: 1px solid var(--eh-line);
+  box-sizing: border-box;
+}
+.eh-gantt-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--eh-panel);
+}
+.eh-gantt-head .eh-gantt-row {
+  height: 44px;
+}
+.eh-gantt-name {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  flex: 0 0 var(--eh-gantt-name-width);
+  display: flex;
+  align-items: center;
+  gap: var(--eh-space-1);
+  min-width: 0;
+  padding-inline-end: var(--eh-space-2);
+  box-sizing: border-box;
+  border-right: 1px solid var(--eh-line);
+  background: var(--eh-surface);
+  overflow: hidden;
+}
+.eh-gantt-head .eh-gantt-name {
+  background: var(--eh-panel);
+  font-weight: 600;
+}
+.eh-gantt-cell {
+  position: relative;
+  flex: 1 0 auto;
+}
+.eh-gantt-row[aria-selected="true"] .eh-gantt-name {
+  background: var(--eh-selected);
+}
+.eh-gantt-task-name,
+.eh-gantt-group-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eh-gantt-badge {
+  flex-shrink: 0;
+  padding: 0 4px;
+  border: 1px solid var(--eh-warning);
+  border-radius: 4px;
+  color: var(--eh-ink);
+  font-size: 11px;
+}
+.eh-gantt-badge::before {
+  content: "! ";
+  color: var(--eh-warning);
+  font-weight: 700;
+}
+.eh-gantt-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--eh-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.eh-gantt-chevron {
+  width: 1em;
+  color: var(--eh-muted);
+}
+
+/* The header: the larger units above, the scale's own below, and today's label. */
+.eh-gantt-header {
+  position: relative;
+  height: 100%;
+  font-size: 11px;
+}
+.eh-gantt-header-upper,
+.eh-gantt-header-lower {
+  position: absolute;
+  box-sizing: border-box;
+  padding-inline-start: 3px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-left: 1px solid var(--eh-line);
+}
+.eh-gantt-header-upper {
+  top: 0;
+  height: 22px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.eh-gantt-header-lower {
+  top: 22px;
+  height: 22px;
+  line-height: 22px;
+  color: var(--eh-muted);
+}
+.eh-gantt-header-lower[data-weekend] {
+  background: var(--eh-background);
+}
+.eh-gantt-header-today {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--eh-problem);
+  color: var(--eh-surface);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+/* Behind the rows: weekends and today; over them, the arrows. Both start at the drawing, after the names. */
+.eh-gantt-body {
+  position: relative;
+}
+.eh-gantt-backdrop,
+.eh-gantt-arrows {
+  position: absolute;
+  top: 0;
+  left: var(--eh-gantt-name-width);
+  pointer-events: none;
+}
+.eh-gantt-backdrop {
+  z-index: 0;
+}
+.eh-gantt-arrows {
+  z-index: 1;
+  overflow: visible;
+}
+.eh-gantt-weekend {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--eh-background);
+}
+.eh-gantt-today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--eh-problem);
+}
+.eh-gantt-arrow {
+  fill: none;
+  stroke: var(--eh-muted);
+  stroke-width: 1.5;
+}
+.eh-gantt-arrow[data-late] {
+  stroke: var(--eh-warning);
+  stroke-dasharray: 4 3;
+}
+.eh-gantt-arrowhead {
+  fill: var(--eh-muted);
+}
+.eh-gantt-arrowhead[data-late] {
+  fill: var(--eh-warning);
+}
+
+/* Bars, milestones and summaries. */
+.eh-gantt-bar,
+.eh-gantt-milestone {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  font: inherit;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.eh-gantt-bar {
+  top: 6px;
+  height: calc(var(--eh-gantt-row) - 13px);
+  box-sizing: border-box;
+  min-width: 4px;
+  overflow: visible;
+  border: 2px solid var(--eh-gantt-bar);
+  border-radius: 4px;
+  background: var(--eh-surface);
+}
+.eh-gantt-progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--eh-gantt-bar);
+}
+.eh-gantt-handle {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.eh-gantt-handle[data-edge="start"] {
+  left: -4px;
+}
+.eh-gantt-handle[data-edge="end"] {
+  right: -4px;
+}
+.eh-gantt-milestone {
+  top: calc((var(--eh-gantt-row) - 16px) / 2);
+  height: 16px;
+  border: 2px solid var(--eh-gantt-bar);
+  background: var(--eh-gantt-bar);
+  transform: rotate(45deg) scale(0.75);
+}
+.eh-gantt-bar[data-late],
+.eh-gantt-milestone[data-late] {
+  outline: 2px dashed var(--eh-warning);
+  outline-offset: 1px;
+}
+.eh-gantt-flag {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--eh-warning);
+  font-weight: 700;
+}
+.eh-gantt-milestone .eh-gantt-flag {
+  transform: rotate(-45deg);
+}
+.eh-gantt-bar[data-dragging],
+.eh-gantt-milestone[data-dragging] {
+  cursor: grabbing;
+  opacity: 0.8;
+}
+.eh-gantt-bar:focus-visible,
+.eh-gantt-milestone:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: 2px;
+}
+.eh-gantt-summary {
+  position: absolute;
+  top: 12px;
+  height: 6px;
+  background: var(--eh-ink);
+}
+.eh-gantt-summary::before,
+.eh-gantt-summary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  border: 5px solid transparent;
+  border-top: 6px solid var(--eh-ink);
+  transform: translateY(6px);
+}
+.eh-gantt-summary::before {
+  left: 0;
+  border-left-color: var(--eh-ink);
+}
+.eh-gantt-summary::after {
+  right: 0;
+  border-right-color: var(--eh-ink);
+}
+
+/* The task dialog. */
+.eh-gantt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.eh-gantt-field-pair {
+  display: flex;
+  gap: var(--eh-space-2);
+}
+.eh-gantt-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.eh-gantt-dependencies .eh-dialog-list {
+  max-height: 160px;
+}
+.eh-gantt-dependency-days {
+  margin-inline-start: auto;
+  color: var(--eh-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .eh-gantt-bar,
+  .eh-gantt-milestone {
+    transition: opacity 0.1s;
+  }
+}
+
+/* Forced colours: bars and diamonds in the text colour, done parts and flags in the highlight. */
+@media (forced-colors: active) {
+  .eh-gantt-bar,
+  .eh-gantt-milestone {
+    border-color: CanvasText;
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+  .eh-gantt-progress,
+  .eh-gantt-milestone {
+    background: Highlight;
+  }
+  .eh-gantt-summary {
+    background: CanvasText;
+  }
+  .eh-gantt-today {
+    border-color: Highlight;
+  }
+}

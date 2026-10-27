@@ -58,6 +58,57 @@ export {
   today,
 } from "./common/days";
 export { idSchema, MAX_ID_LENGTH, newId, uniqueIds } from "./common/ids";
+export {
+  addDependency,
+  addGanttGroup,
+  addGanttTask,
+  blankGanttTask,
+  canDependOn,
+  deleteGanttGroup,
+  deleteGanttTask,
+  type GanttGroupDisposal,
+  type GanttResult,
+  moveGanttGroup,
+  moveGanttTask,
+  putGanttTask,
+  removeDependency,
+  renameGanttGroup,
+  renameGanttTask,
+  resizeTask,
+  setGanttGroupCollapsed,
+  setTaskProgress,
+  shiftTask,
+  type TaskEdge,
+  tasksInGanttGroup,
+  toggleGanttGroup,
+} from "./gantt/edit";
+export {
+  type DependencyConflict,
+  dependencyConflicts,
+  type GanttRow,
+  type GanttSection,
+  type GanttStep,
+  ganttRows,
+  ganttSections,
+  ganttStepTarget,
+  ganttTaskPlace,
+  groupSpan,
+  lateTasks,
+} from "./gantt/layout";
+export {
+  emptyGantt,
+  type Gantt,
+  ganttDocument,
+  type GanttGroup,
+  type GanttProblem,
+  ganttProblems,
+  ganttSchema,
+  type GanttTask,
+  MAX_DEPENDENCIES,
+  MAX_GANTT_GROUPS,
+  MAX_GANTT_TASKS,
+  MAX_PROGRESS,
+} from "./gantt/schema";
 export { type Colour, colourSchema, PALETTE_SIZE } from "./common/palette";
 export { done, type EditResult, type Problem, refused } from "./common/result";
 export {

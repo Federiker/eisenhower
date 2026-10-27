@@ -13,4 +13,6 @@ what they share: the strings, the theme, the keys and the controls. See
 - `src/controls/`: buttons, fields, menus, dialogues and lists, from jerome's
   components.
 - `src/hooks/`: the live region (`useAnnouncer`) and `useHistory`.
+- `src/gantt/`: `<Gantt>`, its scale, rows, drawing and task dialog (see
+  [the gantt chart](../../docs/features/gantt.md)).
 - `src/style.css`: the one stylesheet, themed by `--eh-*` variables.

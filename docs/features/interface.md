@@ -177,6 +177,15 @@ In the todo list, Alt+← and Alt+→ make an item a top-level item or a
 subtask of the one above, as an outliner does; in its matrix they move the
 item to the quadrant that way ([the todo list](todo.md#keys)).
 
+The gantt chart's own keys ([the gantt chart](gantt.md#keys)): there
+Alt+← and Alt+→ move a task earlier or later (a day on the day scale, a
+week on the others), and ← and → fold and unfold a group.
+
+| Keys | Action |
+| --- | --- |
+| Alt+Shift+←, Alt+Shift+→ | Make the task end earlier or later |
+| Ctrl+= (or Ctrl++), Ctrl+- | A finer or coarser scale (months, weeks, days), as jerome's timeline zooms |
+
 In an open menu, ↑ ↓, Home and End move between its items, Enter or an
 item's underlined letter chooses one, and Esc or Tab closes it. In a
 dialogue, Tab and Shift+Tab stay inside it and Esc cancels.
