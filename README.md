@@ -20,6 +20,30 @@ changes out), works with the keyboard alone, follows the light or dark theme
 and speaks UK English unless the host translates it. The first host is
 [jerome](https://github.com/Federiker/jerome).
 
+The demo app ([packages/app](packages/app/README.md)) shows each view on an
+invented sample. The board, with a card's colour named beside its stripe:
+
+![A house move as a board: four columns of cards, each with its title, summary and colour](docs/screenshots/board-light.png)
+
+A Dates timeline, BCE and approximate dates included, with its entries'
+table below it:
+
+![A history of science as a timeline: three coloured lanes from 430 BCE to 1808, a break over the empty centuries](docs/screenshots/timeline-light.png)
+
+A gantt chart on the week scale, in the dark theme: groups, milestones,
+dependencies, today, and a task that starts too early flagged in words:
+
+![A product launch as a gantt chart in the dark theme, the press release marked Starts too early](docs/screenshots/gantt-dark.png)
+
+The todo list, and the same items as the Eisenhower matrix:
+
+![A todo list with tags, subtasks, due days and two overdue items](docs/screenshots/todo-light.png)
+
+![The same list as the Eisenhower matrix: Do, Schedule, Delegate and Drop](docs/screenshots/matrix-light.png)
+
+The other pictures in [docs/screenshots](docs/screenshots) are written by
+`mise run screenshots`.
+
 What is built and what was decided are in [docs/](docs/README.md); remaining
 work is in [TODO.md](TODO.md).
 
@@ -29,6 +53,45 @@ work is in [TODO.md](TODO.md).
 dependencies are all under permissive licences (MIT, BSD, Apache-2.0 and the
 like), checked by `mise run audit`; see
 [decision 1](docs/development.md#decisions).
+
+## Use it in an app
+
+Each view takes its data as `value` and gives every change back as the
+whole new value; `useHistory` adds undo and redo, and `EisenhowerProvider`
+sets the theme, the locale and the strings of every view inside it:
+
+```tsx
+import { emptyBoard } from "@eisenhower/model";
+import { Board, EisenhowerProvider, Gantt, TimelineEditor, TodoList, useHistory } from "@eisenhower/react";
+import "@eisenhower/react/style.css";
+
+const board = useHistory(emptyBoard());
+<EisenhowerProvider theme="system" locale="en-GB">
+  <Board value={board.value} onChange={board.set} layout="board" />  {/* or "list" */}
+  <TimelineEditor value={timeline} onChange={setTimeline} />        {/* emptyTimeline("dates") or ("sequence") */}
+  <Gantt value={chart} onChange={setChart} scale="week" onScaleChange={setScale} />
+  <TodoList value={list} onChange={setList} layout="matrix" />       {/* or "list" */}
+</EisenhowerProvider>;
+```
+
+The views never read or write files. A host keeps each one as a document
+through a storage adapter, with its view's `DocumentKind` (`boardDocument`,
+`timelineDocument`, `ganttDocument`, `todoDocument`) and the revision it
+read, so a save never overwrites a change made elsewhere unseen:
+
+```ts
+import { boardDocument, loadDocument, localStorageAdapter, saveDocument } from "@eisenhower/model";
+
+const storage = localStorageAdapter("my-app:"); // or memoryStorage(), or tauriStorage() from @eisenhower/tauri
+const loaded = await loadDocument(storage, "board", boardDocument); // null when nothing is stored
+const revision = await saveDocument(storage, "board", boardDocument, board.value, loaded?.revision);
+```
+
+In a Tauri app, `tauri-plugin-eisenhower` and `@eisenhower/tauri` keep the
+documents in files with a hash guard; the demo app in
+[packages/app](packages/app/README.md) shows the whole integration, in the
+browser and as a window. See [docs/features/](docs/README.md) for each view
+and package.
 
 ## Requirements
 
@@ -81,6 +144,7 @@ durable findings in tracked documentation.
 | `mise run coverage` | The same, failing below 80% |
 | `mise run rust:test` | The Rust tests (nextest when installed) |
 | `mise run test:e2e` | Playwright tests of the demo app |
+| `mise run screenshots` | The demo app's pictures in docs/screenshots |
 | `mise run fix` | Format and apply safe fixes |
 | `mise run ci` | Every check CI runs, in its order |
 | `mise run audit` | Advisories and licences, npm and Rust |
@@ -97,13 +161,13 @@ Bun's caches from Microsoft Defender, or working on a Dev Drive, helps further.
 
 | Path | Package or crate | What it is |
 | --- | --- | --- |
-| `packages/model` | `@eisenhower/model` | Each view's data: schema, edit operations, storage interface |
-| `packages/react` | `@eisenhower/react` | `<Board>`, `<Timeline>`, `<Gantt>`, `<TodoList>`: strings, keys, styles |
+| [packages/model](packages/model) | `@eisenhower/model` | Each view's data: schema, edit operations, storage interface |
+| [packages/react](packages/react) | `@eisenhower/react` | `<Board>`, `<Timeline>`, `<Gantt>`, `<TodoList>`: strings, keys, styles |
 | [packages/tauri](packages/tauri) | `@eisenhower/tauri` | The typed client of the Tauri plugin and its storage adapter |
-| `packages/app` | `@eisenhower/app` | The demo app, browser and Tauri |
+| [packages/app](packages/app) | `@eisenhower/app` | The demo app, browser and Tauri |
 | [packages/tooling](packages/tooling) | `@eisenhower/tooling` | Shared TypeScript settings |
 | [crates/tauri-plugin](crates/tauri-plugin) | `tauri-plugin-eisenhower` | The Tauri plugin: documents on disk with a hash guard |
-| `tests/e2e` | `@eisenhower/e2e` | Playwright tests of the demo app |
+| [tests/e2e](tests/e2e) | `@eisenhower/e2e` | Playwright tests of the demo app |
 
 ## Checks
 

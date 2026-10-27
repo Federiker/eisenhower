@@ -1,7 +1,8 @@
 # @eisenhower/react
 
-The views (`<Board>`, `<Timeline>`, `<Gantt>`, `<TodoList>`, to come) and
-what they share: the strings, the theme, the keys and the controls. See
+The views (`<Board>`, `<Timeline>` and `<TimelineEditor>`, `<Gantt>`,
+`<TodoList>`) and what they share: the strings, the theme, the keys and the
+controls. See
 [theming, strings and keys](../../docs/features/interface.md).
 
 - `src/theme/`: `EisenhowerProvider`, `ViewRoot`, the theme's variables

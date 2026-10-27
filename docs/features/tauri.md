@@ -188,8 +188,57 @@ with the plugin's `detail` (or the error's message) as `detail` and the
 
 ## The demo app
 
-The demo app (decision 14) will show the whole integration as a Tauri
-window: its native side registers `tauri_plugin_eisenhower::init()` with
-`eisenhower:default` in its capability, and saves each view's document
-through `tauriStorage`. It is described here once it is built (see the
-[TODO](../../TODO.md)).
+The demo app ([packages/app](../../packages/app/README.md), decision 14) is
+also a Tauri window, `mise run tauri:dev`, and shows the whole integration.
+Its native side, `packages/app/src-tauri` (the crate `eisenhower_app`), only
+registers the plugins:
+
+```rust
+tauri::Builder::default()
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_eisenhower::init())
+```
+
+with `core:default`, `dialog:default` and `eisenhower:default` in its one
+capability. Its content security policy allows the app's own scripts,
+inline styles (the views place bars and lanes with them), `data:` and
+`blob:` images and Tauri's IPC (`ipc:`, `http://ipc.localhost`), nothing
+from elsewhere.
+
+`App.tsx` uses the Tauri host (`src/host/tauri.ts`) when `isTauri()` says it
+runs in the window, and the browser host otherwise. Each tab's document
+(the board, the two timelines, the gantt chart, the todo list) is read and
+written with `loadDocument` and `saveDocument` and its view's
+`DocumentKind` (`boardDocument`, `timelineDocument`, `ganttDocument`,
+`todoDocument`) through `tauriStorage()`. The window starts on the samples,
+on no file. The Tauri host:
+
+- **Open…** asks with Tauri's dialog for a JSON file (the filter
+  "Eisenhower documents", `*.json`: a document is JSON, and its `kind` says
+  which view it is for) and loads it as the tab's kind, keeping its path and
+  revision (the file's hash). A document of another view, or one that is
+  not valid, is refused with its problem in words ("Garden.json could not
+  be opened. It is a document of another view; open it on that view's
+  tab."), and the tab keeps what it had. Unsaved changes are asked about
+  first.
+- **Save** writes the file back with the revision it was read with. If
+  another program changed the file since (`StorageError` `changed`, from
+  the plugin's `changed_on_disk`), it asks with the dialog's `ask` whether
+  to overwrite it; only on yes does it write again, without the revision. A
+  document that has no file yet (a sample) goes to **Save as…**: a save
+  dialog suggesting the document's name with `.json`, then a write without
+  a revision, since the dialog has asked before replacing a file. Each save
+  keeps the new revision for the next.
+- **Open the sample** puts the tab's sample back, on no file (asking first
+  when there are unsaved changes).
+
+Failures are shown under the view from the app's strings
+(`src/host/messages.ts`, `src/strings.ts`): the plugin's code when there is
+one (kept as the `StorageError`'s cause), else the `StorageError`'s or
+`DocumentError`'s problem; the systems' details go to the console only. In
+the browser the same app keeps the documents in `localStorage`
+(`localStorageAdapter("eisenhower-demo:")`), saved automatically a moment
+after each change, with the same revision guarding against another tab.
+`packages/app/tests` checks the Tauri host with Tauri's IPC mocks; the
+window itself is clicked through by hand (see the
+[TODO](../../TODO.md#verification)).
