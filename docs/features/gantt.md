@@ -110,7 +110,12 @@ place, and the drawing, which scrolls under a header that stays in place:
 - **Header**: the larger units above the scale's own, formatted in the
   locale with `Intl`: months over days (each day's weekday letter and
   number), months over weeks (each Monday's day and month) or years over
-  months. **Today** is labelled in the header and drawn as a line.
+  months. A month only partly drawn, at either end of the range, is named
+  in full when its name fits the width drawn, else in short in the locale
+  ("Sep 2026", then "Sep"), else not at all, never clipped; the widths are
+  reckoned from the characters (`fittingLabel`), not measured. A label
+  shortened or left out has the full name as its title. **Today** is
+  labelled in the header and drawn as a line.
 - **Day scale**: Saturdays and Sundays are shaded.
 - **Range**: every task and today, with a week (days), two weeks (weeks)
   or a month (months) of room either side, in whole units. On opening, today
@@ -206,6 +211,9 @@ The owner's decisions of 27 October 2026:
 - The default scale is weeks.
 - The limits stay: 2000 tasks, 200 groups, 50 dependencies a task, and
   names of 1 to 120 characters.
+- A month's name in the header is shown in full when it fits the width
+  drawn, else in short with its year, then in short, else left out; never a
+  clipped word (the first slice clipped it: "Septer").
 
 ## Decisions to confirm
 

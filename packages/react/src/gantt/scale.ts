@@ -98,6 +98,33 @@ export function headerOf(geometry: Geometry): { upper: HeaderCell[]; lower: Head
   };
 }
 
+/**
+ * How wide a character of the header's upper line is reckoned to be, in pixels: a little more than the
+ * average of the 11-pixel semibold system font, so that a label judged to fit does. East Asian wide
+ * characters take a whole em.
+ */
+const CHARACTER_WIDTH = 7;
+const WIDE_CHARACTER_WIDTH = 11;
+const WIDE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦]/u;
+
+/** The room a header label's cell keeps besides its text: its border and padding before, a gap after. */
+const LABEL_INSET = 6;
+
+/** How wide a header label is reckoned to be drawn, in pixels, from its characters (no DOM measuring). */
+export function labelWidth(text: string): number {
+  let width = LABEL_INSET;
+  for (const character of text) width += WIDE.test(character) ? WIDE_CHARACTER_WIDTH : CHARACTER_WIDTH;
+  return width;
+}
+
+/**
+ * The first label, from the longest to the shortest, that fits a cell `width` pixels wide, or null when
+ * none does: a label is shortened, then left out, never clipped.
+ */
+export function fittingLabel(labels: readonly string[], width: number): string | null {
+  return labels.find((label) => labelWidth(label) <= width) ?? null;
+}
+
 /** The weekends of the drawn range (Saturday and Sunday as one stretch), for the day scale's shading. */
 export function weekendsOf(geometry: Geometry): HeaderCell[] {
   const list: HeaderCell[] = [];

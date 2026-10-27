@@ -9,14 +9,16 @@ import {
 import { memo, useId } from "react";
 
 import { useLocale, useTranslate } from "../strings/translate";
-import { formatDay } from "./format";
+import { formatDay, upperLabels } from "./format";
 import { DIAMOND, ROW_HEIGHT } from "./GanttRows";
-import { type Geometry, headerOf, weekendsOf, xOfDay } from "./scale";
+import { fittingLabel, type Geometry, headerOf, weekendsOf, xOfDay } from "./scale";
 
 /**
  * The dates above the drawing, in the locale: months over days (each day's number and weekday), months over
- * weeks (each Monday's day), or years over months. Hidden from screen readers, which hear the column's name
- * with its first and last day instead, and each bar's own days.
+ * weeks (each Monday's day), or years over months. A month only partly drawn is named in short ("Sep 2026",
+ * then "Sep") when its full name does not fit, and not at all when neither does, never clipped; its full name
+ * is then its title. Hidden from screen readers, which hear the column's name with its first and last day
+ * instead, and each bar's own days.
  */
 export const GanttHeader = memo(function GanttHeader({ geometry, today }: { geometry: Geometry; today: CalendarDay }) {
   const t = useTranslate();
@@ -25,11 +27,20 @@ export const GanttHeader = memo(function GanttHeader({ geometry, today }: { geom
   const todayX = dayNumber(today) - geometry.first;
   return (
     <div className="eh-gantt-header" aria-hidden="true" style={{ width: geometry.width }}>
-      {upper.map((cell) => (
-        <span key={cell.day} className="eh-gantt-header-upper" style={{ left: cell.x, width: cell.width }}>
-          {formatDay(cell.day, locale, geometry.scale === "month" ? "year" : "monthYear")}
-        </span>
-      ))}
+      {upper.map((cell) => {
+        const labels = upperLabels(cell.day, geometry.scale === "month", locale);
+        const label = fittingLabel(labels, cell.width);
+        return (
+          <span
+            key={cell.day}
+            className="eh-gantt-header-upper"
+            title={label === labels[0] ? undefined : labels[0]}
+            style={{ left: cell.x, width: cell.width }}
+          >
+            {label}
+          </span>
+        );
+      })}
       {lower.map((cell) => (
         <span
           key={cell.day}

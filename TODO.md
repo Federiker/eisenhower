@@ -24,10 +24,6 @@ tests, each described in [docs/features/](docs/README.md). What is left:
 
 - [ ] A Playwright test of dragging timeline entries in a real browser, on
   the demo app's timeline page (the unit tests' DOM has no layout).
-- [ ] The gantt header clips a month's name when little of that month is
-  drawn (the first month of the range reads "Septer" on the week scale,
-  the last "December 20"): shorten it, end it with an ellipsis or leave it
-  out (seen in the demo app; see **Awaiting owner decisions**).
 
 ## Verification
 
@@ -56,7 +52,7 @@ stand until the owner says otherwise:
   where a resize leaves the entry).
 - The gantt chart: [its decisions to confirm](docs/features/gantt.md#decisions-to-confirm)
   (a milestone on its predecessor's last day, today's colour, Alt+↑ ↓ across
-  groups, the stored fold), and how the header shows a clipped month.
+  groups, the stored fold).
 - The todo list: [its open choices](docs/features/todo.md#decisions-taken-with-the-view)
   (the title's limit, notes on several lines, new items taking the filter's
   tags, the order in a quadrant, outdenting, Hide done's start).

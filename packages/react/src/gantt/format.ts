@@ -2,7 +2,7 @@ import { type CalendarDay, dayAsDate, daysBetween, type GanttTask } from "@eisen
 
 import type { Translate } from "../strings/translate";
 
-type DayStyle = "full" | "short" | "day" | "weekday" | "month" | "monthYear" | "year";
+type DayStyle = "full" | "short" | "day" | "weekday" | "month" | "monthYear" | "shortMonthYear" | "year";
 
 const OPTIONS: Readonly<Record<DayStyle, Intl.DateTimeFormatOptions>> = {
   full: { day: "numeric", month: "short", year: "numeric" },
@@ -11,6 +11,7 @@ const OPTIONS: Readonly<Record<DayStyle, Intl.DateTimeFormatOptions>> = {
   weekday: { weekday: "narrow" },
   month: { month: "short" },
   monthYear: { month: "long", year: "numeric" },
+  shortMonthYear: { month: "short", year: "numeric" },
   year: { year: "numeric" },
 };
 
@@ -25,6 +26,19 @@ export function formatDay(day: CalendarDay, locale: string, style: DayStyle = "f
     formatters.set(key, formatter);
   }
   return formatter.format(dayAsDate(day));
+}
+
+/**
+ * The ways the header's upper line may name the unit a day starts, from the longest to the shortest: a year
+ * on the month scale ("2026"); a month on the others ("September 2026", "Sep 2026", "Sep").
+ */
+export function upperLabels(day: CalendarDay, monthScale: boolean, locale: string): string[] {
+  if (monthScale) return [formatDay(day, locale, "year")];
+  return [
+    formatDay(day, locale, "monthYear"),
+    formatDay(day, locale, "shortMonthYear"),
+    formatDay(day, locale, "month"),
+  ];
 }
 
 /** A task's days in words: "3 Nov 2026 to 7 Nov 2026" (one day when it starts and ends the same day). */
