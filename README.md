@@ -248,6 +248,14 @@ these names; the plugin is taken by git at a release's tag
 licences, the type-check, cargo-machete, cargo-deny, Clippy, the tests with
 coverage (80% or more), the end-to-end tests and the builds.
 
+The GitHub Actions workflows run only when started by hand, from the
+repository's Actions tab or with `gh workflow run`; nothing runs on a push, on
+a pull request or on a schedule. **Checks**
+([checks.yml](.github/workflows/checks.yml)) runs the same checks on the
+platforms you choose. **Advisories**
+([advisories.yml](.github/workflows/advisories.yml)) looks for known
+vulnerabilities in the packages and crates, as `mise run audit` does locally.
+
 ## Git conventions
 
 [.gitattributes](.gitattributes) normalises text to LF, with CRLF for Windows
@@ -262,7 +270,7 @@ batch/command scripts. Binary files (images, fonts, archives) use Git LFS.
 - **on the commit message**, the first line must start with a prefix below;
 - **before a push**, the type-check (`mise run typecheck`).
 
-`git commit --no-verify` skips them; CI runs the same checks anyway.
+`git commit --no-verify` skips them; `mise run ci` runs the same checks anyway.
 
 ### Commit messages
 
