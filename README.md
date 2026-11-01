@@ -123,7 +123,26 @@ and package.
 
 ## Develop
 
-Set up a machine once (again after the pinned tools change):
+After cloning, one command takes the clone to a tested build (Bash; on
+Windows, from Git Bash):
+
+```sh
+./new-folder-who-dis.sh                 # --help for the steps; --skip-ci
+```
+
+In order, it runs `scripts/install.sh` (below), installs the Tauri
+prerequisites above (Windows: the Visual Studio Build Tools' C++ workload,
+which brings the Windows SDK, and WebView2, with winget; Debian and Ubuntu:
+the WebKitGTK packages, with `apt-get`; macOS: the Xcode command-line tools;
+on other Linux distributions it lists what to install and stops), creates
+`.env` from `.env.example` if there is none, installs the Playwright browser
+(about 300 MB), runs `mise run ci` and makes a debug build of the demo app
+without installers (`tauri build --debug --no-bundle`:
+`target/debug/eisenhower_app`). It stops at the first step that fails, says
+which, and is safe to run again. `--skip-ci` leaves out `mise run ci`.
+
+To set up only the tools, on a machine once (again after the pinned tools
+change):
 
 ```sh
 scripts/install.sh      # macOS and Linux
