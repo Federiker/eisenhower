@@ -5,6 +5,8 @@
 export const board = {
   "board.label": "Board",
   "board.newCard": "New card",
+  "board.newCardIn": "New card in {group}",
+  "board.newCardField": "Title of the new card in {group}",
   "board.newColumn": "New column",
   "board.newCardTitle": "New card",
   "board.newColumnName": "New column",
@@ -40,6 +42,7 @@ export const board = {
   "board.deleteWithCards": "Delete with its cards",
   "board.movedTo": "{name}: moved to {group}, {position} of {total}",
   "board.columnMovedTo": "{name}: moved to {position} of {total}",
+  "board.cardAdded": "{name}: added to {group}, {position} of {total}",
 
   "board.card.title": "Title",
   "board.card.summary": "Summary",
