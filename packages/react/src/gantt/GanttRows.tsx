@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { InlineRename } from "../controls/InlineRename";
+import { isMac } from "../keyboard/shortcuts";
 import { useLocale, useTranslate } from "../strings/translate";
 import { colourVar } from "../theme/palette";
 import { describeTask, formatSpan } from "./format";
@@ -38,24 +39,36 @@ export type RowBridge = {
   menu: (rowKey: string, event: MouseEvent<HTMLElement>) => void;
   drag: (id: string, mode: DragMode, days: number) => void;
   rename: (rowKey: string, name: string | null) => void;
+  /** A link drag (Ctrl, or ⌘ on macOS, held as it starts): from a task, the pointer's place, the drop, a cancel. */
+  linkStart: (id: string, x: number, y: number) => void;
+  linkMove: (x: number, y: number) => void;
+  linkEnd: () => void;
+  linkCancel: () => void;
 };
+
+/** How a row takes part in a link drag: the task dragged from, the one under the pointer, or one it cannot link to. */
+export type LinkRole = "source" | "target" | "refused";
 
 /** The row element and its two cells: the name column and the drawing. */
 function Row({
+  rowKey,
   level,
   index,
   expanded,
   selected,
   kind,
+  link,
   name,
   drawing,
   onMenu,
 }: {
+  rowKey: string;
   level: number;
   index: number;
   expanded?: boolean;
   selected?: boolean;
   kind: "task" | "group";
+  link?: LinkRole;
   name: ReactNode;
   drawing: ReactNode;
   onMenu: (event: MouseEvent<HTMLElement>) => void;
@@ -65,6 +78,8 @@ function Row({
       role="row"
       className="eh-gantt-row"
       data-kind={kind}
+      data-row-key={rowKey}
+      data-link={link}
       aria-level={level}
       aria-rowindex={index + 2}
       aria-expanded={expanded}
@@ -111,6 +126,7 @@ type TaskRowProps = {
   selected: boolean;
   renaming: boolean;
   readOnly: boolean;
+  link?: LinkRole;
   bridge: RowBridge;
 };
 
@@ -130,12 +146,14 @@ export const TaskRow = memo(function TaskRow({
   selected,
   renaming,
   readOnly,
+  link,
   bridge,
 }: TaskRowProps) {
   const t = useTranslate();
   const locale = useLocale();
   const rowKey = `task:${task.id}`;
   const [drag, setDrag] = useState<{ mode: DragMode; x: number; dx: number } | null>(null);
+  const [linking, setLinking] = useState(false);
   const shown = drag ? draggedDays(task, drag.mode, Math.round(drag.dx / geometry.dayWidth)) : task;
   const left = xOfDay(geometry, shown.start);
   const width = (daysBetween(shown.start, shown.end) + 1) * geometry.dayWidth;
@@ -144,13 +162,25 @@ export const TaskRow = memo(function TaskRow({
 
   function pointerDown(event: PointerEvent<HTMLButtonElement>) {
     if (readOnly || event.button !== 0) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    // Ctrl (⌘ on macOS, where Ctrl+click is the context menu) links instead of moving.
+    if (isMac() ? event.metaKey : event.ctrlKey) {
+      event.preventDefault();
+      setLinking(true);
+      bridge.linkStart(task.id, event.clientX, event.clientY);
+      return;
+    }
     const edge = (event.target as HTMLElement).dataset.edge;
     const mode: DragMode = !task.milestone && (edge === "start" || edge === "end") ? edge : "move";
-    event.currentTarget.setPointerCapture?.(event.pointerId);
     setDrag({ mode, x: event.clientX, dx: 0 });
   }
 
   function pointerUp() {
+    if (linking) {
+      setLinking(false);
+      bridge.linkEnd();
+      return;
+    }
     if (!drag) return;
     setDrag(null);
     const days = dragDays(task, drag.mode, drag.dx, geometry.dayWidth);
@@ -166,9 +196,11 @@ export const TaskRow = memo(function TaskRow({
   return (
     <Row
       kind="task"
+      rowKey={rowKey}
       level={level}
       index={index}
       selected={selected || undefined}
+      link={link}
       onMenu={(event) => bridge.menu(rowKey, event)}
       name={
         renaming ? (
@@ -200,9 +232,13 @@ export const TaskRow = memo(function TaskRow({
           ref={(element) => bridge.register(rowKey, element)}
           onFocus={() => bridge.focused(rowKey)}
           onKeyDown={(event) => {
-            if (drag && event.key === "Escape") {
+            if ((drag || linking) && event.key === "Escape") {
               event.preventDefault();
               setDrag(null);
+              if (linking) {
+                setLinking(false);
+                bridge.linkCancel();
+              }
               return;
             }
             bridge.key(event, rowKey);
@@ -210,10 +246,17 @@ export const TaskRow = memo(function TaskRow({
           onDoubleClick={() => bridge.open(task.id)}
           onPointerDown={pointerDown}
           onPointerMove={(event) => {
-            if (drag) setDrag({ ...drag, dx: event.clientX - drag.x });
+            if (linking) bridge.linkMove(event.clientX, event.clientY);
+            else if (drag) setDrag({ ...drag, dx: event.clientX - drag.x });
           }}
           onPointerUp={pointerUp}
-          onPointerCancel={() => setDrag(null)}
+          onPointerCancel={() => {
+            setDrag(null);
+            if (linking) {
+              setLinking(false);
+              bridge.linkCancel();
+            }
+          }}
         >
           {!task.milestone && <span className="eh-gantt-progress" style={{ width: `${task.progress}%` }} />}
           {!task.milestone && !readOnly && <span className="eh-gantt-handle" data-edge="start" />}
@@ -234,6 +277,7 @@ type GroupRowProps = {
   geometry: Geometry;
   tabbable: boolean;
   renaming: boolean;
+  link?: LinkRole;
   bridge: RowBridge;
 };
 
@@ -250,6 +294,7 @@ export const GroupRow = memo(function GroupRow({
   geometry,
   tabbable,
   renaming,
+  link,
   bridge,
 }: GroupRowProps) {
   const t = useTranslate();
@@ -262,6 +307,8 @@ export const GroupRow = memo(function GroupRow({
   return (
     <Row
       kind="group"
+      rowKey={rowKey}
+      link={link}
       level={1}
       index={index}
       expanded={!collapsed}

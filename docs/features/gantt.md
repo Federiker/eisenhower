@@ -171,10 +171,12 @@ Ctrl+click is the context menu) links instead of moving: the task dragged
 from comes to depend on the task dropped on. While dragging, an arrow is
 drawn from the end of the task under the pointer to the start of the task
 dragged from, and the row under the pointer is highlighted; any part of a
-task's row takes the drop. A link that cannot be made (the task itself, a
-group's row, a dependency already there, one that would make a cycle) is
-previewed dashed in the problem colour with the reason as its tooltip, and
-dropping it changes nothing but says why. Escape cancels. The keys' way is
+task's row takes the drop. A link that cannot be made (a group's row, a
+dependency already there, one that would make a cycle, too many) is
+previewed dashed in the problem colour with the reason beside the pointer,
+and dropping it changes nothing but says why; dropped on the task itself
+or outside the rows, it links nothing. Escape cancels. The drop is
+announced ("Paint now depends on Sketch"). The keys' way is
 the task menu's **Depends on…**: a list of the tasks it may depend on.
 
 ### Move dependent tasks

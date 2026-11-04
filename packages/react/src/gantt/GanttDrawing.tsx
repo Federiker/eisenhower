@@ -93,7 +93,7 @@ export const GanttBackdrop = memo(function GanttBackdrop({
 });
 
 /** Where a task's bar begins and ends across the drawing, a milestone's diamond being narrower than its day. */
-function barEnds(task: GanttTask, geometry: Geometry): { from: number; to: number } {
+export function barEnds(task: GanttTask, geometry: Geometry): { from: number; to: number } {
   const left = xOfDay(geometry, task.start);
   if (task.milestone) {
     const middle = left + geometry.dayWidth / 2;
@@ -192,3 +192,59 @@ export const GanttArrows = memo(function GanttArrows({
     </svg>
   );
 });
+
+/**
+ * The link being dragged (Ctrl+drag, ⌘+drag on macOS): an arrow into the start of the task dragged from, out
+ * of the end of the task under the pointer (or from the pointer itself, over no task), dashed in the problem
+ * colour when that link cannot be made; and beside the pointer, what dropping would do or why it would not.
+ * Hidden from screen readers: the drop is announced.
+ */
+export function GanttLinkPreview({
+  geometry,
+  height,
+  from,
+  to,
+  pointer,
+  refused,
+  label,
+  flip = false,
+}: {
+  geometry: Geometry;
+  height: number;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  pointer: { x: number; y: number };
+  refused: boolean;
+  label: string;
+  /** Puts the words on the pointer's left (in the right half of the view, so that they are not cut off). */
+  flip?: boolean;
+}) {
+  const id = useId();
+  return (
+    <>
+      <svg
+        className="eh-gantt-link"
+        aria-hidden="true"
+        width={geometry.width}
+        height={height}
+        data-refused={refused || undefined}
+      >
+        <defs>
+          <marker id={id} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M 0 0 L 8 4 L 0 8 z" className="eh-gantt-link-head" />
+          </marker>
+        </defs>
+        <path className="eh-gantt-link-line" d={arrowPath(from, to)} markerEnd={`url(#${id})`} />
+      </svg>
+      <span
+        className="eh-gantt-link-label"
+        aria-hidden="true"
+        data-refused={refused || undefined}
+        data-flip={flip || undefined}
+        style={{ left: flip ? pointer.x - 14 : pointer.x + 14, top: pointer.y + 14 }}
+      >
+        {label}
+      </span>
+    </>
+  );
+}

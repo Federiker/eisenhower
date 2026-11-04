@@ -78,6 +78,63 @@
 .eh-gantt-row[aria-selected="true"] .eh-gantt-name {
   background: var(--eh-selected);
 }
+
+/* A link drag: the row under the pointer, the arrow and what dropping would do. */
+.eh-gantt-row[data-link="target"],
+.eh-gantt-row[data-link="target"] .eh-gantt-name {
+  background: color-mix(in srgb, var(--eh-accent) 16%, var(--eh-surface));
+}
+.eh-gantt-row[data-link="refused"],
+.eh-gantt-row[data-link="refused"] .eh-gantt-name {
+  background: color-mix(in srgb, var(--eh-problem) 12%, var(--eh-surface));
+}
+.eh-gantt-row[data-link="source"] .eh-gantt-name {
+  font-weight: 600;
+}
+.eh-gantt-link {
+  position: absolute;
+  top: 0;
+  left: var(--eh-gantt-name-width);
+  z-index: 2;
+  overflow: visible;
+  pointer-events: none;
+}
+.eh-gantt-link-line {
+  fill: none;
+  stroke: var(--eh-accent);
+  stroke-width: 2;
+}
+.eh-gantt-link-head {
+  fill: var(--eh-accent);
+}
+.eh-gantt-link[data-refused] .eh-gantt-link-line {
+  stroke: var(--eh-problem);
+  stroke-dasharray: 5 3;
+}
+.eh-gantt-link[data-refused] .eh-gantt-link-head {
+  fill: var(--eh-problem);
+}
+.eh-gantt-link-label {
+  position: absolute;
+  z-index: 4;
+  margin-left: var(--eh-gantt-name-width);
+  max-width: 280px;
+  padding: 2px 6px;
+  border: 1px solid var(--eh-accent);
+  border-radius: var(--eh-radius);
+  background: var(--eh-surface);
+  color: var(--eh-ink);
+  font-size: calc(12px * var(--eh-scale, 1));
+  white-space: nowrap;
+  pointer-events: none;
+}
+.eh-gantt-link-label[data-flip] {
+  transform: translateX(-100%);
+}
+.eh-gantt-link-label[data-refused] {
+  border-color: var(--eh-problem);
+  color: var(--eh-problem);
+}
 .eh-gantt-task-name,
 .eh-gantt-group-name {
   overflow: hidden;
@@ -379,6 +436,27 @@
   .eh-gantt-handle::after {
     border-color: CanvasText;
     background: Canvas;
+  }
+  .eh-gantt-link-line,
+  .eh-gantt-link[data-refused] .eh-gantt-link-line {
+    stroke: Highlight;
+  }
+  .eh-gantt-link-head,
+  .eh-gantt-link[data-refused] .eh-gantt-link-head {
+    fill: Highlight;
+  }
+  .eh-gantt-link-label,
+  .eh-gantt-link-label[data-refused] {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+  .eh-gantt-row[data-link="target"] .eh-gantt-name,
+  .eh-gantt-row[data-link="refused"] .eh-gantt-name {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .eh-gantt-row[data-link="refused"] .eh-gantt-name {
+    outline-style: dashed;
   }
   .eh-gantt-today {
     border-color: Highlight;

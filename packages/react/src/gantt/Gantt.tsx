@@ -2,10 +2,12 @@
 // biome-ignore-all lint/a11y/useFocusableInteractive: the focus is on the control in each row (a bar, a group's button), as a tree grid allows; rows and cells are not stops of their own.
 import {
   addDays,
+  addDependency,
   addGanttGroup,
   addGanttTask,
   blankGanttTask,
   type CalendarDay,
+  canDependOn,
   dayOfNumber,
   daysBetween,
   dependencyConflicts,
@@ -21,6 +23,7 @@ import {
   ganttSections,
   ganttStepTarget,
   ganttTaskPlace,
+  MAX_DEPENDENCIES,
   moveGanttGroup,
   moveGanttTask,
   newId,
@@ -40,13 +43,13 @@ import { InlineQuestion } from "../controls/InlineQuestion";
 import { MoveToDialog } from "../controls/MoveToDialog";
 import { Notice } from "../controls/Notice";
 import { LiveRegion, useAnnouncer } from "../hooks/useAnnouncer";
-import { actionOf, shortcutsIn } from "../keyboard/shortcuts";
+import { actionOf, isMac, shortcutsIn } from "../keyboard/shortcuts";
 import type { MessageKey } from "../strings/en-GB";
 import { useLocale, useTranslate } from "../strings/translate";
 import { type EisenhowerSettings, ViewRoot } from "../theme/EisenhowerProvider";
 import { formatDay, formatLength, formatSpan } from "./format";
-import { GanttArrows, GanttBackdrop, GanttHeader } from "./GanttDrawing";
-import { type DragMode, GroupRow, ROW_HEIGHT, type RowBridge, TaskRow } from "./GanttRows";
+import { barEnds, GanttArrows, GanttBackdrop, GanttHeader, GanttLinkPreview } from "./GanttDrawing";
+import { type DragMode, GroupRow, type LinkRole, ROW_HEIGHT, type RowBridge, TaskRow } from "./GanttRows";
 import { type GanttScale, geometryOf, xOfDay, zoomed } from "./scale";
 import { TaskDialog } from "./TaskDialog";
 
@@ -80,6 +83,10 @@ export type GanttProps = EisenhowerSettings & {
 
 type Menu = { rowKey: string; place: MenuPlace; returnTo: HTMLElement | null };
 type TaskAction = "open" | "rename" | "up" | "down" | "moveTo" | "delete";
+/** Why a dragged link cannot be made: dropped on a group, already there, a cycle, or too many. */
+type LinkRefusal = "linkGroup" | "linkDuplicate" | "linkCycle" | "linkLimit";
+/** A link being dragged: from a task, the pointer in the drawing's pixels, the row under it and why it cannot link. */
+type Link = { from: string; x: number; y: number; over: string | null; refusal: LinkRefusal | null };
 type GroupAction = "toggle" | "rename" | "up" | "down" | "newTask" | "delete";
 
 const taskKey = (id: string) => `task:${id}`;
@@ -126,7 +133,9 @@ function GanttView({
   const [menu, setMenu] = useState<Menu | null>(null);
   const [moving, setMoving] = useState<string | null>(null);
   const [dialog, setDialog] = useState<string | null>(null);
-  const [problem, setProblem] = useState<GanttProblem | "milestone" | null>(null);
+  const [problem, setProblem] = useState<GanttProblem | "milestone" | LinkRefusal | null>(null);
+  const [link, setLink] = useState<Link | null>(null);
+  const body = useRef<HTMLDivElement>(null);
   // A read-only chart folds its groups for this view only, without changing the chart.
   const [folded, setFolded] = useState<ReadonlyMap<string, boolean>>(new Map());
   const elements = useRef(new Map<string, HTMLElement>());
@@ -282,6 +291,61 @@ function GanttView({
       t("gantt.groupMovedTo", { name: groupOf(id)!.name, position: index + by + 1, total: value.groups.length }),
     );
   }
+
+  /** A point on the page in the drawing's pixels (from its first day and its first row). */
+  function drawingPoint(clientX: number, clientY: number): { x: number; y: number } {
+    const rect = body.current?.getBoundingClientRect();
+    return { x: clientX - (rect?.left ?? 0) - NAME_WIDTH, y: clientY - (rect?.top ?? 0) };
+  }
+
+  /** Why the task `from` cannot come to depend on the row `over`, or null when it can (or there is nothing to link). */
+  function linkRefusal(from: string, over: string | null): LinkRefusal | null {
+    if (over === null) return null;
+    if (over.startsWith("group:")) return "linkGroup";
+    const task = taskOf(from);
+    const id = idOf(over);
+    if (!task || id === from) return null;
+    if (task.dependsOn.includes(id)) return "linkDuplicate";
+    if (!canDependOn(value, from, id)) return "linkCycle";
+    return task.dependsOn.length >= MAX_DEPENDENCIES ? "linkLimit" : null;
+  }
+
+  function linkMove(clientX: number, clientY: number) {
+    if (!link) return;
+    const row = document.elementFromPoint(clientX, clientY)?.closest<HTMLElement>("[data-row-key]");
+    const key = row && body.current?.contains(row) ? (row.dataset.rowKey ?? null) : null;
+    // The task's own row is no target: a drag that has not left it links nothing.
+    const over = key === taskKey(link.from) ? null : key;
+    setLink({ ...link, ...drawingPoint(clientX, clientY), over, refusal: linkRefusal(link.from, over) });
+  }
+
+  /** The drop of a link drag: the task dragged from depends on the task dropped on, or why it cannot. */
+  function linkEnd() {
+    if (!link) return;
+    setLink(null);
+    if (readOnly || link.over === null) return;
+    if (link.refusal) {
+      setProblem(link.refusal);
+      announce(t(`gantt.problem.${link.refusal}`));
+      return;
+    }
+    const predecessor = taskOf(idOf(link.over));
+    const next = apply(addDependency(value, link.from, idOf(link.over)));
+    const task = next && taskOf(link.from, next);
+    if (!task || !predecessor) return;
+    announce(t("gantt.linked", { name: task.name, predecessor: predecessor.name }));
+  }
+
+  // Escape cancels a link drag wherever the focus is.
+  const linking = link !== null;
+  useEffect(() => {
+    if (!linking) return;
+    const cancel = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setLink(null);
+    };
+    window.addEventListener("keydown", cancel);
+    return () => window.removeEventListener("keydown", cancel);
+  }, [linking]);
 
   function open(id: string) {
     if (onOpenTask) onOpenTask(id);
@@ -441,8 +505,10 @@ function GanttView({
 
   // The rows' bridge is made once; it calls the latest of these through a ref, so the rows never draw again
   // only because the chart's own functions are new.
-  const latest = useRef({ rowKeyDown, open, setCollapsed, isCollapsed, moveDays, rename, setMenu, setFocusKey });
-  latest.current = { rowKeyDown, open, setCollapsed, isCollapsed, moveDays, rename, setMenu, setFocusKey };
+  const own = { rowKeyDown, open, setCollapsed, isCollapsed, moveDays, rename, setMenu, setFocusKey };
+  const linkHandlers = { linkMove, linkEnd, setLink, drawingPoint };
+  const latest = useRef({ ...own, ...linkHandlers });
+  latest.current = { ...own, ...linkHandlers };
   const bridge = useMemo<RowBridge>(
     () => ({
       key: (event, rowKey) => latest.current.rowKeyDown(event, rowKey),
@@ -463,6 +529,11 @@ function GanttView({
       },
       drag: (id, mode, days) => latest.current.moveDays(id, mode, days),
       rename: (rowKey, name) => latest.current.rename(rowKey, name),
+      linkStart: (id, x, y) =>
+        latest.current.setLink({ from: id, ...latest.current.drawingPoint(x, y), over: null, refusal: null }),
+      linkMove: (x, y) => latest.current.linkMove(x, y),
+      linkEnd: () => latest.current.linkEnd(),
+      linkCancel: () => latest.current.setLink(null),
     }),
     [],
   );
@@ -560,6 +631,19 @@ function GanttView({
   const movingTask = moving ? taskOf(moving) : undefined;
   const dialogTask = dialog ? taskOf(dialog) : undefined;
   const firstDay = dayOfNumber(geometry.first);
+  const linkRole = (rowKey: string): LinkRole | undefined =>
+    !link
+      ? undefined
+      : rowKey === taskKey(link.from)
+        ? "source"
+        : rowKey === link.over
+          ? link.refusal
+            ? "refused"
+            : "target"
+          : undefined;
+  const linkFrom = link ? taskOf(link.from) : undefined;
+  const linkOver = link?.over?.startsWith("task:") ? taskOf(idOf(link.over)) : undefined;
+  const middleOf = (rowKey: string) => rowKeys.indexOf(rowKey) * ROW_HEIGHT + ROW_HEIGHT / 2;
   const lastDay = dayOfNumber(geometry.first + geometry.days - 1);
 
   return (
@@ -675,7 +759,7 @@ function GanttView({
               </div>
             </div>
           </div>
-          <div role="rowgroup" className="eh-gantt-body">
+          <div role="rowgroup" className="eh-gantt-body" ref={body}>
             <GanttBackdrop geometry={geometry} today={today} height={rows.length * ROW_HEIGHT} />
             <GanttArrows rows={rows} tasks={value.tasks} conflicts={conflicts} geometry={geometry} />
             {rows.map((row, index) =>
@@ -691,6 +775,7 @@ function GanttView({
                   selected={selectedId === row.task.id}
                   renaming={renaming === keyOf(row)}
                   readOnly={readOnly}
+                  link={linkRole(keyOf(row))}
                   bridge={bridge}
                 />
               ) : (
@@ -704,15 +789,45 @@ function GanttView({
                   geometry={geometry}
                   tabbable={tabbable === keyOf(row)}
                   renaming={renaming === keyOf(row)}
+                  link={linkRole(keyOf(row))}
                   bridge={bridge}
                 />
               ),
+            )}
+            {link && linkFrom && (
+              <GanttLinkPreview
+                geometry={geometry}
+                height={rows.length * ROW_HEIGHT}
+                from={
+                  linkOver
+                    ? { x: barEnds(linkOver, geometry).to, y: middleOf(taskKey(linkOver.id)) }
+                    : { x: link.x, y: link.y }
+                }
+                to={{ x: barEnds(linkFrom, geometry).from, y: middleOf(taskKey(linkFrom.id)) }}
+                pointer={link}
+                flip={
+                  scroller.current !== null &&
+                  link.x - scroller.current.scrollLeft > (scroller.current.clientWidth - NAME_WIDTH) / 2
+                }
+                refused={link.refusal !== null}
+                label={
+                  link.refusal
+                    ? t(`gantt.problem.${link.refusal}`)
+                    : linkOver
+                      ? t("gantt.linkTo", { name: linkFrom.name, predecessor: linkOver.name })
+                      : t("gantt.linkHint", { name: linkFrom.name })
+                }
+              />
             )}
           </div>
         </div>
       </div>
       {rows.length === 0 && <Notice>{t("gantt.empty")}</Notice>}
-      {rows.length > 0 && !readOnly && <Notice className="eh-gantt-help">{t("gantt.help")}</Notice>}
+      {rows.length > 0 && !readOnly && (
+        <Notice className="eh-gantt-help">
+          {t("gantt.help")} {t("gantt.helpLink", { key: isMac() ? "⌘" : "Ctrl" })}
+        </Notice>
+      )}
       <LiveRegion message={message} />
       {menu && menuTask && (
         <ContextMenu
