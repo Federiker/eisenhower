@@ -11,6 +11,7 @@ target/
 # Builds
 dist/
 packages/app/src-tauri/gen/
+packages/desktop/src-tauri/gen/
 playwright-report/
 test-results/
 

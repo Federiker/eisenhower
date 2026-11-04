@@ -37,6 +37,11 @@ is under **Verification** and **Awaiting owner decisions**.
   view's document saved, reopened, changed on disk by another program and
   saved again (the hash guard), and closed with unsaved changes (Save,
   Don't save, Cancel).
+- [ ] The desktop app's window (`mise run app:dev`, and the installers in
+  `dist/release` installed): a document of each type created, saved,
+  changed on disk by another program and saved again, the recent list after a
+  restart and after a file is moved away, Ctrl+N, O, S and Shift+S, the
+  window's title, and closing with unsaved changes (Save, Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
   names, roles and the announcements of moves.
 - [ ] The gantt chart's ⌘+drag link on macOS (the tests only press Ctrl),
@@ -64,5 +69,8 @@ stand until the owner says otherwise:
 - The todo list: [its open choices](docs/features/todo.md#decisions-taken-with-the-view)
   (the title's limit, notes on several lines, new items taking the filter's
   tags, the order in a quadrant, outdenting, Hide done's start).
+- The desktop app: [its choices](docs/features/desktop.md#decisions-taken-with-the-app)
+  (the keys in a text field, the title's unsaved mark, the recent list's
+  look, a new document written at once, the settings kept, the focus).
 - The demo app: the samples and the locales offered, Ctrl+Z and Ctrl+Y as
   the app's keys.

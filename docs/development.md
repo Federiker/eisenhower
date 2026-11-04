@@ -178,3 +178,20 @@ Owner decisions, 27 October 2026, on the views:
 Owner decision, 27 October 2026: after a card is dropped in the "No column"
 column offered at the end of the board, that column has cards and so moves
 to first place, exactly as jerome's 6cece75 does (decision 15).
+
+Owner decisions, 4 November 2026, on the desktop app:
+
+19. **A desktop app beside the demo**:
+    [packages/desktop](../packages/desktop/README.md) (`@eisenhower/desktop`
+    and the crate `eisenhower_desktop`), a Tauri window that opens, creates
+    and saves any view's document as a file, from a start screen with the
+    recent documents ([the desktop app](features/desktop.md)). It is a host
+    like any other: the library's packages and the plugin are reused, not
+    changed for it, and stay importable by other apps as they are. It copies
+    and adapts the demo's document handling rather than sharing a package
+    with it, and its TypeScript counts in the coverage measure. It is
+    **Eisenhower** (`org.eisenhower.desktop`), and the demo's window becomes
+    **Eisenhower demo**. `mise run app:release`, `app:debug` and `app:all`
+    build it and move the program and its installers to
+    `dist/<release|debug>/`; the names `release` and `release:dry` stay the
+    GitHub release's (decision 11).
