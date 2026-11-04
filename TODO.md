@@ -31,17 +31,6 @@ is under **Verification** and **Awaiting owner decisions**.
   - [ ] A throwaway host installs the three tarballs by URL (`bun add`) and
     the plugin by git at the tag, and builds.
 
-- [ ] Gantt dragging and linking (owner decisions of 4 November 2026, in
-  [gantt.md](docs/features/gantt.md#decisions)):
-  - [x] Model: `earliestStart`, and `{ autoSchedule }` on `shiftTask`,
-    `resizeTask`, `addDependency`, `putGanttTask` (clamp, push as needed).
-  - [x] View: the bar's ends as wider zones with hover grips.
-  - [x] View: the `autoSchedule` prop and the Move dependent tasks toggle,
-    through drags (clamped preview), keys and the dialog.
-  - [x] View: Ctrl/⌘+drag to link, the preview arrow, the refusals.
-  - [x] View: the task menu's Depends on… list.
-  - [ ] End to end, screenshots, the demo app.
-
 ## Verification
 
 - [ ] The demo app's window (`mise run tauri:dev`), clicked through: each
@@ -50,6 +39,8 @@ is under **Verification** and **Awaiting owner decisions**.
   Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
   names, roles and the announcements of moves.
+- [ ] The gantt chart's ⌘+drag link on macOS (the tests only press Ctrl),
+  and its links and pushes in the Tauri window on Windows (WebView2).
 
 ## Later
 
