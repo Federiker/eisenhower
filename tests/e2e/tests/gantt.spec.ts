@@ -52,11 +52,13 @@ test("drags a bar to move its days, and its end to make it longer", async ({ pag
     `Write the shop copy, ${await dayFromToday(page, 12)} to ${await dayFromToday(page, 19)}, 8 days, 0% done`,
   );
 
-  // Its end, three days later: the handle is at the bar's right edge.
+  // Its end, three days later: the handle is at the bar's right edge. (Moving the copy pushed the press release
+  // after it, so the note about a task starting too early is gone and the chart has moved up.)
   const moved = (await copy.boundingBox())!;
-  await page.mouse.move(moved.x + moved.width - 2, y);
+  const middle = moved.y + moved.height / 2;
+  await page.mouse.move(moved.x + moved.width - 2, middle);
   await page.mouse.down();
-  await page.mouse.move(moved.x + moved.width - 2 + 96, y, { steps: 6 });
+  await page.mouse.move(moved.x + moved.width - 2 + 96, middle, { steps: 6 });
   await page.mouse.up();
   await expect(copy).toHaveAccessibleName(
     `Write the shop copy, ${await dayFromToday(page, 12)} to ${await dayFromToday(page, 22)}, 11 days, 0% done`,
@@ -84,4 +86,53 @@ test("changes the scale with the keys, and moves a task and its end a day with A
   );
   await page.keyboard.press("Control+-");
   await expect(page.getByRole("button", { name: "Weeks", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
+
+/** Ctrl+drag from the middle of one bar to the middle of another, and the drop. */
+async function linkDrag(page: Page, from: string, to: string) {
+  const a = (await bar(page, from).boundingBox())!;
+  const b = (await bar(page, to).boundingBox())!;
+  await page.keyboard.down("Control");
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.keyboard.up("Control");
+}
+
+test("links a task to the one it depends on with Ctrl+drag, and refuses a cycle with its reason", async ({ page }) => {
+  const errors = await openApp(page, "Gantt");
+  await page.getByRole("button", { name: "Days", exact: true }).click();
+  await bar(page, "Write the shop copy").scrollIntoViewIfNeeded();
+  const status = page.locator(".eh-gantt-view").getByRole("status");
+  await linkDrag(page, "Test in the rain", "Write the shop copy");
+  await expect(status).toHaveText(/^Test in the rain now depends on Write the shop copy/);
+  // The press release depends on the shop copy, so the copy cannot depend on it.
+  await linkDrag(page, "Write the shop copy", "Press release");
+  await expect(status).toHaveText("That task depends on this one, so this one cannot depend on it.");
+  expect(errors).toEqual([]);
+});
+
+test("pushes the tasks after a moved one with Move dependent tasks, and not without it", async ({ page }) => {
+  await openApp(page, "Gantt");
+  await page.getByRole("button", { name: "Days", exact: true }).click();
+  const status = page.locator(".eh-gantt-view").getByRole("status");
+  const toggle = page.getByRole("button", { name: "Move dependent tasks" });
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+
+  const drag = async () => {
+    const box = (await bar(page, "Print a prototype").boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width / 2, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 4 * 32, y, { steps: 6 });
+    await page.mouse.up();
+  };
+  await drag();
+  await expect(status).toHaveText(/^Print a prototype: moved to .*; \d+ tasks? after it moved too\s*$/);
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await drag();
+  await expect(status).toHaveText(/^Print a prototype: moved to [^;]*$/);
 });
