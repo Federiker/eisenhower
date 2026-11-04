@@ -161,6 +161,7 @@ describe("the menus", () => {
       t("common.moveUp"),
       t("common.moveDown"),
       t("gantt.moveToGroup"),
+      t("gantt.dependsOn"),
       t("gantt.deleteTask"),
     ]);
     fireEvent.keyDown(menuItem(t("gantt.open")), { key: "Escape" });

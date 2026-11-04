@@ -53,6 +53,7 @@ import { formatDay, formatLength, formatSpan } from "./format";
 import { barEnds, GanttArrows, GanttBackdrop, GanttHeader, GanttLinkPreview } from "./GanttDrawing";
 import { type DragMode, GroupRow, type LinkRole, ROW_HEIGHT, type RowBridge, TaskRow } from "./GanttRows";
 import { type GanttScale, geometryOf, xOfDay, zoomed } from "./scale";
+import { DependsOnDialog } from "./DependsOnDialog";
 import { TaskDialog } from "./TaskDialog";
 
 /** The name column's width, in pixels (the stylesheet's `--eh-gantt-name-width` is set from it). */
@@ -90,7 +91,7 @@ export type GanttProps = EisenhowerSettings & {
 };
 
 type Menu = { rowKey: string; place: MenuPlace; returnTo: HTMLElement | null };
-type TaskAction = "open" | "rename" | "up" | "down" | "moveTo" | "delete";
+type TaskAction = "open" | "rename" | "up" | "down" | "moveTo" | "dependsOn" | "delete";
 /** Why a dragged link cannot be made: dropped on a group, already there, a cycle, or too many. */
 type LinkRefusal = "linkGroup" | "linkDuplicate" | "linkCycle" | "linkLimit";
 /** A link being dragged: from a task, the pointer in the drawing's pixels, the row under it and why it cannot link. */
@@ -145,6 +146,7 @@ function GanttView({
   const [menu, setMenu] = useState<Menu | null>(null);
   const [moving, setMoving] = useState<string | null>(null);
   const [dialog, setDialog] = useState<string | null>(null);
+  const [choosingPredecessor, setChoosingPredecessor] = useState<string | null>(null);
   const [problem, setProblem] = useState<GanttProblem | "milestone" | "early" | LinkRefusal | null>(null);
   const [link, setLink] = useState<Link | null>(null);
   const body = useRef<HTMLDivElement>(null);
@@ -380,17 +382,22 @@ function GanttView({
       announce(t(`gantt.problem.${link.refusal}`));
       return;
     }
-    const predecessor = taskOf(idOf(link.over));
-    const next = apply(addDependency(value, link.from, idOf(link.over), { autoSchedule }));
-    const task = next && taskOf(link.from, next);
+    linkTasks(link.from, idOf(link.over));
+  }
+
+  /** Makes a task depend on another (Ctrl+drag, Depends on…), moving it after it with Move dependent tasks. */
+  function linkTasks(id: string, predecessorId: string) {
+    const predecessor = taskOf(predecessorId);
+    const next = apply(addDependency(value, id, predecessorId, { autoSchedule }));
+    const task = next && taskOf(id, next);
     if (!task || !predecessor) return;
     const values = { name: task.name, predecessor: predecessor.name };
     announce(
       withPushed(
-        task.start === taskOf(link.from)?.start
+        task.start === taskOf(id)?.start
           ? t("gantt.linked", values)
           : t("gantt.linkedMoved", { ...values, dates: formatSpan(task.start, task.end, t, locale) }),
-        link.from,
+        id,
         value,
         next,
       ),
@@ -614,6 +621,7 @@ function GanttView({
       { id: "up", label: t("common.moveUp"), disabled: !ganttStepTarget(value, id, "up") },
       { id: "down", label: t("common.moveDown"), disabled: !ganttStepTarget(value, id, "down") },
       { id: "moveTo", label: t("gantt.moveToGroup") },
+      { id: "dependsOn", label: t("gantt.dependsOn") },
       { id: "delete", label: t("gantt.deleteTask"), separated: true },
     ];
   }
@@ -651,6 +659,9 @@ function GanttView({
         break;
       case "moveTo":
         setMoving(id);
+        break;
+      case "dependsOn":
+        setChoosingPredecessor(id);
         break;
       case "delete":
         setDeleting(rowKey);
@@ -691,6 +702,7 @@ function GanttView({
   const menuGroup = menu?.rowKey.startsWith("group:") ? groupOf(idOf(menu.rowKey)) : undefined;
   const movingTask = moving ? taskOf(moving) : undefined;
   const dialogTask = dialog ? taskOf(dialog) : undefined;
+  const linkingTask = choosingPredecessor ? taskOf(choosingPredecessor) : undefined;
   const firstDay = dayOfNumber(geometry.first);
   const linkRole = (rowKey: string): LinkRole | undefined =>
     !link
@@ -933,6 +945,21 @@ function GanttView({
           onClose={() => {
             setMoving(null);
             focusRow(taskKey(movingTask.id));
+          }}
+        />
+      )}
+      {linkingTask && (
+        <DependsOnDialog
+          gantt={value}
+          task={linkingTask}
+          onChoose={(predecessorId) => {
+            setChoosingPredecessor(null);
+            linkTasks(linkingTask.id, predecessorId);
+            focusRow(taskKey(linkingTask.id));
+          }}
+          onClose={() => {
+            setChoosingPredecessor(null);
+            focusRow(taskKey(linkingTask.id));
           }}
         />
       )}

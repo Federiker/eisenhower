@@ -39,7 +39,7 @@ is under **Verification** and **Awaiting owner decisions**.
   - [x] View: the `autoSchedule` prop and the Move dependent tasks toggle,
     through drags (clamped preview), keys and the dialog.
   - [x] View: Ctrl/⌘+drag to link, the preview arrow, the refusals.
-  - [ ] View: the task menu's Depends on… list.
+  - [x] View: the task menu's Depends on… list.
   - [ ] End to end, screenshots, the demo app.
 
 ## Verification

@@ -1,8 +1,8 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createTranslate } from "../../../src";
-import { latest, setup, taskOf } from "./fixtures";
+import { latest, setup, task, taskOf } from "./fixtures";
 
 const t = createTranslate();
 const bar = (name: RegExp) => screen.getByRole("button", { name });
@@ -127,5 +127,51 @@ describe("linking tasks with Ctrl+drag", () => {
     link(bar(/^Paint/), bar(/^Sketch/));
     expect(taskOf("paint").dependsOn).toEqual([]);
     expect(document.querySelector(".eh-gantt-link")).toBeNull();
+  });
+});
+
+describe("linking tasks with the menu's Depends on…", () => {
+  const choose = (name: RegExp) => {
+    act(() => bar(name).focus());
+    fireEvent.keyDown(bar(name), { key: "F10", shiftKey: true });
+    fireEvent.click(screen.getByRole("menuitem", { name: t("gantt.dependsOn") }));
+  };
+
+  it("lists the tasks it may depend on in the rows' order, the first chosen, and adds the one chosen", () => {
+    setup();
+    choose(/^Paint/);
+    const dialog = screen.getByRole("dialog", { name: "Paint depends on…" });
+    // Not Paint itself, nor the Release that depends on it.
+    expect(
+      within(dialog)
+        .getAllByRole("radio")
+        .map((radio) => radio.parentElement?.textContent),
+    ).toEqual(["Brief", "Sketch", "Review", "Frame"]);
+    expect(within(dialog).getByRole("radio", { name: "Brief" })).toHaveFocus();
+    fireEvent.click(within(dialog).getByRole("radio", { name: "Sketch" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: t("gantt.dependsOnConfirm") }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(taskOf("paint").dependsOn).toEqual(["sketch"]);
+    expect(announced()).toBe("Paint now depends on Sketch");
+    expect(bar(/^Paint/)).toHaveFocus();
+  });
+
+  it("leaves out the tasks it already depends on, and Cancel changes nothing", () => {
+    setup();
+    choose(/^Frame/);
+    const dialog = screen.getByRole("dialog", { name: "Frame depends on…" });
+    expect(within(dialog).queryByRole("radio", { name: "Sketch" })).not.toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: t("common.cancel") }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(taskOf("frame").dependsOn).toEqual(["sketch"]);
+    expect(bar(/^Frame/)).toHaveFocus();
+  });
+
+  it("says when there is no task it can depend on", () => {
+    setup({}, { groups: [], tasks: [task("only", "Only", "2026-11-05", "2026-11-06")] });
+    choose(/^Only/);
+    const dialog = screen.getByRole("dialog", { name: "Only depends on…" });
+    expect(within(dialog).getByText(t("gantt.noPredecessors"))).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: t("gantt.dependsOnConfirm") })).toBeDisabled();
   });
 });
