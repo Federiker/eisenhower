@@ -13,6 +13,8 @@ const menuTexts = (menu: HTMLElement) =>
     .map((item) => item.textContent);
 const dialog = () => screen.getByRole("dialog");
 const field = (label: string) => within(dialog()).getByLabelText(label);
+/** The box beside a colour menu that shows the colour chosen. */
+const swatch = (menu: HTMLElement) => menu.closest(".eh-colour-choice")!.querySelector<HTMLElement>(".eh-swatch")!;
 
 function columnMenu(view: HTMLElement, name: string) {
   fireEvent.click(more(view, name));
@@ -183,8 +185,14 @@ describe("a board's cards", () => {
     fireEvent.click(titleButton(view, "Draft"));
     fireEvent.change(field(t("board.card.summary")), { target: { value: " Everything turns. " } });
     fireEvent.change(field(t("board.card.column")), { target: { value: "todo" } });
-    fireEvent.change(field(t("board.card.colour")), { target: { value: "5" } });
-    expect(dialog().querySelector<HTMLElement>(".eh-board-swatch")!.style.background).toBe("var(--eh-colour-5)");
+    const colour = field(t("board.card.colour"));
+    // The box beside the colour menu shows the colour chosen as the menu changes: none, then vermilion.
+    expect(swatch(colour)).toHaveAttribute("aria-hidden", "true");
+    expect(swatch(colour)).toHaveAttribute("data-none", "true");
+    expect(swatch(colour).style.background).toBe("");
+    fireEvent.change(colour, { target: { value: "5" } });
+    expect(swatch(colour)).not.toHaveAttribute("data-none");
+    expect(swatch(colour).style.background).toBe("var(--eh-colour-5)");
     fireEvent.click(within(dialog()).getByRole("button", { name: t("common.save") }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(board().cards.find((one) => one.id === "draft")).toEqual({
@@ -200,7 +208,9 @@ describe("a board's cards", () => {
     expect(cardOf(view, "Draft")).toHaveTextContent(`${t("common.colour.vermilion")}DraftEverything turns.`);
 
     fireEvent.keyDown(titleButton(view, "Draft"), { key: "Enter" });
+    expect(swatch(field(t("board.card.colour"))).style.background).toBe("var(--eh-colour-5)");
     fireEvent.change(field(t("board.card.colour")), { target: { value: "" } });
+    expect(swatch(field(t("board.card.colour")))).toHaveAttribute("data-none", "true");
     fireEvent.change(field(t("board.card.column")), { target: { value: "" } });
     fireEvent.submit(dialog());
     expect(board().cards.find((one) => one.id === "draft")).toMatchObject({ columnId: null, colour: null });

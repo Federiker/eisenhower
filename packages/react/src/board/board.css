@@ -147,18 +147,6 @@
   color: var(--eh-muted);
   font-size: calc(12px * var(--eh-scale));
 }
-.eh-board-swatch {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  border: 1px solid var(--eh-line);
-}
-.eh-board-swatch[data-none="true"] {
-  background: transparent;
-  border-style: dashed;
-}
 .eh-board-badge {
   color: var(--eh-muted);
   font-size: calc(12px * var(--eh-scale));
@@ -319,14 +307,6 @@
 }
 .eh-board-field-row .eh-board-field {
   flex: 1 1 12em;
-}
-.eh-board-colour-choice {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.eh-board-colour-choice select {
-  flex: 1;
 }
 .eh-board-dialog .eh-dialog-actions .eh-board-dialog-delete {
   margin-inline-end: auto;

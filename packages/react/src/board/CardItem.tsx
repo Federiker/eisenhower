@@ -2,6 +2,7 @@ import type { BoardCard, Colour } from "@eisenhower/model";
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
 
 import { Button } from "../controls/Button";
+import { ColourSwatch } from "../controls/ColourSwatch";
 import { IconButton } from "../controls/IconButton";
 import { InlineRename } from "../controls/InlineRename";
 import { useTranslate } from "../strings/translate";
@@ -18,18 +19,6 @@ export type DragHandlers = {
   onDragEnd: () => void;
 };
 
-/** A colour as a small square; its name is always written beside it, never the colour alone. */
-export function Swatch({ colour }: { colour: Colour }) {
-  return (
-    <span
-      className="eh-board-swatch"
-      aria-hidden="true"
-      data-none={colour === null ? "true" : undefined}
-      style={colour === null ? undefined : { background: colourVar(colour) }}
-    />
-  );
-}
-
 /** A card's colour, named, or nothing when it has none. */
 function CardColour({ colour }: { colour: Colour }) {
   const t = useTranslate();
@@ -38,7 +27,7 @@ function CardColour({ colour }: { colour: Colour }) {
     <span className="eh-board-colour">
       {named && (
         <>
-          <Swatch colour={colour} />
+          <ColourSwatch className="eh-board-swatch" colour={colour} />
           {t(named.name)}
         </>
       )}

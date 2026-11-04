@@ -263,6 +263,27 @@ describe("opening a task", () => {
     expect(bar(/^Varnish/)).toHaveFocus();
   });
 
+  it("shows the colour chosen in a box beside the colour menu, as the menu changes", () => {
+    setup();
+    // Sketch is sky blue (colour 1); Brief has no colour.
+    fireEvent.doubleClick(bar(/^Sketch/));
+    const menu = within(screen.getByRole("dialog")).getByRole("combobox", { name: t("gantt.fieldColour") });
+    const box = () => menu.closest(".eh-colour-choice")!.querySelector<HTMLElement>(".eh-swatch")!;
+    expect(box()).toHaveAttribute("aria-hidden", "true");
+    expect(box().style.background).toBe("var(--eh-colour-1)");
+    fireEvent.change(menu, { target: { value: "6" } });
+    expect(box().style.background).toBe("var(--eh-colour-6)");
+    fireEvent.change(menu, { target: { value: "" } });
+    expect(box()).toHaveAttribute("data-none", "true");
+    expect(box().style.background).toBe("");
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: t("common.cancel") }));
+    expect(taskOf("sketch").colour).toBe(1);
+
+    fireEvent.doubleClick(bar(/^Brief/));
+    const none = within(screen.getByRole("dialog")).getByRole("combobox", { name: t("gantt.fieldColour") });
+    expect(none.closest(".eh-colour-choice")!.querySelector(".eh-swatch")).toHaveAttribute("data-none", "true");
+  });
+
   it("makes a milestone of a task, and leaves out the tasks that would make a cycle", () => {
     setup({}, { ...PLAN, groups: PLAN.groups.map((one) => ({ ...one, collapsed: one.id === "launch" })) });
     fireEvent.doubleClick(bar(/^Sketch/));

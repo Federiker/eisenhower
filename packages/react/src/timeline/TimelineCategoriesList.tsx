@@ -13,6 +13,7 @@ import {
 import { useRef, useState } from "react";
 
 import { Button } from "../controls/Button";
+import { ColourSwatch, menuColour } from "../controls/ColourSwatch";
 import { EditableText } from "../controls/EditableText";
 import { InlineQuestion } from "../controls/InlineQuestion";
 import { Notice } from "../controls/Notice";
@@ -23,7 +24,7 @@ import { CategorySwatch, editIcon, LINE_LABELS, PROBLEM_LABELS } from "./labels"
 
 /**
  * The categories of a timeline (its lanes, in order; jerome's): the name, colour and line read as text, each
- * with a pencil. New category adds one named "New category" (numbered when the name is taken) with the next
+ * with a pencil; a box beside the colour shows it, and the colour chosen while its menu is open. New category adds one named "New category" (numbered when the name is taken) with the next
  * free colour and line, open for its name; Escape keeps that name. Reordered by dragging, with Alt+Up and
  * Alt+Down, or from a category's menu (right-click or the Menu key), which also deletes it, as the Delete key
  * does. Deleting a category with entries asks whether they move to another category or go with it.
@@ -37,6 +38,8 @@ export function TimelineCategoriesList() {
   // Where the focus goes back to when the question is cancelled: the category's row.
   const returnTo = useRef<HTMLElement | null>(null);
   const [moveTo, setMoveTo] = useState("");
+  // The colour in a category's open colour menu, so the box beside it shows the colour chosen as it changes.
+  const [recolouring, setRecolouring] = useState<{ id: string; value: string } | null>(null);
   const { categories } = timeline;
 
   function remove(category: TimelineCategory) {
@@ -117,6 +120,9 @@ export function TimelineCategoriesList() {
               />
               <span className="eh-timeline-list-choice">
                 <span aria-hidden="true">{t("timeline.colour")}</span>
+                <ColourSwatch
+                  colour={recolouring?.id === category.id ? menuColour(recolouring.value) : category.colour}
+                />
                 <EditableText
                   text={String(category.colour)}
                   choices={colours}
@@ -126,6 +132,11 @@ export function TimelineCategoriesList() {
                   pencilVisible={pencil}
                   disabled={readOnly}
                   onCommit={(next) => update(category, { colour: Number(next) })}
+                  onEditing={(value) =>
+                    setRecolouring((old) =>
+                      value !== null ? { id: category.id, value } : old?.id === category.id ? null : old,
+                    )
+                  }
                 />
               </span>
               <span className="eh-timeline-list-choice">

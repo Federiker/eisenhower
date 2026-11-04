@@ -111,7 +111,8 @@ import { Timeline, TimelineEditor } from "@eisenhower/react";
 the narrow list), the entry's menu and dialog. `<TimelineEditor>` adds
 jerome's timeline page below it: the entries as a table in time order, the
 steps (a Sequence) and the categories, each in a list put in order by
-dragging, Alt+↑ ↓ or its menu.
+dragging, Alt+↑ ↓ or its menu. A box beside a category's colour shows it,
+and the colour chosen while its menu is open.
 
 The view never stores anything: jerome kept each drawing's zoom in
 `localStorage`; here the zoom is the view's own state unless the host passes

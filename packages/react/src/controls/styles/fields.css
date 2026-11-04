@@ -11,3 +11,34 @@
 :where(.eh-checkbox) {
   accent-color: var(--eh-accent);
 }
+
+/*
+ * ColourSwatch: a palette colour as a small box, dashed and empty for no colour; beside a colour menu
+ * (.eh-colour-choice) it shows the colour chosen. Forced colours draw every palette colour in the text colour
+ * and would empty the box, so it keeps its own fill there: a filled box is a colour, a dashed one none.
+ */
+.eh-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--eh-line);
+}
+.eh-swatch[data-none="true"] {
+  background: transparent;
+  border-style: dashed;
+}
+.eh-colour-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.eh-colour-choice select {
+  flex: 1;
+}
+@media (forced-colors: active) {
+  .eh-swatch {
+    forced-color-adjust: none;
+  }
+}
