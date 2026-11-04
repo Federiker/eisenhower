@@ -23,6 +23,19 @@ four views, the Tauri plugin and client, the demo app and its end-to-end
 tests, each described in [docs/features/](docs/README.md). What is left
 is under **Verification** and **Awaiting owner decisions**.
 
+- [ ] The desktop app (decision 19, [the desktop app](docs/features/desktop.md)):
+  - [ ] `packages/desktop` and its crate `eisenhower_desktop`: the window on
+    Vite, the plugins and capability, the icons; the demo's window renamed
+    "Eisenhower demo".
+  - [ ] The recent list (localStorage, 20, latest first, pruned) and the
+    hosts: Tauri (plugin and dialogs) and the in-memory preview.
+  - [ ] The start screen: recent documents, Open…, the new-document form.
+  - [ ] A document open: its view, the toolbar, Start, saving, the close
+    question, the window's title and the app's keys.
+  - [ ] End-to-end tests in the preview and screenshots (light, dark).
+  - [ ] `mise run app:release`, `app:debug`, `app:all` (and `app:dev`) to
+    `dist/<release|debug>/`.
+  - [ ] The README's workspace table, the packages' READMEs.
 - [ ] The first release, v0.1.0 (decision 11; see the README's Releasing):
   - [ ] `mise run tag`: 0.1.0 (never tagged, so no commit), the tag on
     HEAD, `main` and `v0.1.0` pushed.
