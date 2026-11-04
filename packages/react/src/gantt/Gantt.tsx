@@ -8,11 +8,13 @@ import {
   blankGanttTask,
   type CalendarDay,
   canDependOn,
+  compareDays,
   dayOfNumber,
   daysBetween,
   dependencyConflicts,
   deleteGanttGroup,
   deleteGanttTask,
+  earliestStart,
   freeName,
   type Gantt as GanttData,
   type GanttGroupDisposal,
@@ -78,6 +80,12 @@ export type GanttProps = EisenhowerSettings & {
   onOpenTask?: (id: string) => void;
   /** The task shown as chosen (the one the host has open). */
   selectedId?: string | null;
+  /**
+   * Move dependent tasks: every edit keeps a task after the tasks it depends on and pushes the tasks after it
+   * as far as needed. Without it the chart keeps its own, starting on.
+   */
+  autoSchedule?: boolean;
+  onAutoScheduleChange?: (on: boolean) => void;
   className?: string;
 };
 
@@ -119,12 +127,16 @@ function GanttView({
   readOnly = false,
   onOpenTask,
   selectedId = null,
+  autoSchedule: autoScheduleProp,
+  onAutoScheduleChange,
 }: Omit<GanttProps, keyof EisenhowerSettings | "className">) {
   const t = useTranslate();
   const locale = useLocale();
   const { message, announce } = useAnnouncer();
   const [ownScale, setOwnScale] = useState<GanttScale>("week");
   const scale = scaleProp ?? ownScale;
+  const [ownAutoSchedule, setOwnAutoSchedule] = useState(true);
+  const autoSchedule = autoScheduleProp ?? ownAutoSchedule;
   const today = todayProp ?? localToday();
   const [focusKey, setFocusKey] = useState<string | null>(null);
   const [pendingFocus, setPendingFocus] = useState<{ rowKey: string; n: number } | null>(null);
@@ -133,7 +145,7 @@ function GanttView({
   const [menu, setMenu] = useState<Menu | null>(null);
   const [moving, setMoving] = useState<string | null>(null);
   const [dialog, setDialog] = useState<string | null>(null);
-  const [problem, setProblem] = useState<GanttProblem | "milestone" | LinkRefusal | null>(null);
+  const [problem, setProblem] = useState<GanttProblem | "milestone" | "early" | LinkRefusal | null>(null);
   const [link, setLink] = useState<Link | null>(null);
   const body = useRef<HTMLDivElement>(null);
   // A read-only chart folds its groups for this view only, without changing the chart.
@@ -159,6 +171,16 @@ function GanttView({
     return names;
   }, [value, conflicts]);
   const lateCount = conflictNames.size;
+  // With Move dependent tasks, the first day each task may start on: a drag stops there.
+  const earliestDays = useMemo(() => {
+    const days = new Map<string, CalendarDay>();
+    if (!autoSchedule) return days;
+    for (const task of value.tasks) {
+      const day = task.dependsOn.length > 0 ? earliestStart(value, task.id) : null;
+      if (day !== null) days.set(task.id, day);
+    }
+    return days;
+  }, [value, autoSchedule]);
   const rowKeys = rows.map(keyOf);
   const selectedKey = selectedId === null ? null : taskKey(selectedId);
   const tabbable =
@@ -239,6 +261,19 @@ function GanttView({
     return result.ok ? result.value : chart;
   }
 
+  function setAutoSchedule(on: boolean) {
+    if (autoScheduleProp === undefined) setOwnAutoSchedule(on);
+    onAutoScheduleChange?.(on);
+    announce(t(on ? "gantt.autoScheduleOn" : "gantt.autoScheduleOff"));
+  }
+
+  /** A move's message, with how many tasks after the moved one were pushed (Move dependent tasks). */
+  function withPushed(message: string, id: string, before: GanttData, after: GanttData): string {
+    const old = new Map(before.tasks.map((task) => [task.id, task]));
+    const count = after.tasks.filter((task) => task.id !== id && old.get(task.id)?.start !== task.start).length;
+    return count === 0 ? message : t("gantt.withPushed", { message, count });
+  }
+
   function moveDays(id: string, mode: DragMode, days: number) {
     const task = taskOf(id);
     if (!task || readOnly) return;
@@ -248,19 +283,35 @@ function GanttView({
     }
     const length = daysBetween(task.start, task.end);
     // An end goes no further than the other: a task is one day at the shortest.
-    const by = mode === "start" ? Math.min(days, length) : mode === "end" ? Math.max(days, -length) : days;
+    let by = mode === "start" ? Math.min(days, length) : mode === "end" ? Math.max(days, -length) : days;
     if (by === 0) {
       setProblem("order");
       return;
     }
-    const next = apply(mode === "move" ? shiftTask(value, id, by) : resizeTask(value, id, mode, by));
+    // With Move dependent tasks, the start goes no earlier than the day after the tasks it depends on end.
+    const earliest = autoSchedule && mode !== "end" ? earliestStart(value, id) : null;
+    if (earliest !== null && by < 0 && compareDays(task.start, earliest) >= 0) {
+      by = Math.max(by, daysBetween(task.start, earliest));
+      if (by === 0) {
+        setProblem("early");
+        announce(t("gantt.problem.early"));
+        return;
+      }
+    }
+    const options = { autoSchedule };
+    const next = apply(mode === "move" ? shiftTask(value, id, by, options) : resizeTask(value, id, mode, by, options));
     const moved = next && taskOf(id, next);
     if (!moved) return;
     const dates = formatSpan(moved.start, moved.end, t, locale);
     announce(
-      mode === "move"
-        ? t("gantt.movedDays", { name: moved.name, dates })
-        : t("gantt.resized", { name: moved.name, dates, length: formatLength(moved, t) }),
+      withPushed(
+        mode === "move"
+          ? t("gantt.movedDays", { name: moved.name, dates })
+          : t("gantt.resized", { name: moved.name, dates, length: formatLength(moved, t) }),
+        id,
+        value,
+        next,
+      ),
     );
   }
 
@@ -330,10 +381,20 @@ function GanttView({
       return;
     }
     const predecessor = taskOf(idOf(link.over));
-    const next = apply(addDependency(value, link.from, idOf(link.over)));
+    const next = apply(addDependency(value, link.from, idOf(link.over), { autoSchedule }));
     const task = next && taskOf(link.from, next);
     if (!task || !predecessor) return;
-    announce(t("gantt.linked", { name: task.name, predecessor: predecessor.name }));
+    const values = { name: task.name, predecessor: predecessor.name };
+    announce(
+      withPushed(
+        task.start === taskOf(link.from)?.start
+          ? t("gantt.linked", values)
+          : t("gantt.linkedMoved", { ...values, dates: formatSpan(task.start, task.end, t, locale) }),
+        link.from,
+        value,
+        next,
+      ),
+    );
   }
 
   // Escape cancels a link drag wherever the focus is.
@@ -674,6 +735,15 @@ function GanttView({
           ))}
         </fieldset>
         <Button onClick={() => scrollToDay(today)}>{t("gantt.goToToday")}</Button>
+        {!readOnly && (
+          <Button
+            pressed={autoSchedule}
+            title={t("gantt.autoScheduleHint")}
+            onClick={() => setAutoSchedule(!autoSchedule)}
+          >
+            {t("gantt.autoSchedule")}
+          </Button>
+        )}
       </fieldset>
       {deletingTask && (
         <InlineQuestion
@@ -776,6 +846,7 @@ function GanttView({
                   renaming={renaming === keyOf(row)}
                   readOnly={readOnly}
                   link={linkRole(keyOf(row))}
+                  earliest={earliestDays.get(row.task.id) ?? null}
                   bridge={bridge}
                 />
               ) : (
@@ -869,6 +940,7 @@ function GanttView({
         <TaskDialog
           gantt={value}
           task={dialogTask}
+          autoSchedule={autoSchedule}
           onSave={(next) => {
             setDialog(null);
             onChange(unfolded(next, taskOf(dialogTask.id, next)?.groupId ?? null));

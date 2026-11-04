@@ -36,7 +36,7 @@ is under **Verification** and **Awaiting owner decisions**.
   - [x] Model: `earliestStart`, and `{ autoSchedule }` on `shiftTask`,
     `resizeTask`, `addDependency`, `putGanttTask` (clamp, push as needed).
   - [x] View: the bar's ends as wider zones with hover grips.
-  - [ ] View: the `autoSchedule` prop and the Move dependent tasks toggle,
+  - [x] View: the `autoSchedule` prop and the Move dependent tasks toggle,
     through drags (clamped preview), keys and the dialog.
   - [x] View: Ctrl/⌘+drag to link, the preview arrow, the refusals.
   - [ ] View: the task menu's Depends on… list.

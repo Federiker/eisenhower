@@ -19,11 +19,14 @@ import { formatSpan } from "./format";
 export function TaskDialog({
   gantt,
   task,
+  autoSchedule = false,
   onSave,
   onClose,
 }: {
   gantt: Gantt;
   task: GanttTask;
+  /** Move dependent tasks: the task starts after the tasks it depends on, and pushes those after it. */
+  autoSchedule?: boolean;
   onSave: (next: Gantt, task: GanttTask) => void;
   onClose: () => void;
 }) {
@@ -54,7 +57,7 @@ export function TaskDialog({
       groupId: groupId === "" ? null : groupId,
       dependsOn: [...dependsOn],
     };
-    const result = putGanttTask(gantt, next);
+    const result = putGanttTask(gantt, next, { autoSchedule });
     if (!result.ok) {
       setProblem(result.reason);
       return;

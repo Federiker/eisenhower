@@ -96,14 +96,20 @@ function Row({
   );
 }
 
-/** A task's days as drawn while it is dragged: moved, or with one end moved, never past the other. */
+/**
+ * A task's days as drawn while it is dragged: moved, or with one end moved, never past the other. With
+ * `earliest` (Move dependent tasks), its start stops at that day once the drag moves at all.
+ */
 function draggedDays(
   task: GanttTask,
   mode: DragMode,
   days: number,
+  earliest: CalendarDay | null = null,
 ): { start: CalendarDay; end: CalendarDay; by: number } {
   const length = daysBetween(task.start, task.end);
-  const by = mode === "start" ? Math.min(days, length) : mode === "end" ? Math.max(days, -length) : days;
+  let wanted = days;
+  if (earliest !== null && mode !== "end" && days !== 0) wanted = Math.max(days, daysBetween(task.start, earliest));
+  const by = mode === "start" ? Math.min(wanted, length) : mode === "end" ? Math.max(wanted, -length) : wanted;
   return {
     start: mode === "end" ? task.start : addDays(task.start, by),
     end: mode === "start" ? task.end : addDays(task.end, by),
@@ -112,8 +118,14 @@ function draggedDays(
 }
 
 /** How far a drag moved, in whole days (rounded to the nearest), and so how many days it moves the task. */
-export function dragDays(task: GanttTask, mode: DragMode, pixels: number, dayWidth: number): number {
-  return draggedDays(task, mode, Math.round(pixels / dayWidth)).by;
+export function dragDays(
+  task: GanttTask,
+  mode: DragMode,
+  pixels: number,
+  dayWidth: number,
+  earliest: CalendarDay | null = null,
+): number {
+  return draggedDays(task, mode, Math.round(pixels / dayWidth), earliest).by;
 }
 
 type TaskRowProps = {
@@ -127,6 +139,8 @@ type TaskRowProps = {
   renaming: boolean;
   readOnly: boolean;
   link?: LinkRole;
+  /** The first day it may start on (Move dependent tasks), or null. */
+  earliest?: CalendarDay | null;
   bridge: RowBridge;
 };
 
@@ -147,6 +161,7 @@ export const TaskRow = memo(function TaskRow({
   renaming,
   readOnly,
   link,
+  earliest = null,
   bridge,
 }: TaskRowProps) {
   const t = useTranslate();
@@ -154,7 +169,7 @@ export const TaskRow = memo(function TaskRow({
   const rowKey = `task:${task.id}`;
   const [drag, setDrag] = useState<{ mode: DragMode; x: number; dx: number } | null>(null);
   const [linking, setLinking] = useState(false);
-  const shown = drag ? draggedDays(task, drag.mode, Math.round(drag.dx / geometry.dayWidth)) : task;
+  const shown = drag ? draggedDays(task, drag.mode, Math.round(drag.dx / geometry.dayWidth), earliest) : task;
   const left = xOfDay(geometry, shown.start);
   const width = (daysBetween(shown.start, shown.end) + 1) * geometry.dayWidth;
   const label = describeTask(task, conflicts, t, locale);
@@ -183,7 +198,7 @@ export const TaskRow = memo(function TaskRow({
     }
     if (!drag) return;
     setDrag(null);
-    const days = dragDays(task, drag.mode, drag.dx, geometry.dayWidth);
+    const days = dragDays(task, drag.mode, drag.dx, geometry.dayWidth, earliest);
     if (days !== 0) bridge.drag(task.id, drag.mode, days);
   }
 
