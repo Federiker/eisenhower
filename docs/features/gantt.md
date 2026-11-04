@@ -29,6 +29,8 @@ const [chart, setChart] = useState<GanttData>(emptyGantt());
 | `readOnly` | `boolean` | Shows the chart without changing it |
 | `onOpenTask` | `(id: string) => void` | Opens a task the host's way; without it the built-in task dialog opens |
 | `selectedId` | `string \| null` | The task shown as chosen |
+| `autoSchedule` | `boolean` | Move dependent tasks: without it the view keeps its own, starting on |
+| `onAutoScheduleChange` | `(on: boolean) => void` | When the user switches Move dependent tasks |
 | `strings`, `t`, `locale`, `theme`, `className` | | As for every view ([interface](interface.md)) |
 
 ## The data
@@ -155,9 +157,50 @@ every scale; the bar shows its new days in its tooltip while dragged, and
 only that row draws until the drop (the arrows follow on the drop). Escape
 during a drag cancels it. A milestone moves and never resizes. A double
 click opens a task; a right click opens its menu (Open, Rename, Move up,
-Move down, Move to group…, Delete task) or a group's (Collapse or Expand,
-Rename, Move up, Move down, New task in this group, Delete group).
-Ctrl+wheel changes the scale.
+Move down, Move to group…, Depends on…, Delete task) or a group's
+(Collapse or Expand, Rename, Move up, Move down, New task in this group,
+Delete group). Ctrl+wheel changes the scale.
+
+Each end of a bar is a zone about 8 pixels wide inside the bar (a quarter
+of a short bar, so its middle can still be grabbed), with the resize
+cursor and a grip shown on hover and focus: the left end moves the start,
+the right end the end, the middle the whole task.
+
+**Linking.** A drag that starts with Ctrl held (⌘ on macOS, where
+Ctrl+click is the context menu) links instead of moving: the task dragged
+from comes to depend on the task dropped on. While dragging, an arrow is
+drawn from the end of the task under the pointer to the start of the task
+dragged from, and the row under the pointer is highlighted; any part of a
+task's row takes the drop. A link that cannot be made (the task itself, a
+group's row, a dependency already there, one that would make a cycle) is
+previewed dashed in the problem colour with the reason as its tooltip, and
+dropping it changes nothing but says why. Escape cancels. The keys' way is
+the task menu's **Depends on…**: a list of the tasks it may depend on.
+
+### Move dependent tasks
+
+A pressed button in the toolbar, **Move dependent tasks** (on by default;
+the `autoSchedule` prop, which the view keeps for itself without it), keeps
+every task after the tasks it depends on as the chart is edited:
+
+- A task moved, or whose end moves, later pushes the tasks that depend on
+  it (and theirs, and so on) only as far as needed: one that would start
+  on or before its predecessor's last day starts the day after, keeping
+  its length. A gap (a breather) absorbs the move; moving earlier leaves
+  them where they are.
+- A task, or its start, goes no earlier than the day after the last day of
+  the tasks it depends on: a drag stops there, Alt+← stops there and says
+  why, and the dialog's save moves it there (keeping its length).
+- A new dependency (by drag, the menu or the dialog) moves the task after
+  its new predecessor, and pushes the tasks after it.
+- It applies to every edit: drags, keys, the dialog. Tasks that already
+  start too early (opened that way, or before the button was pressed) stay
+  as they are and flagged, until they or a task they depend on is moved.
+
+Off, nothing moves by itself, and tasks starting too early are only
+flagged, as before. In the model the same edits take an option,
+`{ autoSchedule: true }`, and `earliestStart` gives the first day a task
+may start on.
 
 ### Keys
 
@@ -214,6 +257,21 @@ The owner's decisions of 27 October 2026:
 - A month's name in the header is shown in full when it fits the width
   drawn, else in short with its year, then in short, else left out; never a
   clipped word (the first slice clipped it: "Septer").
+
+The owner's decisions of 4 November 2026, on dragging and linking:
+
+- A bar's ends are wider zones inside it, with a grip on hover and focus.
+- Ctrl+drag (⌘+drag on macOS) from task A to task B makes A depend on B,
+  with a preview arrow; any part of B's row takes the drop, and a link that
+  cannot be made is previewed in the problem colour and refused with its
+  reason. The keys' way is the task menu's Depends on….
+- Move dependent tasks is a view setting (`autoSchedule`, a pressed button
+  in the toolbar, on by default), not stored in the chart.
+- With it on, dependents are pushed only as far as needed (a breather
+  absorbs a move; moving earlier pulls nothing), a task stops at the day
+  after its predecessors' last day, every edit keeps the rule, and tasks
+  already starting too early are left until they or their predecessors
+  move.
 
 ## Decisions to confirm
 
