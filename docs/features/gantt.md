@@ -146,7 +146,8 @@ it).
 
 The built-in task dialog edits the name, the first and last day (date
 fields), the milestone switch (which disables the end), the percentage
-done, the colour, the group and the tasks it depends on: those that depend
+done, the colour (a menu with a box beside it showing the colour chosen,
+as the board's card dialog has), the group and the tasks it depends on: those that depend
 on it, through others too, cannot be chosen. Save stores it all at once,
 saying why when it is refused; Cancel and Escape change nothing.
 
@@ -165,6 +166,14 @@ Each end of a bar is a zone about 8 pixels wide inside the bar (a quarter
 of a short bar, so its middle can still be grabbed), with the resize
 cursor and a grip shown on hover and focus: the left end moves the start,
 the right end the end, the middle the whole task.
+
+**Reordering.** A task's name in the left column is dragged up or down
+the rows (a grip shows on hover): a line shows where it goes, among the
+tasks of any group or outside every group, and a folded group it is
+dropped on unfolds and takes it at its end. A group's name drags the group,
+with its tasks, among the groups. The bar still moves only in time. Escape
+cancels; the move is announced as Alt+↑ ↓'s are, and the keys stay the
+keyboard's way.
 
 **Linking.** A drag that starts with Ctrl held (⌘ on macOS, where
 Ctrl+click is the context menu) links instead of moving: the task dragged
@@ -259,6 +268,10 @@ The owner's decisions of 27 October 2026:
 - A month's name in the header is shown in full when it fits the width
   drawn, else in short with its year, then in short, else left out; never a
   clipped word (the first slice clipped it: "Septer").
+
+The owner's decisions of 4 November 2026, on reordering: tasks are
+dragged up and down the rows by their names (the bar keeps moving in time),
+into any group or none; groups are dragged by their names among the groups.
 
 The owner's decisions of 4 November 2026, on dragging and linking:
 

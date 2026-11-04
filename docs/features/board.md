@@ -91,6 +91,14 @@ focus goes to.
   then has cards). The list keeps it first. A board without columns shows
   its cards in it (a plain list in the list layout). Hosts rename it with
   the `board.noColumn` string (jerome: "No part").
+- **New card** at the foot of each column (and of No column when it is
+  shown), in the board and the list layouts: the button becomes a title
+  field there; Enter adds a card with that title at the end of the column
+  and keeps the field open, empty, for the next; Escape, or leaving it
+  empty, closes it and gives the focus back to the button. A blank title
+  adds nothing; a refused one says why under the field. The card is not
+  opened (the dialog or `onOpenCard` stay for Open). Each card added is
+  announced ("Fix the gate: added to To do, 4 of 4").
 - **New card** and **New column** above the board. A new column is named
   "New column" ("New column 2"… when taken) and opens for its name; a new
   card opens the card dialog titled "New card", and goes after the card
@@ -162,3 +170,8 @@ the drop line is a border. Nothing animates.
   sideways); F2 renames a card in place; with `onOpenCard`, New card adds the
   card at once; jerome's narrow-page fallback (the board shown as the list
   below 600px) is left to the host, which chooses `layout`.
+- The owner's decision of 4 November 2026: each column ends with a New card
+  button that turns into a title field (Trello's way): Enter adds the card
+  at the column's end and keeps the field open; the toolbar's New card
+  stays. Proposed with it: the card added is not opened, and Escape or an
+  empty field closes it.

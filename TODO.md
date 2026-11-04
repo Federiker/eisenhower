@@ -31,6 +31,18 @@ is under **Verification** and **Awaiting owner decisions**.
   - [ ] A throwaway host installs the three tarballs by URL (`bun add`) and
     the plugin by git at the tag, and builds.
 
+- [ ] Owner requests of 4 November 2026 (decisions in the
+  [gantt](docs/features/gantt.md#decisions),
+  [board](docs/features/board.md#decisions) and
+  [timeline](docs/features/timeline.md#decisions) documents):
+  - [ ] Gantt: tasks dragged up and down the rows by their names, into any
+    group; groups dragged by their names.
+  - [ ] Board: a New card button at each column's foot that turns into a
+    title field (Enter adds and stays open).
+  - [ ] Colours: a box showing the colour chosen beside every colour menu
+    (the gantt task dialog, the timeline's categories).
+  - [ ] Pictures, end to end, the desktop app's views checked.
+
 ## Verification
 
 - [ ] The demo app's window (`mise run tauri:dev`), clicked through: each
