@@ -89,6 +89,7 @@ body {
   grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
   gap: var(--eh-space-4);
   align-items: start;
+  align-content: start;
   max-width: 72rem;
   width: 100%;
   margin: 0 auto;

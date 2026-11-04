@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+import { DESKTOP_URL } from "./tests/desktop";
+
 const browser = { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } };
 
 // The demo app in the browser (`mise run test:e2e`): Vite serves it, Chromium (WebView2's engine) drives it.
@@ -18,11 +20,21 @@ export default defineConfig({
       use: { ...browser, viewport: { width: 1280, height: 760 } },
     },
   ],
-  webServer: {
-    command: "bun run --filter @eisenhower/app dev",
-    cwd: "../..",
-    url: "http://127.0.0.1:1440",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: "bun run --filter @eisenhower/app dev",
+      cwd: "../..",
+      url: "http://127.0.0.1:1440",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    // The desktop app's preview (desktop.spec.ts): its files in the browser, its dialogues the page's.
+    {
+      command: "bun run --filter @eisenhower/desktop dev",
+      cwd: "../..",
+      url: DESKTOP_URL,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });
