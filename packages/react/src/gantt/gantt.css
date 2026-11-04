@@ -230,18 +230,48 @@
   inset: 0 auto 0 0;
   background: var(--eh-gantt-bar);
 }
+/* Each end is a zone inside the bar (8px, or a quarter of a short bar so its middle can still be grabbed); a grip shows on hover and focus. */
 .eh-gantt-handle {
   position: absolute;
+  z-index: 1;
   top: -2px;
   bottom: -2px;
-  width: 6px;
+  width: min(8px, 25%);
   cursor: ew-resize;
 }
 .eh-gantt-handle[data-edge="start"] {
-  left: -4px;
+  left: -2px;
 }
 .eh-gantt-handle[data-edge="end"] {
-  right: -4px;
+  right: -2px;
+}
+.eh-gantt-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  max-height: 70%;
+  border: 1px solid var(--eh-ink);
+  border-radius: 2px;
+  background: var(--eh-surface);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.1s;
+}
+.eh-gantt-bar:hover .eh-gantt-handle::after,
+.eh-gantt-bar:focus-visible .eh-gantt-handle::after,
+.eh-gantt-bar[data-dragging="start"] .eh-gantt-handle[data-edge="start"]::after,
+.eh-gantt-bar[data-dragging="end"] .eh-gantt-handle[data-edge="end"]::after {
+  opacity: 1;
+}
+.eh-gantt-bar[data-dragging="move"] .eh-gantt-handle::after {
+  opacity: 0;
+}
+.eh-gantt-bar[data-dragging="start"],
+.eh-gantt-bar[data-dragging="end"] {
+  cursor: ew-resize;
 }
 .eh-gantt-milestone {
   top: calc((var(--eh-gantt-row) - 16px) / 2);
@@ -345,6 +375,10 @@
   }
   .eh-gantt-summary {
     background: CanvasText;
+  }
+  .eh-gantt-handle::after {
+    border-color: CanvasText;
+    background: Canvas;
   }
   .eh-gantt-today {
     border-color: Highlight;
