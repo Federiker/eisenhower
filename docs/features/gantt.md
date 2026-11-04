@@ -124,7 +124,8 @@ place, and the drawing, which scrolls under a header that stays in place:
   is a third of the way across; Go to today brings it back; changing the
   scale keeps the day in the middle in the middle.
 - **Tasks**: a bar outlined in the task's colour (the accent colour when it
-  has none) and filled as far as it is done; a milestone is a diamond.
+  has none), filled in that colour as far as it is done and with a faint
+  tint of it for the rest; a milestone is a diamond.
 - **Groups**: a summary row with a button that folds and unfolds it (the
   fold is stored in the chart) and a black bar from its first task's start
   to its last task's end.
@@ -176,10 +177,11 @@ cancels; the move is announced as Alt+↑ ↓'s are, and the keys stay the
 keyboard's way.
 
 **Linking.** A drag that starts with Ctrl held (⌘ on macOS, where
-Ctrl+click is the context menu) links instead of moving: the task dragged
-from comes to depend on the task dropped on. While dragging, an arrow is
-drawn from the end of the task under the pointer to the start of the task
-dragged from, and the row under the pointer is highlighted; any part of a
+Ctrl+click is the context menu) links instead of moving: the task dropped on
+comes to depend on the task dragged from (dragged from the parent to its
+child). While dragging, an arrow is drawn from the end of the task dragged
+from to the start of the task under the pointer (or to the pointer), and
+the row under the pointer is highlighted; any part of a
 task's row takes the drop. A link that cannot be made (a group's row, a
 dependency already there, one that would make a cycle, too many) is
 previewed dashed in the problem colour with the reason beside the pointer,
@@ -276,8 +278,11 @@ into any group or none; groups are dragged by their names among the groups.
 The owner's decisions of 4 November 2026, on dragging and linking:
 
 - A bar's ends are wider zones inside it, with a grip on hover and focus.
-- Ctrl+drag (⌘+drag on macOS) from task A to task B makes A depend on B,
-  with a preview arrow; any part of B's row takes the drop, and a link that
+- The part of a bar not yet done is a faint tint of its colour, not the
+  surface's white or dark.
+- Ctrl+drag (⌘+drag on macOS) from task A to task B makes B depend on A
+  (the owner turned it round after trying it: A depending on B read as the
+  child being the parent), with a preview arrow; any part of B's row takes the drop, and a link that
   cannot be made is previewed in the problem colour and refused with its
   reason. The keys' way is the task menu's Depends on….
 - Move dependent tasks is a view setting (`autoSchedule`, a pressed button

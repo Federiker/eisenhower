@@ -106,11 +106,11 @@ describe("Move dependent tasks", () => {
 
   it("moves a task after a predecessor linked by Ctrl+drag, and says where", () => {
     setup({ scale: "day" });
-    const brief = bar(/^Brief/);
-    fireEvent.pointerDown(brief, { clientX: 10, clientY: 10, button: 0, pointerId: 1, ctrlKey: true });
-    vi.spyOn(document, "elementFromPoint").mockReturnValue(bar(/^Paint/));
-    fireEvent.pointerMove(brief, { clientX: 30, clientY: 60, pointerId: 1 });
-    fireEvent.pointerUp(brief, { pointerId: 1 });
+    const paint = bar(/^Paint/);
+    fireEvent.pointerDown(paint, { clientX: 10, clientY: 10, button: 0, pointerId: 1, ctrlKey: true });
+    vi.spyOn(document, "elementFromPoint").mockReturnValue(bar(/^Brief/));
+    fireEvent.pointerMove(paint, { clientX: 30, clientY: 60, pointerId: 1 });
+    fireEvent.pointerUp(paint, { pointerId: 1 });
     expect(days("brief")).toEqual(["2026-11-21", "2026-11-22"]);
     expect(announced()).toBe("Brief now depends on Paint, moved to 21 Nov 2026 to 22 Nov 2026");
   });

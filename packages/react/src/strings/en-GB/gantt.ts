@@ -23,8 +23,8 @@ export const gantt = {
   "gantt.help":
     "Arrows move between rows. Alt+Left and Alt+Right move a task a day earlier or later, Alt+Shift+Left and Alt+Shift+Right move its end by a day, Alt+Up and Alt+Down move it in the order. Enter opens a task, F2 renames it, Delete deletes it.",
 
-  "gantt.helpLink": "{key}+drag a task onto another to make it depend on that one.",
-  "gantt.linkHint": "{name} depends on…",
+  "gantt.helpLink": "{key}+drag from a task onto another to make that one depend on it.",
+  "gantt.linkHint": "Drop on a task that depends on {name}",
   "gantt.linkTo": "{name} depends on {predecessor}",
 
   "gantt.days": { one: "{count} day", other: "{count} days" },
@@ -105,8 +105,8 @@ export const gantt = {
   "gantt.problem.milestone": "A milestone has no length: move it instead.",
   "gantt.problem.early": "A task cannot start before the tasks it depends on end.",
   "gantt.problem.linkGroup": "Drop it on a task: a group cannot be depended on.",
-  "gantt.problem.linkDuplicate": "It already depends on that task.",
-  "gantt.problem.linkCycle": "That task depends on this one, so this one cannot depend on it.",
+  "gantt.problem.linkDuplicate": "That task already depends on this one.",
+  "gantt.problem.linkCycle": "This task depends on that one, so that one cannot depend on it.",
   "gantt.problem.linkLimit": "A task cannot depend on any more tasks.",
 
   "gantt.keys.shorten": "Make the task end a day earlier",

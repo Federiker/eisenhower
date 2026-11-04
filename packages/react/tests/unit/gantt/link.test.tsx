@@ -28,43 +28,44 @@ function link(from: HTMLElement, ...path: (Element | null)[]) {
 afterEach(() => vi.restoreAllMocks());
 
 describe("linking tasks with Ctrl+drag", () => {
-  it("makes the task dragged from depend on the task dropped on, anywhere in its row", () => {
+  it("makes the task dropped on, anywhere in its row, depend on the task dragged from", () => {
     setup({ scale: "day" });
-    const paint = bar(/^Paint/);
-    fireEvent.pointerDown(paint, { clientX: 10, clientY: 10, button: 0, pointerId: 1, ctrlKey: true });
-    expect(rowOf(paint)).toHaveAttribute("data-link", "source");
+    const sketch = bar(/^Sketch/);
+    fireEvent.pointerDown(sketch, { clientX: 10, clientY: 10, button: 0, pointerId: 1, ctrlKey: true });
+    expect(rowOf(sketch)).toHaveAttribute("data-link", "source");
     over(null);
-    fireEvent.pointerMove(paint, { clientX: 20, clientY: 20, pointerId: 1 });
-    expect(label()).toBe("Paint depends on…");
-    // The name cell of Sketch's row takes the drop as well as its bar.
-    over(rowOf(bar(/^Sketch/)).querySelector(".eh-gantt-task-name"));
-    fireEvent.pointerMove(paint, { clientX: 30, clientY: 60, pointerId: 1 });
-    expect(rowOf(bar(/^Sketch/))).toHaveAttribute("data-link", "target");
+    fireEvent.pointerMove(sketch, { clientX: 20, clientY: 20, pointerId: 1 });
+    expect(label()).toBe("Drop on a task that depends on Sketch");
+    // The name cell of Paint's row takes the drop as well as its bar.
+    over(rowOf(bar(/^Paint/)).querySelector(".eh-gantt-task-name"));
+    fireEvent.pointerMove(sketch, { clientX: 30, clientY: 60, pointerId: 1 });
+    expect(rowOf(bar(/^Paint/))).toHaveAttribute("data-link", "target");
     expect(label()).toBe("Paint depends on Sketch");
     expect(document.querySelector(".eh-gantt-link")).not.toHaveAttribute("data-refused");
-    fireEvent.pointerUp(paint, { pointerId: 1 });
+    fireEvent.pointerUp(sketch, { pointerId: 1 });
     expect(taskOf("paint").dependsOn).toEqual(["sketch"]);
+    expect(taskOf("sketch").dependsOn).toEqual([]);
     expect(announced()).toBe("Paint now depends on Sketch");
     expect(document.querySelector(".eh-gantt-link")).toBeNull();
-    expect(rowOf(bar(/^Sketch/))).not.toHaveAttribute("data-link");
+    expect(rowOf(bar(/^Paint/))).not.toHaveAttribute("data-link");
   });
 
   it("previews a link that cannot be made in the problem colour, and refuses it with the reason", () => {
     setup({ scale: "day" });
-    // Frame depends on Sketch, so Sketch cannot depend on Frame.
-    const sketch = bar(/^Sketch/);
-    fireEvent.pointerDown(sketch, { clientX: 10, clientY: 10, button: 0, pointerId: 1, ctrlKey: true });
-    over(bar(/^Frame/));
-    fireEvent.pointerMove(sketch, { clientX: 30, clientY: 60, pointerId: 1 });
-    expect(rowOf(bar(/^Frame/))).toHaveAttribute("data-link", "refused");
+    // Frame depends on Sketch, so Sketch cannot depend on Frame: Frame dragged onto Sketch is refused.
+    const frame = bar(/^Frame/);
+    fireEvent.pointerDown(frame, { clientX: 10, clientY: 10, button: 0, pointerId: 1, ctrlKey: true });
+    over(bar(/^Sketch/));
+    fireEvent.pointerMove(frame, { clientX: 30, clientY: 60, pointerId: 1 });
+    expect(rowOf(bar(/^Sketch/))).toHaveAttribute("data-link", "refused");
     expect(document.querySelector(".eh-gantt-link")).toHaveAttribute("data-refused", "true");
     expect(label()).toBe(t("gantt.problem.linkCycle"));
-    fireEvent.pointerUp(sketch, { pointerId: 1 });
+    fireEvent.pointerUp(frame, { pointerId: 1 });
     expect(taskOf("sketch").dependsOn).toEqual([]);
     expect(announced()).toBe(t("gantt.problem.linkCycle"));
     expect(document.querySelector(".eh-gantt-problem")).toHaveTextContent(t("gantt.problem.linkCycle"));
 
-    link(bar(/^Frame/), bar(/^Sketch/));
+    link(bar(/^Sketch/), bar(/^Frame/));
     expect(taskOf("frame").dependsOn).toEqual(["sketch"]);
     expect(announced()).toBe(t("gantt.problem.linkDuplicate"));
 
@@ -108,20 +109,20 @@ describe("linking tasks with Ctrl+drag", () => {
   it("uses ⌘ on macOS, where Ctrl+click is the context menu", () => {
     vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
     setup({ scale: "day" });
-    expect(screen.getByText(/⌘\+drag a task onto another/)).toBeInTheDocument();
+    expect(screen.getByText(/⌘\+drag from a task onto another/)).toBeInTheDocument();
     link(bar(/^Paint/), bar(/^Sketch/));
     expect(taskOf("paint").dependsOn).toEqual([]);
-    const paint = bar(/^Paint/);
-    fireEvent.pointerDown(paint, { clientX: 10, clientY: 10, button: 0, pointerId: 1, metaKey: true });
-    over(bar(/^Sketch/));
-    fireEvent.pointerMove(paint, { clientX: 30, clientY: 60, pointerId: 1 });
-    fireEvent.pointerUp(paint, { pointerId: 1 });
+    const sketch = bar(/^Sketch/);
+    fireEvent.pointerDown(sketch, { clientX: 10, clientY: 10, button: 0, pointerId: 1, metaKey: true });
+    over(bar(/^Paint/));
+    fireEvent.pointerMove(sketch, { clientX: 30, clientY: 60, pointerId: 1 });
+    fireEvent.pointerUp(sketch, { pointerId: 1 });
     expect(taskOf("paint").dependsOn).toEqual(["sketch"]);
   });
 
   it("says how in the help, and does not link in a read-only chart", () => {
     const { unmount } = setup({ scale: "day" });
-    expect(screen.getByText(/Ctrl\+drag a task onto another to make it depend on that one\./)).toBeInTheDocument();
+    expect(screen.getByText(/Ctrl\+drag from a task onto another to make that one depend on it\./)).toBeInTheDocument();
     unmount();
     setup({ scale: "day", readOnly: true });
     link(bar(/^Paint/), bar(/^Sketch/));

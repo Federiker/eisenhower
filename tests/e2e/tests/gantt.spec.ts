@@ -105,11 +105,11 @@ test("links a task to the one it depends on with Ctrl+drag, and refuses a cycle 
   await page.getByRole("button", { name: "Days", exact: true }).click();
   await bar(page, "Write the shop copy").scrollIntoViewIfNeeded();
   const status = page.locator(".eh-gantt-view").getByRole("status");
-  await linkDrag(page, "Test in the rain", "Write the shop copy");
+  await linkDrag(page, "Write the shop copy", "Test in the rain");
   await expect(status).toHaveText(/^Test in the rain now depends on Write the shop copy/);
   // The press release depends on the shop copy, so the copy cannot depend on it.
-  await linkDrag(page, "Write the shop copy", "Press release");
-  await expect(status).toHaveText("That task depends on this one, so this one cannot depend on it.");
+  await linkDrag(page, "Press release", "Write the shop copy");
+  await expect(status).toHaveText("This task depends on that one, so that one cannot depend on it.");
   expect(errors).toEqual([]);
 });
 

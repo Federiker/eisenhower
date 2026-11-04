@@ -46,7 +46,7 @@ export type RowBridge = {
   linkCancel: () => void;
 };
 
-/** How a row takes part in a link drag: the task dragged from, the one under the pointer, or one it cannot link to. */
+/** How a row takes part in a link drag: the task dragged from, the one under the pointer, or one that cannot depend on it. */
 export type LinkRole = "source" | "target" | "refused";
 
 /** The row element and its two cells: the name column and the drawing. */

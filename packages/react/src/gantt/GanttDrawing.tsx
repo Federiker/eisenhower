@@ -194,8 +194,8 @@ export const GanttArrows = memo(function GanttArrows({
 });
 
 /**
- * The link being dragged (Ctrl+drag, ⌘+drag on macOS): an arrow into the start of the task dragged from, out
- * of the end of the task under the pointer (or from the pointer itself, over no task), dashed in the problem
+ * The link being dragged (Ctrl+drag, ⌘+drag on macOS): an arrow out of the end of the task dragged from, into
+ * the start of the task under the pointer (or to the pointer itself, over no task), dashed in the problem
  * colour when that link cannot be made; and beside the pointer, what dropping would do or why it would not.
  * Hidden from screen readers: the drop is announced.
  */

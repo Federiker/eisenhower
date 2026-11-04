@@ -372,15 +372,14 @@ function GanttView({
     return { x: clientX - (rect?.left ?? 0) - NAME_WIDTH, y: clientY - (rect?.top ?? 0) };
   }
 
-  /** Why the task `from` cannot come to depend on the row `over`, or null when it can (or there is nothing to link). */
+  /** Why the row `over` cannot come to depend on the task `from`, or null when it can (or there is nothing to link). */
   function linkRefusal(from: string, over: string | null): LinkRefusal | null {
     if (over === null) return null;
     if (over.startsWith("group:")) return "linkGroup";
-    const task = taskOf(from);
-    const id = idOf(over);
-    if (!task || id === from) return null;
-    if (task.dependsOn.includes(id)) return "linkDuplicate";
-    if (!canDependOn(value, from, id)) return "linkCycle";
+    const task = taskOf(idOf(over));
+    if (!task || task.id === from) return null;
+    if (task.dependsOn.includes(from)) return "linkDuplicate";
+    if (!canDependOn(value, task.id, from)) return "linkCycle";
     return task.dependsOn.length >= MAX_DEPENDENCIES ? "linkLimit" : null;
   }
 
@@ -393,7 +392,7 @@ function GanttView({
     setLink({ ...link, ...drawingPoint(clientX, clientY), over, refusal: linkRefusal(link.from, over) });
   }
 
-  /** The drop of a link drag: the task dragged from depends on the task dropped on, or why it cannot. */
+  /** The drop of a link drag: the task dropped on depends on the task dragged from, or why it cannot. */
   function linkEnd() {
     if (!link) return;
     setLink(null);
@@ -403,7 +402,7 @@ function GanttView({
       announce(t(`gantt.problem.${link.refusal}`));
       return;
     }
-    linkTasks(link.from, idOf(link.over));
+    linkTasks(idOf(link.over), link.from);
   }
 
   /** Makes a task depend on another (Ctrl+drag, Depends on…), moving it after it with Move dependent tasks. */
@@ -962,12 +961,12 @@ function GanttView({
               <GanttLinkPreview
                 geometry={geometry}
                 height={rows.length * ROW_HEIGHT}
-                from={
+                from={{ x: barEnds(linkFrom, geometry).to, y: middleOf(taskKey(linkFrom.id)) }}
+                to={
                   linkOver
-                    ? { x: barEnds(linkOver, geometry).to, y: middleOf(taskKey(linkOver.id)) }
+                    ? { x: barEnds(linkOver, geometry).from, y: middleOf(taskKey(linkOver.id)) }
                     : { x: link.x, y: link.y }
                 }
-                to={{ x: barEnds(linkFrom, geometry).from, y: middleOf(taskKey(linkFrom.id)) }}
                 pointer={link}
                 flip={
                   scroller.current !== null &&
@@ -978,7 +977,7 @@ function GanttView({
                   link.refusal
                     ? t(`gantt.problem.${link.refusal}`)
                     : linkOver
-                      ? t("gantt.linkTo", { name: linkFrom.name, predecessor: linkOver.name })
+                      ? t("gantt.linkTo", { name: linkOver.name, predecessor: linkFrom.name })
                       : t("gantt.linkHint", { name: linkFrom.name })
                 }
               />
