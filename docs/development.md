@@ -190,7 +190,7 @@ Owner decisions, 4 November 2026, on the desktop app:
     changed for it, and stay importable by other apps as they are. It copies
     and adapts the demo's document handling rather than sharing a package
     with it, and its TypeScript counts in the coverage measure. It is
-    **Eisenhower** (`org.eisenhower.app`), and the demo's window becomes
+    **Eisenhower** (`org.eisenhower.desktop`), and the demo's window becomes
     **Eisenhower demo**. `mise run app:release`, `app:debug` and `app:all`
     build it and move the program and its installers to
     `dist/<release|debug>/`; the names `release` and `release:dry` stay the

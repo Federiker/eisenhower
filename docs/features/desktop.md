@@ -86,7 +86,7 @@ release's tasks (`release`, `release:dry`, decision 11) are unrelated.
 
 ## Names
 
-The app is **Eisenhower** (`org.eisenhower.app`); the demo's window is
+The app is **Eisenhower** (`org.eisenhower.desktop`); the demo's window is
 **Eisenhower demo** (its identifier, `org.eisenhower.demo`, unchanged).
 
 ## Code

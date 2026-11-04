@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "The desktop app's window: Tauri's defaults, its title set to the document's name, closing itself once it has asked about unsaved changes, the open, save and question dialogue boxes, and Eisenhower's plugin (documents read and written with the hash guard).",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-title",
+    "core:window:allow-destroy",
+    "dialog:default",
+    "eisenhower:default"
+  ]
+}

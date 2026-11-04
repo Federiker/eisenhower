@@ -1,0 +1,250 @@
+/*
+ * The desktop app's own layout. Its colours are the views' theme (--eh-*): the whole window is inside the
+ * EisenhowerProvider, so the theme chosen in the header colours it too.
+ */
+body {
+  margin: 0;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-3) var(--eh-space-4);
+  align-items: center;
+  padding: var(--eh-space-3) var(--eh-space-4);
+  background: var(--eh-panel);
+  border-bottom: 1px solid var(--eh-line);
+}
+
+.app-title {
+  margin: 0;
+  font-size: calc(1.35rem * var(--eh-scale, 1));
+  line-height: 1.2;
+}
+
+.app-preview {
+  margin: 0;
+  padding: var(--eh-space-1) var(--eh-space-2);
+  color: var(--eh-muted);
+  border: 1px dashed var(--eh-line);
+  border-radius: var(--eh-radius, 4px);
+}
+
+.app-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2) var(--eh-space-3);
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--eh-space-3) var(--eh-space-4);
+}
+
+.app-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2);
+  align-items: center;
+  margin-bottom: var(--eh-space-3);
+}
+
+.app-choice {
+  display: inline-flex;
+  gap: var(--eh-space-1);
+  margin-bottom: var(--eh-space-3);
+}
+
+.app-document {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--eh-space-2);
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.app-file {
+  margin: 0 var(--eh-space-2) 0 0;
+  font-size: calc(1rem * var(--eh-scale, 1));
+  font-weight: 600;
+}
+
+.app-dirty {
+  color: var(--eh-warning);
+}
+
+/* The start screen: the recent documents beside the new document's form, one above the other when narrow. */
+.start {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+  gap: var(--eh-space-4);
+  align-items: start;
+  max-width: 72rem;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 52rem) {
+  .start {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.start-section {
+  padding: var(--eh-space-3) var(--eh-space-4);
+  background: var(--eh-panel);
+  border: 1px solid var(--eh-line);
+  border-radius: var(--eh-radius, 6px);
+}
+
+.start-section h3 {
+  margin: 0 0 var(--eh-space-3);
+  font-size: calc(1.1rem * var(--eh-scale, 1));
+}
+
+.start-heading {
+  display: flex;
+  gap: var(--eh-space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.start-empty {
+  color: var(--eh-muted);
+}
+
+.start-recent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.start-recent-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--eh-space-3);
+  width: 100%;
+  padding: var(--eh-space-2) var(--eh-space-3);
+  font: inherit;
+  text-align: start;
+  color: var(--eh-ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--eh-radius, 4px);
+  cursor: pointer;
+}
+
+.start-recent-item:hover {
+  background: var(--eh-surface, var(--eh-background));
+  border-color: var(--eh-line);
+}
+
+.start-recent-item:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: 2px;
+}
+
+.start-recent-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-recent-kind {
+  justify-self: end;
+  color: var(--eh-muted);
+}
+
+.start-recent-folder,
+.start-recent-when {
+  color: var(--eh-muted);
+  font-size: calc(0.875rem * var(--eh-scale, 1));
+}
+
+.start-recent-folder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-recent-when {
+  justify-self: end;
+}
+
+.start-new {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-3);
+  align-items: flex-start;
+}
+
+.start-types {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.start-types legend {
+  margin-bottom: var(--eh-space-1);
+  font-weight: 600;
+}
+
+.start-type {
+  display: inline-flex;
+  gap: var(--eh-space-2);
+  align-items: center;
+}
+
+.start-name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eh-space-1);
+  align-self: stretch;
+}
+
+.start-name label {
+  font-weight: 600;
+}
+
+.start-problem {
+  margin: 0;
+  color: var(--eh-problem);
+}
+
+.app-footer {
+  padding: 0 var(--eh-space-4) var(--eh-space-3);
+  min-height: 1.5em;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+.app-error {
+  color: var(--eh-problem);
+}
+
+@media (forced-colors: active) {
+  .start-section,
+  .start-recent-item:hover {
+    border-color: CanvasText;
+  }
+}

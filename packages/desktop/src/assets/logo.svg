@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Eisenhower's logo (CC0-1.0): the urgent/important matrix, its first quadrant ticked. -->
+  <rect width="512" height="512" rx="96" fill="#28342d"/>
+  <rect x="80" y="80" width="164" height="164" rx="28" fill="#e69f00"/>
+  <rect x="268" y="80" width="164" height="164" rx="28" fill="#56b4e9"/>
+  <rect x="80" y="268" width="164" height="164" rx="28" fill="#16a479"/>
+  <rect x="268" y="268" width="164" height="164" rx="28" fill="#cc79a7"/>
+  <path d="M118 164 l38 38 l72 -78" fill="none" stroke="#28342d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

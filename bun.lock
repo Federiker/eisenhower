@@ -38,6 +38,32 @@
         "vitest": "catalog:",
       },
     },
+    "packages/desktop": {
+      "name": "@eisenhower/desktop",
+      "dependencies": {
+        "@eisenhower/model": "workspace:*",
+        "@eisenhower/react": "workspace:*",
+        "@eisenhower/tauri": "workspace:*",
+        "@tauri-apps/api": "catalog:",
+        "@tauri-apps/plugin-dialog": "catalog:",
+        "react": "catalog:",
+        "react-dom": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@eisenhower/tooling": "workspace:*",
+        "@tauri-apps/cli": "catalog:",
+        "@testing-library/jest-dom": "catalog:",
+        "@testing-library/react": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
+        "@vitejs/plugin-react": "catalog:",
+        "happy-dom": "catalog:",
+        "typescript": "catalog:",
+        "vite": "catalog:",
+        "vitest": "catalog:",
+      },
+    },
     "packages/model": {
       "name": "@eisenhower/model",
       "dependencies": {
@@ -194,6 +220,8 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.6.2", "", { "os": "win32", "cpu": "x64" }, "sha512-FVlWD+mDDz8nN5LWKRWUhhb7wKIK0VE3oXQvQBX7Fwwj00CvqMVhMyiz1iz8O5aZGmnkhFlKSwJPrUvMh5prQw=="],
 
     "@eisenhower/app": ["@eisenhower/app@workspace:packages/app"],
+
+    "@eisenhower/desktop": ["@eisenhower/desktop@workspace:packages/desktop"],
 
     "@eisenhower/e2e": ["@eisenhower/e2e@workspace:tests/e2e"],
 

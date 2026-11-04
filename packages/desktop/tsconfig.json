@@ -1,0 +1,5 @@
+{
+  "extends": "@eisenhower/tooling/tsconfig/react.json",
+  "include": ["src", "tests", "vite.config.ts", "vitest.config.ts"],
+  "references": [{ "path": "../model" }, { "path": "../react" }, { "path": "../tauri" }]
+}
