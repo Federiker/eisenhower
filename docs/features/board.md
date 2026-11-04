@@ -92,10 +92,12 @@ focus goes to.
   its cards in it (a plain list in the list layout). Hosts rename it with
   the `board.noColumn` string (jerome: "No part").
 - **New card** at the foot of each column (and of No column when it is
-  shown), in the board and the list layouts: the button becomes a title
-  field there; Enter adds a card with that title at the end of the column
+  shown with cards; not the one offered during a drag), in the board and
+  the list layouts, named "New card in To do": the button becomes a title
+  field there ("Title of the new card in To do"); Enter adds a card with that title at the end of the column
   and keeps the field open, empty, for the next; Escape, or leaving it
-  empty, closes it and gives the focus back to the button. A blank title
+  empty, closes it and gives the focus back to the button (leaving it with
+  text keeps it open, the text kept). A blank title
   adds nothing; a refused one says why under the field. The card is not
   opened (the dialog or `onOpenCard` stay for Open). Each card added is
   announced ("Fix the gate: added to To do, 4 of 4").

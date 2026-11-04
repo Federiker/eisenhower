@@ -37,7 +37,7 @@ is under **Verification** and **Awaiting owner decisions**.
   [timeline](docs/features/timeline.md#decisions) documents):
   - [x] Gantt: tasks dragged up and down the rows by their names, into any
     group; groups dragged by their names.
-  - [ ] Board: a New card button at each column's foot that turns into a
+  - [x] Board: a New card button at each column's foot that turns into a
     title field (Enter adds and stays open).
   - [x] Colours: a box showing the colour chosen beside every colour menu
     (the gantt task dialog, the timeline's categories).
