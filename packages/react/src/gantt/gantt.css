@@ -280,7 +280,8 @@
   overflow: visible;
   border: 2px solid var(--eh-gantt-bar);
   border-radius: 4px;
-  background: var(--eh-surface);
+  /* The part not yet done: a faint tint of the bar's colour; the done part is filled in full. */
+  background: color-mix(in srgb, var(--eh-gantt-bar) 18%, var(--eh-surface));
 }
 .eh-gantt-progress {
   position: absolute;
