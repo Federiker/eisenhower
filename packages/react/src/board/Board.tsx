@@ -50,6 +50,7 @@ import { type EisenhowerSettings, ViewRoot } from "../theme/EisenhowerProvider";
 import { BOARD_PROBLEM_LABELS, CardDialog, type CardDialogSubject } from "./CardDialog";
 import { CardRow, CardTile } from "./CardItem";
 import { ColumnHeading } from "./ColumnHeading";
+import { NewCardFoot } from "./NewCardFoot";
 
 /** How the board is drawn: columns of cards side by side, or the same groups as a list, one under another. */
 export type BoardLayout = "board" | "list";
@@ -266,6 +267,33 @@ function BoardContent({
     setOpened(card.id);
     focusLater({ card: card.id }, value);
     onOpenCard(card.id);
+  }
+
+  /**
+   * New card at a column's foot: adds a card with this title at the column's end, without opening it, and
+   * announces it; gives back the reason when it was refused.
+   */
+  function addCardToEnd(columnId: string | null, title: string): string | null {
+    const added = addCardAt(value, blankCard(newId(), title, columnId), { columnId, after: null });
+    if (!added.ok) return t(BOARD_PROBLEM_LABELS[added.reason]);
+    setProblem(null);
+    onChange(added.value);
+    const { cards } = boardGroups(added.value).find((group) => group.columnId === columnId)!;
+    announce(
+      t("board.cardAdded", {
+        name: cards.at(-1)!.title,
+        group: groupName(added.value, columnId),
+        position: cards.length,
+        total: cards.length,
+      }),
+    );
+    return null;
+  }
+
+  /** The New card button and field at a column's foot (none on a read-only board). */
+  function foot(columnId: string | null) {
+    if (readOnly) return null;
+    return <NewCardFoot group={groupName(value, columnId)} onAdd={(title) => addCardToEnd(columnId, title)} />;
   }
 
   function closeDialog(focusOn: string | null, changed: boolean) {
@@ -679,7 +707,10 @@ function BoardContent({
             <section className={groupClass} aria-label={t("board.noColumn")} {...groupDrop(null)}>
               <h3 className="eh-board-group-heading">{t("board.noColumn")}</h3>
               {loose.cards.length > 0 ? (
-                <ol className={cardsClass}>{loose.cards.map(cardItem)}</ol>
+                <>
+                  <ol className={cardsClass}>{loose.cards.map(cardItem)}</ol>
+                  {foot(null)}
+                </>
               ) : (
                 <Notice>{t("board.dropOutside")}</Notice>
               )}
@@ -687,6 +718,7 @@ function BoardContent({
           ) : (
             <div className={groupClass} {...groupDrop(null)}>
               <ol className={cardsClass}>{loose.cards.map(cardItem)}</ol>
+              {foot(null)}
             </div>
           ))}
         {value.columns.map((column, index) => {
@@ -754,6 +786,7 @@ function BoardContent({
               ) : (
                 <Notice>{t("board.columnEmpty")}</Notice>
               )}
+              {foot(column.id)}
             </section>
           );
         })}

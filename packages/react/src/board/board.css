@@ -285,6 +285,33 @@
   color: var(--eh-ink);
 }
 
+/* New card at a column's foot: a quiet button that becomes the title field, with a refused title's reason below. */
+.eh-board-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+.eh-board-view .eh-board-foot-button {
+  align-self: flex-start;
+  color: var(--eh-muted);
+}
+.eh-board-view .eh-board-foot-button:hover,
+.eh-board-view .eh-board-foot-button:focus-visible {
+  color: var(--eh-ink);
+}
+.eh-board-foot-field {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+.eh-board-groups .eh-board-foot-field {
+  max-width: 30em;
+}
+.eh-board-foot .eh-problem {
+  margin: 0;
+}
+
 /* The card dialog: its fields scroll between the title and the actions. */
 .eh-dialog.eh-board-dialog {
   width: min(560px, calc(100vw - 32px));
