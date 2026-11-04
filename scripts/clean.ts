@@ -1,11 +1,13 @@
-// Removes the build outputs (`mise run clean`): every package's dist, the coverage reports, the
-// TypeScript caches and, with --rust, Cargo's target folder. Never touches tmp/.
+// Removes the build outputs (`mise run clean`): every package's dist, the desktop app's builds (the
+// root's dist), the coverage reports, the TypeScript caches and, with --rust, Cargo's target folder.
+// Never touches tmp/.
 import { globSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(import.meta.dirname, "..");
 const targets = [
   ...globSync("packages/*/dist", { cwd: root }),
+  "dist",
   ...globSync("packages/*/coverage", { cwd: root }),
   "coverage",
   "node_modules/.cache/tsc",
