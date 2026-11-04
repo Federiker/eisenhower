@@ -136,3 +136,18 @@ test("pushes the tasks after a moved one with Move dependent tasks, and not with
   await drag();
   await expect(status).toHaveText(/^Print a prototype: moved to [^;]*$/);
 });
+
+test("drags a task up the rows by its name into another group", async ({ page }) => {
+  await openApp(page, "Gantt");
+  const from = page.locator(".eh-gantt-task-name", { hasText: "Write the brief" });
+  const to = page.locator(".eh-gantt-task-name", { hasText: "Print a prototype" });
+  const a = (await from.boundingBox())!;
+  const b = (await to.boundingBox())!;
+  await page.mouse.move(a.x + 10, a.y + a.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + 10, b.y + b.height - 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.locator(".eh-gantt-view").getByRole("status")).toHaveText(
+    /^Write the brief: moved to Design, 3 of 4/,
+  );
+});

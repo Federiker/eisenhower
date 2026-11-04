@@ -474,9 +474,10 @@
 .eh-gantt-body[data-reorder] .eh-gantt-row:hover .eh-gantt-name::before {
   content: "⠿";
   position: absolute;
-  left: 1px;
+  left: 0;
   color: var(--eh-muted);
-  font-size: calc(12px * var(--eh-scale, 1));
+  font-size: calc(9px * var(--eh-scale, 1));
+  line-height: 1;
   pointer-events: none;
 }
 .eh-gantt-body[data-reordering] .eh-gantt-name {

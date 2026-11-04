@@ -91,3 +91,22 @@ test("moves a card with Alt and the arrows, keeping the focus on it, and undoes 
   ).toBeVisible();
   await saved(page);
 });
+
+test("adds cards at a column's end from the field at its foot", async ({ page }) => {
+  await openApp(page, "Board");
+  const button = page.getByRole("button", { name: /^New card in / }).first();
+  const column = (await button.getAttribute("aria-label"))!.replace("New card in ", "");
+  await button.click();
+  const field = page.getByRole("textbox", { name: `Title of the new card in ${column}` });
+  await field.fill("Fix the gate");
+  await field.press("Enter");
+  await expect(field).toBeFocused();
+  await expect(field).toHaveValue("");
+  await field.fill("Paint the shed");
+  await field.press("Enter");
+  await field.press("Escape");
+  await expect(button).toBeFocused();
+  const cards = page.getByRole("region", { name: column }).getByRole("listitem");
+  await expect(cards.last()).toContainText("Paint the shed");
+  await expect(cards.nth(-2)).toContainText("Fix the gate");
+});
