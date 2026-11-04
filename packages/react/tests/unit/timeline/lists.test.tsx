@@ -119,6 +119,37 @@ describe("a timeline's categories", () => {
     expect([...lanes.children].map((lane) => lane.textContent?.trim())).toEqual(["Ships", "Crew", "Harbour"]);
   });
 
+  it("show each colour in a box beside it, following the colour menu while it is open", async () => {
+    render(<Host editor initial={harbour([e(20, d(1066))])} />);
+    const box = (name: string) =>
+      screen
+        .getByRole("button", { name: `Edit colour: ${name}` })
+        .closest(".eh-timeline-list-choice")!
+        .querySelector<HTMLElement>(".eh-swatch")!;
+    expect(box("Ships")).toHaveAttribute("aria-hidden", "true");
+    expect(box("Ships").style.background).toBe("var(--eh-colour-0)");
+    expect(box("Harbour").style.background).toBe("var(--eh-colour-1)");
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit colour: Ships" }));
+    const menu = screen.getByRole("combobox", { name: "Colour: Ships" });
+    const open = () => menu.closest(".eh-timeline-list-choice")!.querySelector<HTMLElement>(".eh-swatch")!;
+    fireEvent.change(menu, { target: { value: "3" } });
+    expect(open().style.background).toBe("var(--eh-colour-3)");
+    expect(box("Harbour").style.background).toBe("var(--eh-colour-1)");
+    // Escape keeps the colour, and the box goes back to it.
+    fireEvent.keyDown(menu, { key: "Escape" });
+    expect(held.value!.categories[0]!.colour).toBe(0);
+    expect(box("Ships").style.background).toBe("var(--eh-colour-0)");
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit colour: Ships" }));
+    const again = screen.getByRole("combobox", { name: "Colour: Ships" });
+    fireEvent.change(again, { target: { value: "5" } });
+    fireEvent.keyDown(again, { key: "Enter" });
+    await act(nextTick);
+    expect(held.value!.categories[0]!.colour).toBe(5);
+    expect(box("Ships").style.background).toBe("var(--eh-colour-5)");
+  });
+
   it("move their entries to another category, or take them along, when deleted", () => {
     render(<Host editor initial={harbour([e(20, d(1066)), e(21, d(1070), null, id(11))])} />);
     fireEvent.keyDown(row(categories(), "Ships"), { key: "Delete" });

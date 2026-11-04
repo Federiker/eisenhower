@@ -2,6 +2,7 @@ import type { Board, BoardCard, Problem } from "@eisenhower/model";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { Button } from "../controls/Button";
+import { ColourSwatch, menuColour } from "../controls/ColourSwatch";
 import { InlineQuestion } from "../controls/InlineQuestion";
 import { Notice } from "../controls/Notice";
 import { Select } from "../controls/Select";
@@ -10,7 +11,6 @@ import { TreeDialog } from "../controls/TreeDialog";
 import type { MessageKey } from "../strings/en-GB";
 import { useTranslate } from "../strings/translate";
 import { PALETTE } from "../theme/palette";
-import { Swatch } from "./CardItem";
 import { type CardDraft, type CardProblem, cardDraft, cardFromDraft } from "./draft";
 
 const CARD_PROBLEM_LABELS = {
@@ -114,9 +114,6 @@ export function CardDialog({
     setDraft((old) => ({ ...old, ...change }));
   };
   const problems = tried && "problems" in result ? result.problems : [];
-  const colour = draft.colour === "" ? null : Number(draft.colour);
-  const shownColour =
-    colour !== null && Number.isInteger(colour) && colour >= 0 && colour < PALETTE.length ? colour : null;
 
   return (
     <TreeDialog
@@ -169,8 +166,8 @@ export function CardDialog({
           </div>
           <div className="eh-board-field">
             <label htmlFor={`${id}-colour`}>{t("board.card.colour")}</label>
-            <span className="eh-board-colour-choice">
-              <Swatch colour={shownColour} />
+            <span className="eh-colour-choice">
+              <ColourSwatch className="eh-board-swatch" colour={menuColour(draft.colour)} />
               <Select
                 id={`${id}-colour`}
                 value={draft.colour}

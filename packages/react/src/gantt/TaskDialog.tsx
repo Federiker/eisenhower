@@ -2,6 +2,7 @@ import { canDependOn, type Gantt, type GanttProblem, type GanttTask, putGanttTas
 import { useId, useState } from "react";
 
 import { Checkbox } from "../controls/Checkbox";
+import { ColourSwatch, menuColour } from "../controls/ColourSwatch";
 import { Notice } from "../controls/Notice";
 import { Select } from "../controls/Select";
 import { TextField } from "../controls/TextField";
@@ -53,7 +54,7 @@ export function TaskDialog({
       end: milestone ? start : end,
       milestone,
       progress: percentage,
-      colour: colour === "" ? null : Number(colour),
+      colour: menuColour(colour),
       groupId: groupId === "" ? null : groupId,
       dependsOn: [...dependsOn],
     };
@@ -119,14 +120,17 @@ export function TaskDialog({
         </div>
         <div className="eh-gantt-field">
           <label htmlFor={`${id}-colour`}>{t("gantt.fieldColour")}</label>
-          <Select id={`${id}-colour`} value={colour} onChange={(event) => setColour(event.target.value)}>
-            <option value="">{t("gantt.noColour")}</option>
-            {PALETTE.map((one, index) => (
-              <option key={one.name} value={String(index)}>
-                {t(one.name)}
-              </option>
-            ))}
-          </Select>
+          <span className="eh-colour-choice">
+            <ColourSwatch colour={menuColour(colour)} />
+            <Select id={`${id}-colour`} value={colour} onChange={(event) => setColour(event.target.value)}>
+              <option value="">{t("gantt.noColour")}</option>
+              {PALETTE.map((one, index) => (
+                <option key={one.name} value={String(index)}>
+                  {t(one.name)}
+                </option>
+              ))}
+            </Select>
+          </span>
         </div>
       </div>
       <div className="eh-gantt-field">
