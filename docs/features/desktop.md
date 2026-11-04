@@ -68,11 +68,13 @@ The app's own keys (not the views'; ⌘ on macOS), listed in its README:
 
 ## Outside Tauri: the preview
 
-Outside the Tauri window, Vite serves the same app with an **in-memory
-host** (marked as a preview): its "files" are kept in memory for the page,
-and its open and save dialogs are the page's own. The end-to-end tests and
-the screenshots drive this preview; the Tauri host is tested with Tauri's
-IPC mocks.
+Outside the Tauri window, Vite serves the same app with a **preview host**,
+marked as such in the header: its "files" are kept in the browser, by path,
+through `localStorageAdapter("eisenhower-desktop-preview:")` (so a test can
+put files there and a reload keeps them), and its open and save dialogues
+are the page's own `prompt`, its questions `confirm`. The browser has no
+close question. The end-to-end tests and the screenshots drive this
+preview; the Tauri host is tested with Tauri's IPC mocks.
 
 ## Builds
 
@@ -95,3 +97,20 @@ The app copies the pieces of the demo it needs (the document's history and
 saving, the close question, the messages, the undo keys) and adapts them to
 one document of any kind, rather than sharing a package with the demo. Its
 TypeScript counts in the 80% coverage measure, unlike the demo's.
+
+## Decisions taken with the app
+
+Choices made while building it; they stand until the owner says otherwise:
+
+- Ctrl+N, Ctrl+O, Ctrl+S and Ctrl+Shift+S work in a text field too (only
+  undo and redo are left to it); none works in a dialogue.
+- The window's title starts with "• " while the document has unsaved
+  changes.
+- The recent list shows the file's name, never its path in full, and the
+  folder below it; a list that cannot be read is said so and starts again.
+- A new document is written as soon as its file is chosen, so a document on
+  the recent list always has a file.
+- The theme and the locale are kept in the window's `localStorage`; a
+  setting that cannot be read is the default.
+- Focus goes to the document's name when it opens and to the start screen's
+  heading when it shows (the name's field after Ctrl+N).

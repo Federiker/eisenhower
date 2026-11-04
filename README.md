@@ -44,6 +44,10 @@ The todo list, and the same items as the Eisenhower matrix:
 The other pictures in [docs/screenshots](docs/screenshots) are written by
 `mise run screenshots`.
 
+Eisenhower is also a desktop app ([packages/desktop](packages/desktop/README.md)):
+a start screen with the recent documents and a new document of any view,
+then one document at a time, saved as a file.
+
 What is built and what was decided are in [docs/](docs/README.md); remaining
 work is in [TODO.md](TODO.md).
 
@@ -156,6 +160,7 @@ do not install the Tauri prerequisites above. Then:
 ```sh
 mise run dev         # the demo app in the browser
 mise run tauri:dev   # the demo app as a desktop app
+mise run app:dev     # the desktop app
 ```
 
 ### Local scratch data
@@ -206,6 +211,10 @@ write on the repository.
 | `mise run dev` | The demo app in the browser (Vite) |
 | `mise run tauri:dev` | The demo app as a native window |
 | `mise run build` | The demo app's production build |
+| `mise run app:dev` | The desktop app's window, on Vite |
+| `mise run app:release` | The desktop app's release build: its program and installers in `dist/release` |
+| `mise run app:debug` | Its debug build, in `dist/debug` |
+| `mise run app:all` | Both builds |
 | `mise run release:dry` | Check, build and verify the release's tarballs; list what releasing does |
 | `mise run tag` | Set the version, commit, tag `v<version>`, push and release, asking at each step |
 | `mise run release` | The GitHub release of the pushed tag `v<version>`, with its tarballs |
@@ -234,9 +243,10 @@ Bun's caches from Microsoft Defender, or working on a Dev Drive, helps further.
 | [packages/react](packages/react) | `@eisenhower/react` | `<Board>`, `<Timeline>`, `<Gantt>`, `<TodoList>`: strings, keys, styles |
 | [packages/tauri](packages/tauri) | `@eisenhower/tauri` | The typed client of the Tauri plugin and its storage adapter |
 | [packages/app](packages/app) | `@eisenhower/app` | The demo app, browser and Tauri |
+| [packages/desktop](packages/desktop) | `@eisenhower/desktop` | The desktop app (Tauri), its crate `eisenhower_desktop` |
 | [packages/tooling](packages/tooling) | `@eisenhower/tooling` | Shared TypeScript settings |
 | [crates/tauri-plugin](crates/tauri-plugin) | `tauri-plugin-eisenhower` | The Tauri plugin: documents on disk with a hash guard |
-| [tests/e2e](tests/e2e) | `@eisenhower/e2e` | Playwright tests of the demo app |
+| [tests/e2e](tests/e2e) | `@eisenhower/e2e` | Playwright tests of the demo app and of the desktop app's preview |
 
 Model, react and tauri are released as tarballs on GitHub releases, under
 these names; the plugin is taken by git at a release's tag

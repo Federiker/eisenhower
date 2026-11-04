@@ -23,19 +23,6 @@ four views, the Tauri plugin and client, the demo app and its end-to-end
 tests, each described in [docs/features/](docs/README.md). What is left
 is under **Verification** and **Awaiting owner decisions**.
 
-- [ ] The desktop app (decision 19, [the desktop app](docs/features/desktop.md)):
-  - [ ] `packages/desktop` and its crate `eisenhower_desktop`: the window on
-    Vite, the plugins and capability, the icons; the demo's window renamed
-    "Eisenhower demo".
-  - [ ] The recent list (localStorage, 20, latest first, pruned) and the
-    hosts: Tauri (plugin and dialogs) and the in-memory preview.
-  - [ ] The start screen: recent documents, Open…, the new-document form.
-  - [ ] A document open: its view, the toolbar, Start, saving, the close
-    question, the window's title and the app's keys.
-  - [ ] End-to-end tests in the preview and screenshots (light, dark).
-  - [ ] `mise run app:release`, `app:debug`, `app:all` (and `app:dev`) to
-    `dist/<release|debug>/`.
-  - [ ] The README's workspace table, the packages' READMEs.
 - [ ] The first release, v0.1.0 (decision 11; see the README's Releasing):
   - [ ] `mise run tag`: 0.1.0 (never tagged, so no commit), the tag on
     HEAD, `main` and `v0.1.0` pushed.
@@ -50,6 +37,11 @@ is under **Verification** and **Awaiting owner decisions**.
   view's document saved, reopened, changed on disk by another program and
   saved again (the hash guard), and closed with unsaved changes (Save,
   Don't save, Cancel).
+- [ ] The desktop app's window (`mise run app:dev`, and the installers in
+  `dist/release` installed): a document of each type created, saved,
+  changed on disk by another program and saved again, the recent list after a
+  restart and after a file is moved away, Ctrl+N, O, S and Shift+S, the
+  window's title, and closing with unsaved changes (Save, Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
   names, roles and the announcements of moves.
 
@@ -75,5 +67,8 @@ stand until the owner says otherwise:
 - The todo list: [its open choices](docs/features/todo.md#decisions-taken-with-the-view)
   (the title's limit, notes on several lines, new items taking the filter's
   tags, the order in a quadrant, outdenting, Hide done's start).
+- The desktop app: [its choices](docs/features/desktop.md#decisions-taken-with-the-app)
+  (the keys in a text field, the title's unsaved mark, the recent list's
+  look, a new document written at once, the settings kept, the focus).
 - The demo app: the samples and the locales offered, Ctrl+Z and Ctrl+Y as
   the app's keys.
