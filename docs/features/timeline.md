@@ -209,5 +209,5 @@ where its entries go) and the Menu key opens its menu.
 - Ctrl+0 (fit) is new; jerome had only the Fit button.
 - The image's font is the system's sans-serif, not jerome's.
 - The owner's decision of 4 November 2026: every colour menu shows the
-  colour chosen in a box beside it (the categories' list and dialog here,
-  as the board's card dialog does).
+  colour chosen in a box beside it (each category's in the categories'
+  list here, as the board's card dialog does).

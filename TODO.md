@@ -39,7 +39,7 @@ is under **Verification** and **Awaiting owner decisions**.
     group; groups dragged by their names.
   - [ ] Board: a New card button at each column's foot that turns into a
     title field (Enter adds and stays open).
-  - [ ] Colours: a box showing the colour chosen beside every colour menu
+  - [x] Colours: a box showing the colour chosen beside every colour menu
     (the gantt task dialog, the timeline's categories).
   - [ ] Pictures, end to end, the desktop app's views checked.
 
