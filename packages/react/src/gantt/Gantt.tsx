@@ -36,7 +36,16 @@ import {
   shiftTask,
   today as localToday,
 } from "@eisenhower/model";
-import { type KeyboardEvent, type MouseEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { Button } from "../controls/Button";
 import { classNames } from "../controls/classNames";
@@ -54,6 +63,7 @@ import { barEnds, GanttArrows, GanttBackdrop, GanttHeader, GanttLinkPreview } fr
 import { type DragMode, GroupRow, type LinkRole, ROW_HEIGHT, type RowBridge, TaskRow } from "./GanttRows";
 import { type GanttScale, geometryOf, xOfDay, zoomed } from "./scale";
 import { DependsOnDialog } from "./DependsOnDialog";
+import { type GroupDrop, groupDrop, type TaskDrop, taskDrop } from "./reorder";
 import { TaskDialog } from "./TaskDialog";
 
 /** The name column's width, in pixels (the stylesheet's `--eh-gantt-name-width` is set from it). */
@@ -96,6 +106,14 @@ type TaskAction = "open" | "rename" | "up" | "down" | "moveTo" | "dependsOn" | "
 type LinkRefusal = "linkGroup" | "linkDuplicate" | "linkCycle" | "linkLimit";
 /** A link being dragged: from a task, the pointer in the drawing's pixels, the row under it and why it cannot link. */
 type Link = { from: string; x: number; y: number; over: string | null; refusal: LinkRefusal | null };
+/** A row being dragged up or down by its name: which, by which pointer from where, once it has moved, and where to. */
+type Reorder = {
+  rowKey: string;
+  pointerId: number;
+  startY: number;
+  active: boolean;
+  drop: TaskDrop | GroupDrop | null;
+};
 type GroupAction = "toggle" | "rename" | "up" | "down" | "newTask" | "delete";
 
 const taskKey = (id: string) => `task:${id}`;
@@ -149,6 +167,9 @@ function GanttView({
   const [choosingPredecessor, setChoosingPredecessor] = useState<string | null>(null);
   const [problem, setProblem] = useState<GanttProblem | "milestone" | "early" | LinkRefusal | null>(null);
   const [link, setLink] = useState<Link | null>(null);
+  const [reorder, setReorder] = useState<Reorder | null>(null);
+  // A drag by a row's name ends in a click on the name's button (a group's), which must not fold the group.
+  const justReordered = useRef(false);
   const body = useRef<HTMLDivElement>(null);
   // A read-only chart folds its groups for this view only, without changing the chart.
   const [folded, setFolded] = useState<ReadonlyMap<string, boolean>>(new Map());
@@ -404,16 +425,55 @@ function GanttView({
     );
   }
 
-  // Escape cancels a link drag wherever the focus is.
-  const linking = link !== null;
+  // Escape cancels a link drag, or a row dragged by its name, wherever the focus is.
+  const dragging = link !== null || reorder !== null;
   useEffect(() => {
-    if (!linking) return;
+    if (!dragging) return;
     const cancel = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") setLink(null);
+      if (event.key !== "Escape") return;
+      setLink(null);
+      setReorder(null);
     };
     window.addEventListener("keydown", cancel);
     return () => window.removeEventListener("keydown", cancel);
-  }, [linking]);
+  }, [dragging]);
+
+  /** A press on a row's name: the start of a drag up or down the rows, once the pointer has moved a little. */
+  function reorderDown(event: PointerEvent<HTMLDivElement>) {
+    if (readOnly || event.button !== 0 || event.ctrlKey || event.metaKey) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest(".eh-gantt-name") || target.closest("input, textarea")) return;
+    const rowKey = target.closest<HTMLElement>("[data-row-key]")?.dataset.rowKey;
+    if (!rowKey) return;
+    setReorder({ rowKey, pointerId: event.pointerId, startY: event.clientY, active: false, drop: null });
+  }
+
+  function reorderMove(event: PointerEvent<HTMLDivElement>) {
+    if (!reorder || event.pointerId !== reorder.pointerId) return;
+    if (!reorder.active && Math.abs(event.clientY - reorder.startY) < 4) return;
+    if (!reorder.active) event.currentTarget.setPointerCapture?.(event.pointerId);
+    const y = drawingPoint(event.clientX, event.clientY).y;
+    const id = idOf(reorder.rowKey);
+    const drop = reorder.rowKey.startsWith("task:")
+      ? taskDrop(value, rows, id, y, ROW_HEIGHT)
+      : groupDrop(value, rows, id, y, ROW_HEIGHT);
+    setReorder({ ...reorder, active: true, drop });
+  }
+
+  /** The drop of a row dragged by its name: the task into its new place, or the group among the groups. */
+  function reorderUp() {
+    if (!reorder) return;
+    setReorder(null);
+    if (!reorder.active) return;
+    justReordered.current = true;
+    const id = idOf(reorder.rowKey);
+    if (!reorder.drop) {
+      focusRow(reorder.rowKey);
+      return;
+    }
+    if ("to" in reorder.drop) moveGroupBy(id, reorder.drop.to - value.groups.findIndex((group) => group.id === id));
+    else moveTaskTo(id, { groupId: reorder.drop.groupId, index: reorder.drop.index });
+  }
 
   function open(id: string) {
     if (onOpenTask) onOpenTask(id);
@@ -841,7 +901,23 @@ function GanttView({
               </div>
             </div>
           </div>
-          <div role="rowgroup" className="eh-gantt-body" ref={body}>
+          <div
+            role="rowgroup"
+            className="eh-gantt-body"
+            ref={body}
+            data-reorder={readOnly ? undefined : "true"}
+            data-reordering={reorder?.active || undefined}
+            onPointerDown={reorderDown}
+            onPointerMove={reorderMove}
+            onPointerUp={reorderUp}
+            onPointerCancel={() => setReorder(null)}
+            onClickCapture={(event) => {
+              if (!justReordered.current) return;
+              justReordered.current = false;
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
             <GanttBackdrop geometry={geometry} today={today} height={rows.length * ROW_HEIGHT} />
             <GanttArrows rows={rows} tasks={value.tasks} conflicts={conflicts} geometry={geometry} />
             {rows.map((row, index) =>
@@ -858,6 +934,7 @@ function GanttView({
                   renaming={renaming === keyOf(row)}
                   readOnly={readOnly}
                   link={linkRole(keyOf(row))}
+                  moving={reorder?.active && reorder.rowKey === keyOf(row)}
                   earliest={earliestDays.get(row.task.id) ?? null}
                   bridge={bridge}
                 />
@@ -873,9 +950,13 @@ function GanttView({
                   tabbable={tabbable === keyOf(row)}
                   renaming={renaming === keyOf(row)}
                   link={linkRole(keyOf(row))}
+                  moving={reorder?.active && reorder.rowKey === keyOf(row)}
                   bridge={bridge}
                 />
               ),
+            )}
+            {reorder?.active && reorder.drop && (
+              <span className="eh-gantt-drop-line" aria-hidden="true" style={{ top: reorder.drop.line }} />
             )}
             {link && linkFrom && (
               <GanttLinkPreview

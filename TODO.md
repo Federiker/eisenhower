@@ -35,7 +35,7 @@ is under **Verification** and **Awaiting owner decisions**.
   [gantt](docs/features/gantt.md#decisions),
   [board](docs/features/board.md#decisions) and
   [timeline](docs/features/timeline.md#decisions) documents):
-  - [ ] Gantt: tasks dragged up and down the rows by their names, into any
+  - [x] Gantt: tasks dragged up and down the rows by their names, into any
     group; groups dragged by their names.
   - [ ] Board: a New card button at each column's foot that turns into a
     title field (Enter adds and stays open).

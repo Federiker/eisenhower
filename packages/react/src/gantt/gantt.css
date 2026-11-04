@@ -462,3 +462,41 @@
     border-color: Highlight;
   }
 }
+
+/* Rows dragged up and down by their names: a grip on hover, the row dimmed, a line where it goes. */
+.eh-gantt-body[data-reorder] .eh-gantt-name {
+  cursor: grab;
+}
+.eh-gantt-body[data-reorder] .eh-gantt-task-name,
+.eh-gantt-body[data-reorder] .eh-gantt-group-name {
+  user-select: none;
+}
+.eh-gantt-body[data-reorder] .eh-gantt-row:hover .eh-gantt-name::before {
+  content: "⠿";
+  position: absolute;
+  left: 1px;
+  color: var(--eh-muted);
+  font-size: calc(12px * var(--eh-scale, 1));
+  pointer-events: none;
+}
+.eh-gantt-body[data-reordering] .eh-gantt-name {
+  cursor: grabbing;
+}
+.eh-gantt-row[data-moving] {
+  opacity: 0.55;
+}
+.eh-gantt-drop-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  height: 0;
+  border-top: 2px solid var(--eh-accent);
+  margin-top: -1px;
+  pointer-events: none;
+}
+@media (forced-colors: active) {
+  .eh-gantt-drop-line {
+    border-top-color: Highlight;
+  }
+}

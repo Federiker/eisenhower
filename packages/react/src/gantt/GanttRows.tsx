@@ -58,6 +58,7 @@ function Row({
   selected,
   kind,
   link,
+  moving,
   name,
   drawing,
   onMenu,
@@ -69,6 +70,8 @@ function Row({
   selected?: boolean;
   kind: "task" | "group";
   link?: LinkRole;
+  /** Being dragged up or down the rows by its name. */
+  moving?: boolean;
   name: ReactNode;
   drawing: ReactNode;
   onMenu: (event: MouseEvent<HTMLElement>) => void;
@@ -80,6 +83,7 @@ function Row({
       data-kind={kind}
       data-row-key={rowKey}
       data-link={link}
+      data-moving={moving || undefined}
       aria-level={level}
       aria-rowindex={index + 2}
       aria-expanded={expanded}
@@ -139,6 +143,7 @@ type TaskRowProps = {
   renaming: boolean;
   readOnly: boolean;
   link?: LinkRole;
+  moving?: boolean;
   /** The first day it may start on (Move dependent tasks), or null. */
   earliest?: CalendarDay | null;
   bridge: RowBridge;
@@ -161,6 +166,7 @@ export const TaskRow = memo(function TaskRow({
   renaming,
   readOnly,
   link,
+  moving,
   earliest = null,
   bridge,
 }: TaskRowProps) {
@@ -216,6 +222,7 @@ export const TaskRow = memo(function TaskRow({
       index={index}
       selected={selected || undefined}
       link={link}
+      moving={moving}
       onMenu={(event) => bridge.menu(rowKey, event)}
       name={
         renaming ? (
@@ -293,6 +300,7 @@ type GroupRowProps = {
   tabbable: boolean;
   renaming: boolean;
   link?: LinkRole;
+  moving?: boolean;
   bridge: RowBridge;
 };
 
@@ -310,6 +318,7 @@ export const GroupRow = memo(function GroupRow({
   tabbable,
   renaming,
   link,
+  moving,
   bridge,
 }: GroupRowProps) {
   const t = useTranslate();
@@ -324,6 +333,7 @@ export const GroupRow = memo(function GroupRow({
       kind="group"
       rowKey={rowKey}
       link={link}
+      moving={moving}
       level={1}
       index={index}
       expanded={!collapsed}
