@@ -66,6 +66,8 @@ export {
   canDependOn,
   deleteGanttGroup,
   deleteGanttTask,
+  earliestStart,
+  type GanttEditOptions,
   type GanttGroupDisposal,
   type GanttResult,
   moveGanttGroup,
