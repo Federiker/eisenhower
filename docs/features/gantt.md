@@ -37,7 +37,7 @@ const [chart, setChart] = useState<GanttData>(emptyGantt());
 
 ```ts
 type Gantt = { groups: GanttGroup[]; tasks: GanttTask[] };
-type GanttGroup = { id: string; name: string; collapsed: boolean };
+type GanttGroup = { id: string; name: string; collapsed: boolean; colour?: Colour };
 type GanttTask = {
   id: string;
   name: string;
@@ -258,6 +258,21 @@ A read-only chart moves nothing, offers only Open and folding, and folds
 its groups for itself without changing the chart.
 
 ## Decisions
+
+The owner's decisions of 5 November 2026:
+
+- A group may have a colour (`colour`, optional in the stored group, so
+  version 1 documents read as they are; none when it is left out), chosen
+  with the group menu's **Colour…** (the colour picker, None included). Its
+  summary bar is drawn in it (black without one), with a swatch beside its
+  name. A task made in a group takes the group's colour as its own; tasks
+  keep their colours afterwards, when the group's changes or they move.
+- A double-click on a task's or a group's name renames it in place. Only a
+  group's chevron folds it on a click; its name no longer does (Enter on
+  the row still folds, F2 still renames).
+- Every colour field is Eisenhower's own colour picker (a button with the
+  swatch and name, opening a list with a swatch beside each colour), not a
+  native menu.
 
 The owner's decisions of 27 October 2026:
 

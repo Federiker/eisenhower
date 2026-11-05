@@ -109,7 +109,11 @@ import { Timeline, TimelineEditor } from "@eisenhower/react";
 
 `<Timeline>` is the drawing: the zoom buttons, New entry, the drawing (or
 the narrow list), the entry's menu and dialog. `<TimelineEditor>` adds
-jerome's timeline page below it: the entries as a table in time order, the
+jerome's timeline page below it: the entries as a table grouped by
+category (a heading row a category, in the categories' order, with its
+swatch and number of entries, that folds and unfolds its rows; the fold
+lasts while the view is open and is not stored; categories without entries
+are left out), each group in time order, the
 steps (a Sequence) and the categories, each in a list put in order by
 dragging, Alt+↑ ↓ or its menu. A box beside a category's colour shows it,
 and the colour chosen while its menu is open.
@@ -193,6 +197,10 @@ where its entries go) and the Menu key opens its menu.
   entry is outlined in the system's highlight.
 
 ## Decisions
+
+- The owner's decision of 5 November 2026: the entries' table is grouped
+  by category, each group folding for the view only (not stored); the
+  drawing is unchanged.
 
 - The timeline itself has no title or summary: the host owns its
   documents' names, and passes a name to `timelineSvg` when it needs one.

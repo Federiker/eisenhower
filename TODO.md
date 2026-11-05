@@ -31,6 +31,19 @@ is under **Verification** and **Awaiting owner decisions**.
   - [ ] A throwaway host installs the three tarballs by URL (`bun add`) and
     the plugin by git at the tag, and builds.
 
+- [ ] Owner requests of 5 November 2026 (decisions in the gantt, board,
+  todo and timeline documents):
+  - [ ] Colours: Eisenhower's own colour picker (swatches in its list) in
+    every colour field.
+  - [ ] Gantt: a group's colour (optional stored field, Colour… in its
+    menu, its summary bar), new tasks in it take it.
+  - [ ] Gantt: double-click a task's or group's name to rename; only the
+    chevron folds on a click.
+  - [ ] Todo and board: pointer drags (no HTML5 drag and drop), a drop
+    line, the matrix reordering within and across quadrants.
+  - [ ] Timeline: the entries' table grouped by category, folding.
+  - [ ] Pictures, end to end, checks.
+
 ## Verification
 
 - [ ] The demo app's window (`mise run tauri:dev`), clicked through: each

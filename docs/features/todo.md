@@ -121,6 +121,11 @@ what the row says and its notes); the common keys of
 Dragging an item onto another puts it just before that one, among its
 siblings (the list); onto the space after the items, at the end; onto a
 quadrant, into that quadrant (the matrix, where the order is the list's).
+In the matrix an item dropped onto another, in its quadrant or another,
+goes just before it (in the list's order too) and takes that quadrant's
+flags. A line shows where it goes. The drags are pointer drags (the owner's
+decision of 5 November 2026), working in a Tauri window as in a browser;
+Escape cancels one, and a press without a move is still a click.
 
 The menu: Details…, Rename, Add a subtask (top-level items), Move up, Move
 down, Make it a subtask or Make it a top-level item (the list), Move to each

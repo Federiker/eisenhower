@@ -144,6 +144,11 @@ heading onto another (it takes its place). The place it would go is drawn: a
 line above the card or heading, a border round the column. A drag that ends
 without a drop changes nothing. Drags from elsewhere are not taken.
 
+The drags are pointer drags (the owner's decision of 5 November 2026), not
+the browser's drag and drop, which a Tauri window catches for dropped files
+on Windows: they work in any host without a window setting. Escape cancels
+one, and a press without a move is still a click.
+
 ## Accessibility
 
 The board is a region named "Board"; each column a region named by its
