@@ -1,4 +1,5 @@
 import { addDays, type CalendarDay, compareDays, daysBetween, isCalendarDay } from "../common/days";
+import type { Colour } from "../common/palette";
 import { done, type EditResult, refused } from "../common/result";
 import { nameProblem } from "../common/text";
 import { dependsOnTask } from "./graph";
@@ -213,6 +214,22 @@ export function toggleGanttGroup(gantt: Gantt, id: string): GanttResult {
   return setGanttGroupCollapsed(gantt, id, !group.collapsed);
 }
 
+/**
+ * Gives a group a palette colour, or takes it away (null: the field is left out, as in a group that never had
+ * one). The group's tasks keep their own colours.
+ */
+export function setGanttGroupColour(gantt: Gantt, id: string, colour: Colour): GanttResult {
+  if (!gantt.groups.some((group) => group.id === id)) return refused("missing");
+  return checked({
+    ...gantt,
+    groups: gantt.groups.map((group) => {
+      if (group.id !== id) return group;
+      const { colour: _old, ...rest } = group;
+      return colour === null ? rest : { ...rest, colour };
+    }),
+  });
+}
+
 /** The tasks of a group. */
 export function tasksInGanttGroup(gantt: Gantt, id: string): number {
   return gantt.tasks.filter((task) => task.groupId === id).length;
@@ -258,15 +275,19 @@ export function deleteGanttGroup(gantt: Gantt, id: string, disposal: GanttGroupD
   return checked(fromSections({ ...gantt, groups }, rest));
 }
 
-/** A new task with nothing but its name and days: in a group or none, not done, without colour or dependencies. */
+/**
+ * A new task with nothing but its name and days: in a group or none, not done, without dependencies, in
+ * `colour` (none by default; the view gives a task made in a group its group's colour).
+ */
 export function blankGanttTask(
   id: string,
   name: string,
   start: CalendarDay,
   end: CalendarDay,
   groupId: string | null,
+  colour: Colour = null,
 ): GanttTask {
-  return { id, name, groupId, start, end, milestone: false, progress: 0, colour: null, dependsOn: [] };
+  return { id, name, groupId, start, end, milestone: false, progress: 0, colour, dependsOn: [] };
 }
 
 /** Why a task as a whole cannot be stored, or null: its name, its days, its progress. Its links are the chart's. */

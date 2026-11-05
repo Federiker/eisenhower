@@ -19,9 +19,11 @@ export const MAX_PROGRESS = 100;
 
 /**
  * A group of tasks, drawn as a summary row spanning its tasks, which it shows or hides (`collapsed`). Groups
- * have one level: a group holds tasks, never other groups.
+ * have one level: a group holds tasks, never other groups. `colour` (a palette index) is optional, so that
+ * version 1 documents written before it read as they are; a group without one has none. A task made in a group
+ * takes its colour.
  */
-export type GanttGroup = { id: string; name: string; collapsed: boolean };
+export type GanttGroup = { id: string; name: string; collapsed: boolean; colour?: Colour };
 
 /**
  * A task, a bar from its first day to its last (`end` is included: a one-day task ends on the day it starts),
@@ -59,6 +61,7 @@ export const ganttGroupSchema: z.ZodType<GanttGroup> = z.strictObject({
   id: idSchema,
   name: nameSchema,
   collapsed: z.boolean(),
+  colour: colourSchema.optional(),
 });
 
 export const ganttTaskSchema: z.ZodType<GanttTask> = z.strictObject({

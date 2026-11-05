@@ -82,6 +82,7 @@ export {
   shiftTask,
   type TaskEdge,
   tasksInGanttGroup,
+  setGanttGroupColour,
   toggleGanttGroup,
 } from "./gantt/edit";
 export {
