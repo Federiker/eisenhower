@@ -39,7 +39,11 @@ export const gantt = {
     other: "{count} tasks start before a task they depend on ends.",
   },
   "gantt.groupSummary": { one: "{name}, {count} task", other: "{name}, {count} tasks" },
-  "gantt.groupSummaryDates": { one: "{name}, {count} task, {dates}", other: "{name}, {count} tasks, {dates}" },
+  "gantt.groupSummaryDates": {
+    one: "{name}, {count} task, {progress}% done, {dates}",
+    other: "{name}, {count} tasks, {progress}% done, {dates}",
+  },
+  "gantt.groupProgress": "{progress}%",
   "gantt.collapse": "Collapse {name}",
   "gantt.expand": "Expand {name}",
   "gantt.renameTask": "Name of {name}",

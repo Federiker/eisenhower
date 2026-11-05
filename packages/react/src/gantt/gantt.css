@@ -368,7 +368,12 @@
   position: absolute;
   top: 12px;
   height: 6px;
-  background: var(--eh-gantt-summary, var(--eh-ink));
+  /* Solid as far as its tasks are done (weighted by length), faint for the rest. */
+  background: linear-gradient(
+    to right,
+    var(--eh-gantt-summary, var(--eh-ink)) var(--eh-gantt-done, 0%),
+    color-mix(in srgb, var(--eh-gantt-summary, var(--eh-ink)) 30%, var(--eh-surface)) var(--eh-gantt-done, 0%)
+  );
 }
 .eh-gantt-summary::before,
 .eh-gantt-summary::after {
@@ -430,9 +435,6 @@
   .eh-gantt-progress,
   .eh-gantt-milestone {
     background: Highlight;
-  }
-  .eh-gantt-summary {
-    background: CanvasText;
   }
   .eh-gantt-handle::after {
     border-color: CanvasText;
@@ -512,4 +514,25 @@
 }
 .eh-gantt-group-swatch {
   flex: none;
+}
+
+/* A group's percentage done, right of its summary bar. */
+.eh-gantt-group-progress {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--eh-muted);
+  font-size: calc(11px * var(--eh-scale, 1));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+@media (forced-colors: active) {
+  .eh-gantt-summary {
+    forced-color-adjust: none;
+    background: linear-gradient(to right, Highlight var(--eh-gantt-done, 0%), CanvasText var(--eh-gantt-done, 0%));
+  }
+  .eh-gantt-group-progress {
+    color: CanvasText;
+  }
 }

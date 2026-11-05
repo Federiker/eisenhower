@@ -1,4 +1,4 @@
-import { type CalendarDay, compareDays } from "../common/days";
+import { type CalendarDay, compareDays, daysBetween } from "../common/days";
 import type { Gantt, GanttGroup, GanttTask } from "./schema";
 
 /** The tasks of a group in order (`groupId` null: the tasks outside every group). */
@@ -36,6 +36,22 @@ export function groupSpan(gantt: Gantt, groupId: string): { start: CalendarDay; 
   return { start, end };
 }
 
+/**
+ * How far a group's tasks are done, as a whole percentage weighted by their lengths (a ten-day task at half
+ * weighs more than a one-day task done; a milestone counts as a day), or null for a group without tasks.
+ */
+export function groupProgress(gantt: Gantt, groupId: string): number | null {
+  let days = 0;
+  let done = 0;
+  for (const task of gantt.tasks) {
+    if (task.groupId !== groupId) continue;
+    const length = daysBetween(task.start, task.end) + 1;
+    days += length;
+    done += length * task.progress;
+  }
+  return days === 0 ? null : Math.round(done / days);
+}
+
 /** A broken finish-to-start dependency: the task starts on or before the last day of a task it depends on. */
 export type DependencyConflict = { taskId: string; predecessorId: string };
 
@@ -63,7 +79,14 @@ export function lateTasks(gantt: Gantt): Set<string> {
 
 /** A row of the chart as drawn: a group's summary row, or a task (in a group that is not collapsed, or in none). */
 export type GanttRow =
-  | { kind: "group"; group: GanttGroup; span: { start: CalendarDay; end: CalendarDay } | null; count: number }
+  | {
+      kind: "group";
+      group: GanttGroup;
+      span: { start: CalendarDay; end: CalendarDay } | null;
+      count: number;
+      /** How far its tasks are done ({@link groupProgress}), or null without tasks. */
+      progress: number | null;
+    }
   | { kind: "task"; task: GanttTask };
 
 /**
@@ -79,7 +102,13 @@ export function ganttRows(gantt: Gantt, collapsed?: ReadonlyMap<string, boolean>
       const group = gantt.groups[index]!;
       const folded = collapsed?.get(group.id) ?? group.collapsed;
       return [
-        { kind: "group", group, span: groupSpan(gantt, group.id), count: section.tasks.length },
+        {
+          kind: "group",
+          group,
+          span: groupSpan(gantt, group.id),
+          count: section.tasks.length,
+          progress: groupProgress(gantt, group.id),
+        },
         ...(folded ? [] : section.tasks.map((task): GanttRow => ({ kind: "task", task }))),
       ];
     }),

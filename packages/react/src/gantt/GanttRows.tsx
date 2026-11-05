@@ -93,7 +93,7 @@ function Row({
       aria-selected={selected}
       onContextMenu={onMenu}
     >
-      <div role="gridcell" className="eh-gantt-name" style={{ paddingInlineStart: 8 + (level - 1) * 16 }}>
+      <div role="gridcell" className="eh-gantt-name" style={{ paddingInlineStart: 8 + (level - 1) * 28 }}>
         {name}
       </div>
       <div role="gridcell" className="eh-gantt-cell">
@@ -298,6 +298,8 @@ type GroupRowProps = {
   group: GanttGroup;
   span: { start: CalendarDay; end: CalendarDay } | null;
   count: number;
+  /** How far its tasks are done, weighted by their lengths, or null without tasks. */
+  progress: number | null;
   collapsed: boolean;
   index: number;
   geometry: Geometry;
@@ -316,6 +318,7 @@ export const GroupRow = memo(function GroupRow({
   group,
   span,
   count,
+  progress,
   collapsed,
   index,
   geometry,
@@ -329,7 +332,12 @@ export const GroupRow = memo(function GroupRow({
   const locale = useLocale();
   const rowKey = `group:${group.id}`;
   const label = span
-    ? t("gantt.groupSummaryDates", { name: group.name, count, dates: formatSpan(span.start, span.end, t, locale) })
+    ? t("gantt.groupSummaryDates", {
+        name: group.name,
+        count,
+        progress: progress ?? 0,
+        dates: formatSpan(span.start, span.end, t, locale),
+      })
     : t("gantt.groupSummary", { name: group.name, count });
   const toggle: Ref<HTMLButtonElement> = (element) => bridge.register(rowKey, element);
   return (
@@ -382,16 +390,26 @@ export const GroupRow = memo(function GroupRow({
       }
       drawing={
         span && (
-          <span
-            className="eh-gantt-summary"
-            style={
-              {
-                left: xOfDay(geometry, span.start),
-                width: (daysBetween(span.start, span.end) + 1) * geometry.dayWidth,
-                ...(group.colour != null && { "--eh-gantt-summary": colourVar(group.colour) }),
-              } as object
-            }
-          />
+          <>
+            <span
+              className="eh-gantt-summary"
+              style={
+                {
+                  left: xOfDay(geometry, span.start),
+                  width: (daysBetween(span.start, span.end) + 1) * geometry.dayWidth,
+                  "--eh-gantt-done": `${progress ?? 0}%`,
+                  ...(group.colour != null && { "--eh-gantt-summary": colourVar(group.colour) }),
+                } as object
+              }
+            />
+            <span
+              className="eh-gantt-group-progress"
+              aria-hidden="true"
+              style={{ left: xOfDay(geometry, span.end) + geometry.dayWidth + 8 }}
+            >
+              {t("gantt.groupProgress", { progress: progress ?? 0 })}
+            </span>
+          </>
         )
       }
     />

@@ -95,6 +95,7 @@ export {
   ganttSections,
   ganttStepTarget,
   ganttTaskPlace,
+  groupProgress,
   groupSpan,
   lateTasks,
 } from "./gantt/layout";

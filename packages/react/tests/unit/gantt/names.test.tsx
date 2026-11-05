@@ -113,3 +113,18 @@ describe("Colour… in a group's menu", () => {
     expect(group("Design")).toHaveFocus();
   });
 });
+
+describe("a group's progress", () => {
+  it("shows beside its summary bar and fills the bar as far, weighted by the tasks' lengths", () => {
+    setup();
+    // Design: Sketch, three days at 50%, and Review, a day at 0%: 150 of 400, so 38%.
+    const design = group("Design").closest("[role=row]")!;
+    expect(design.querySelector(".eh-gantt-group-progress")).toHaveTextContent("38%");
+    expect(design.querySelector<HTMLElement>(".eh-gantt-summary")!.style.getPropertyValue("--eh-gantt-done")).toBe(
+      "38%",
+    );
+    expect(group("Design")).toHaveAccessibleName("Design, 2 tasks, 38% done, 4 Nov 2026 to 9 Nov 2026");
+    // A group without tasks has no bar, so no percentage.
+    expect(group("Launch").closest("[role=row]")!.querySelector(".eh-gantt-group-progress")).toBeNull();
+  });
+});

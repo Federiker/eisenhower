@@ -54,7 +54,7 @@ describe("the gantt chart's grid", () => {
 
   it("names the group rows' buttons with the group, its tasks and its days, and spans their summary", () => {
     setup();
-    const design = screen.getByRole("button", { name: "Design, 2 tasks, 4 Nov 2026 to 9 Nov 2026" });
+    const design = screen.getByRole("button", { name: "Design, 2 tasks, 38% done, 4 Nov 2026 to 9 Nov 2026" });
     expect(design).toHaveAttribute("aria-expanded", "true");
     expect(design.closest(".eh-gantt-row")?.querySelector(".eh-gantt-summary")).toHaveStyle({ width: `${6 * 12}px` });
     expect(screen.getByRole("button", { name: "Launch, 0 tasks" })).toBeInTheDocument();

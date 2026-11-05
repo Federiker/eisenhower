@@ -3,13 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   blankGanttTask,
   ganttDocument,
+  ganttRows,
+  groupProgress,
   ganttProblems,
   ganttSchema,
   parseDocument,
   serialiseDocument,
   setGanttGroupColour,
 } from "../../../src";
-import { CHART } from "./fixtures";
+import { CHART, task } from "./fixtures";
 
 const value = <T>(result: { ok: true; value: T } | { ok: false; reason: string }): T => {
   if (!result.ok) throw new Error(result.reason);
@@ -46,5 +48,29 @@ describe("a gantt group's colour", () => {
     expect(blankGanttTask("t", "Dig", "2026-11-02", "2026-11-03", "build", 4).colour).toBe(4);
     expect(blankGanttTask("t", "Dig", "2026-11-02", "2026-11-03", null).colour).toBeNull();
     expect(ganttProblems(value(setGanttGroupColour(CHART, "design", 0)))).toEqual([]);
+  });
+});
+
+describe("a gantt group's progress", () => {
+  it("is weighted by the tasks' lengths, a milestone counting as a day, and rounded", () => {
+    const chart = {
+      groups: [{ id: "g", name: "G", collapsed: false }],
+      tasks: [
+        task("long", "2026-11-02", "2026-11-11", { groupId: "g", progress: 50 }),
+        task("short", "2026-11-12", "2026-11-12", { groupId: "g", progress: 100 }),
+        task("gate", "2026-11-13", "2026-11-13", { groupId: "g", milestone: true, progress: 0 }),
+        task("loose", "2026-11-02", "2026-11-30", { progress: 100 }),
+      ],
+    };
+    // (10 × 50 + 1 × 100 + 1 × 0) / 12 = 50.
+    expect(groupProgress(chart, "g")).toBe(50);
+    expect(groupProgress(CHART, "launch")).toBeNull();
+    expect(groupProgress(CHART, "missing")).toBeNull();
+  });
+
+  it("is on each group's row", () => {
+    const rows = ganttRows(CHART);
+    const design = rows.find((row) => row.kind === "group" && row.group.id === "design");
+    expect(design).toMatchObject({ progress: groupProgress(CHART, "design") });
   });
 });

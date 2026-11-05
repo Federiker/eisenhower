@@ -959,6 +959,7 @@ function GanttView({
                   group={row.group}
                   span={row.span}
                   count={row.count}
+                  progress={row.progress}
                   collapsed={isCollapsed(row.group.id)}
                   index={index}
                   geometry={geometry}

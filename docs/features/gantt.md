@@ -127,8 +127,12 @@ place, and the drawing, which scrolls under a header that stays in place:
   has none), filled in that colour as far as it is done and with a faint
   tint of it for the rest; a milestone is a diamond.
 - **Groups**: a summary row with a button that folds and unfolds it (the
-  fold is stored in the chart) and a black bar from its first task's start
-  to its last task's end.
+  fold is stored in the chart) and a bar from its first task's start to
+  its last task's end, in the group's colour (black without one), solid as
+  far as its tasks are done and faint for the rest, with that percentage
+  right of it ("38%"): the tasks' percentages weighted by their lengths, a
+  milestone counting as a day (`groupProgress`). A group's tasks are
+  indented under it.
 - **Dependencies**: an arrow from the end of each predecessor to the start
   of its task; a task in a folded group is drawn on its group's row.
 - **Conflicts**: a task that starts too early has a dashed warning outline
@@ -249,7 +253,8 @@ cell is named with the first and last day drawn, its labels hidden. One
 control a row is a Tab stop (the bar, or the group's button), and the
 arrows move between them. A bar's name gives the task's name, days, length
 and percentage done, or a milestone's day, then the tasks it starts too
-early for; a group's button gives its name, its number of tasks and its
+early for; a group's button gives its name, its number of tasks, its percentage done
+and its
 days. Moves, resizes, folding, deleting and the scale are announced in the
 polite live region ("Sketch: moved to 11 Nov 2026 to 13 Nov 2026"), and the
 focus stays on the moved task, goes back to the row after a menu, a dialog
@@ -261,6 +266,10 @@ its groups for itself without changing the chart.
 ## Decisions
 
 The owner's decisions of 5 November 2026:
+
+- A group shows how far its tasks are done, weighted by their lengths: a
+  percentage right of its summary bar, and the bar solid that far and
+  faint for the rest; its tasks' names are indented further under it.
 
 - A group may have a colour (`colour`, optional in the stored group, so
   version 1 documents read as they are; none when it is left out), chosen
