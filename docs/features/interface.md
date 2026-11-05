@@ -188,8 +188,11 @@ and → fold and unfold a group.
 | Ctrl+= (or Ctrl++), Ctrl+- | A finer or coarser scale (months, weeks, days), as jerome's timeline zooms |
 
 In an open menu, ↑ ↓, Home and End move between its items, Enter or an
-item's underlined letter chooses one, and Esc or Tab closes it. In a
-dialogue, Tab and Shift+Tab stay inside it and Esc cancels.
+item's underlined letter chooses one, and Esc or Tab closes it. On a colour
+picker, Enter, Space, ↓ or Alt+↓ opens its list; there ↑ ↓, Home and End
+move, a letter goes to the next colour whose name starts with what was
+typed, Enter, Space or Alt+↑ chooses, and Esc or Tab closes it without a
+change. In a dialogue, Tab and Shift+Tab stay inside it and Esc cancels.
 
 Each view adds its own keys after these:
 
@@ -229,8 +232,12 @@ From jerome's components, with their tests, their keys and their ARIA:
 (text with a pencil that becomes a field), `LabelledField`, `InlineRename`,
 `NameField`, `ReorderList` (rows put in order by dragging, Alt+↑ ↓ or their
 menu), `ContextMenu` with `opensMenu` and `placeBelow`, `TreeDialog` (a
-small modal form) and `MoveToDialog`. They must be drawn inside an
-`.eh-root`, whose variables they use.
+small modal form) and `MoveToDialog`. Eisenhower's own `ColourPicker` is
+every view's colour field: a select-only `combobox` button with the
+colour's swatch and name, opening a `listbox` of the palette's colours,
+each with its swatch and name, the chosen one ticked (None first with
+`allowNone`). They must be drawn inside an `.eh-root`, whose variables
+they use.
 
 ## Adding a view's parts
 
