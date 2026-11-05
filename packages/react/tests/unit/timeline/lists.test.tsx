@@ -91,11 +91,8 @@ describe("a timeline's categories", () => {
     await act(nextTick);
     expect(held.value!.categories.at(-1)!.name).toBe("Crew");
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit colour: Crew" }));
-    const colour = screen.getByRole("combobox", { name: "Colour: Crew" });
-    fireEvent.change(colour, { target: { value: "5" } });
-    fireEvent.keyDown(colour, { key: "Enter" });
-    await act(nextTick);
+    fireEvent.click(screen.getByRole("combobox", { name: "Colour: Crew" }));
+    fireEvent.click(screen.getByRole("option", { name: "Vermilion" }));
     expect(held.value!.categories.at(-1)!.colour).toBe(5);
     expect(row(categories(), "Crew").textContent).toContain("Vermilion");
     fireEvent.click(screen.getByRole("button", { name: "Edit line: Crew" }));
@@ -119,35 +116,39 @@ describe("a timeline's categories", () => {
     expect([...lanes.children].map((lane) => lane.textContent?.trim())).toEqual(["Ships", "Crew", "Harbour"]);
   });
 
-  it("show each colour in a box beside it, following the colour menu while it is open", async () => {
+  it("show each colour in a colour picker, which saves the colour chosen and keeps it on Escape", () => {
     render(<Host editor initial={harbour([e(20, d(1066))])} />);
-    const box = (name: string) =>
-      screen
-        .getByRole("button", { name: `Edit colour: ${name}` })
-        .closest(".eh-timeline-list-choice")!
-        .querySelector<HTMLElement>(".eh-swatch")!;
+    const picker = (name: string) => screen.getByRole("combobox", { name: `Colour: ${name}` });
+    const box = (name: string) => picker(name).querySelector<HTMLElement>(".eh-swatch")!;
+    expect(picker("Ships")).toHaveTextContent("Orange");
     expect(box("Ships")).toHaveAttribute("aria-hidden", "true");
     expect(box("Ships").style.background).toBe("var(--eh-colour-0)");
     expect(box("Harbour").style.background).toBe("var(--eh-colour-1)");
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit colour: Ships" }));
-    const menu = screen.getByRole("combobox", { name: "Colour: Ships" });
-    const open = () => menu.closest(".eh-timeline-list-choice")!.querySelector<HTMLElement>(".eh-swatch")!;
-    fireEvent.change(menu, { target: { value: "3" } });
-    expect(open().style.background).toBe("var(--eh-colour-3)");
-    expect(box("Harbour").style.background).toBe("var(--eh-colour-1)");
-    // Escape keeps the colour, and the box goes back to it.
-    fireEvent.keyDown(menu, { key: "Escape" });
+    // The list's keys stay with the picker: Alt+Down opens it rather than moving the category.
+    act(() => picker("Ships").focus());
+    fireEvent.keyDown(picker("Ships"), { key: "ArrowDown", altKey: true });
+    expect(held.value!.categories.map((category) => category.name)).toEqual(["Ships", "Harbour"]);
+    const list = screen.getByRole("listbox", { name: "Colour: Ships" });
+    expect(within(list).getAllByRole("option")).toHaveLength(8);
+    fireEvent.keyDown(picker("Ships"), { key: "ArrowDown" });
+    // Escape keeps the colour.
+    fireEvent.keyDown(picker("Ships"), { key: "Escape" });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     expect(held.value!.categories[0]!.colour).toBe(0);
-    expect(box("Ships").style.background).toBe("var(--eh-colour-0)");
+    expect(picker("Ships")).toHaveFocus();
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit colour: Ships" }));
-    const again = screen.getByRole("combobox", { name: "Colour: Ships" });
-    fireEvent.change(again, { target: { value: "5" } });
-    fireEvent.keyDown(again, { key: "Enter" });
-    await act(nextTick);
+    fireEvent.keyDown(picker("Ships"), { key: "v" });
+    fireEvent.keyDown(picker("Ships"), { key: "Enter" });
     expect(held.value!.categories[0]!.colour).toBe(5);
     expect(box("Ships").style.background).toBe("var(--eh-colour-5)");
+    expect(picker("Ships")).toHaveTextContent("Vermilion");
+    expect(picker("Ships")).toHaveFocus();
+  });
+
+  it("show their colour read-only, the picker disabled", () => {
+    render(<Host initial={harbour([e(20, d(1066))])} editor readOnly />);
+    expect(screen.getByRole("combobox", { name: "Colour: Ships" })).toBeDisabled();
   });
 
   it("move their entries to another category, or take them along, when deleted", () => {

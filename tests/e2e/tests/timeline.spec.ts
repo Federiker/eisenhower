@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { openApp } from "./app";
+import { openApp, saved } from "./app";
 
 test("shows the Dates sample with BCE and approximate dates, and the Sequence one", async ({ page }) => {
   const errors = await openApp(page, "Timeline");
@@ -17,6 +17,18 @@ test("shows the Dates sample with BCE and approximate dates, and the Sequence on
   await expect(page.getByRole("button", { name: /^Wren: Finds the survivor, The wreck to The inquiry/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Steps" })).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("recolours a category with its colour picker, which saves the colour chosen at once", async ({ page }) => {
+  await openApp(page, "Timeline");
+  const picker = page.getByRole("combobox", { name: "Colour: Medicine" });
+  await expect(picker).toHaveText("Vermilion");
+  await picker.click();
+  await page.getByRole("listbox", { name: "Colour: Medicine" }).getByRole("option", { name: "Bluish green" }).click();
+  await expect(page.getByRole("listbox")).toHaveCount(0);
+  await expect(picker).toHaveText("Bluish green");
+  await expect(picker).toBeFocused();
+  await saved(page);
 });
 
 test("zooms the drawing in and back to its width", async ({ page }) => {

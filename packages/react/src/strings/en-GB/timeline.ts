@@ -70,7 +70,6 @@ export const timeline = {
   "timeline.moveAndDelete": "Move entries and delete",
   "timeline.colour": "Colour",
   "timeline.colourNamed": "Colour: {name}",
-  "timeline.editColour": "Edit colour: {name}",
   "timeline.line": "Line",
   "timeline.lineNamed": "Line: {name}",
   "timeline.editLine": "Edit line: {name}",

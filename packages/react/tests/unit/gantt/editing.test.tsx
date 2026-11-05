@@ -244,7 +244,8 @@ describe("opening a task", () => {
     fireEvent.change(field(t("gantt.fieldStart")), { target: { value: "2026-11-17" } });
     fireEvent.change(field(t("gantt.fieldEnd")), { target: { value: "2026-11-19" } });
     fireEvent.change(field(t("gantt.fieldProgress")), { target: { value: "25" } });
-    fireEvent.change(field(t("gantt.fieldColour")), { target: { value: "4" } });
+    fireEvent.click(field(t("gantt.fieldColour")));
+    fireEvent.click(screen.getByRole("option", { name: t("common.colour.blue") }));
     fireEvent.change(field(t("gantt.fieldGroup")), { target: { value: "launch" } });
     fireEvent.click(within(dialog).getByRole("checkbox", { name: /^Frame/ }));
     fireEvent.click(within(dialog).getByRole("button", { name: t("common.save") }));
@@ -263,17 +264,31 @@ describe("opening a task", () => {
     expect(bar(/^Varnish/)).toHaveFocus();
   });
 
-  it("shows the colour chosen in a box beside the colour menu, as the menu changes", () => {
+  it("picks the colour in the colour picker, its button showing the colour chosen, Escape closing only the list", () => {
     setup();
     // Sketch is sky blue (colour 1); Brief has no colour.
     fireEvent.doubleClick(bar(/^Sketch/));
-    const menu = within(screen.getByRole("dialog")).getByRole("combobox", { name: t("gantt.fieldColour") });
-    const box = () => menu.closest(".eh-colour-choice")!.querySelector<HTMLElement>(".eh-swatch")!;
+    const picker = within(screen.getByRole("dialog")).getByRole("combobox", { name: t("gantt.fieldColour") });
+    const box = () => picker.querySelector<HTMLElement>(".eh-swatch")!;
+    expect(picker).toHaveTextContent(t("common.colour.skyBlue"));
     expect(box()).toHaveAttribute("aria-hidden", "true");
     expect(box().style.background).toBe("var(--eh-colour-1)");
-    fireEvent.change(menu, { target: { value: "6" } });
+    act(() => picker.focus());
+    press(picker, "ArrowDown");
+    const list = screen.getByRole("listbox", { name: t("gantt.fieldColour") });
+    expect(within(list).getAllByRole("option")[0]).toHaveTextContent(t("gantt.noColour"));
+    // Escape closes the list, not the dialog.
+    press(picker, "Escape");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(picker).toHaveFocus();
+    press(picker, "r");
+    press(picker, "Enter");
+    expect(picker).toHaveTextContent(t("common.colour.reddishPurple"));
     expect(box().style.background).toBe("var(--eh-colour-6)");
-    fireEvent.change(menu, { target: { value: "" } });
+    press(picker, "Home");
+    press(picker, "Enter");
+    expect(picker).toHaveTextContent(t("gantt.noColour"));
     expect(box()).toHaveAttribute("data-none", "true");
     expect(box().style.background).toBe("");
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: t("common.cancel") }));
@@ -281,7 +296,7 @@ describe("opening a task", () => {
 
     fireEvent.doubleClick(bar(/^Brief/));
     const none = within(screen.getByRole("dialog")).getByRole("combobox", { name: t("gantt.fieldColour") });
-    expect(none.closest(".eh-colour-choice")!.querySelector(".eh-swatch")).toHaveAttribute("data-none", "true");
+    expect(none.querySelector(".eh-swatch")).toHaveAttribute("data-none", "true");
   });
 
   it("makes a milestone of a task, and leaves out the tasks that would make a cycle", () => {

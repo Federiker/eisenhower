@@ -306,6 +306,10 @@ g[data-selected="true"] .eh-timeline-bar {
 .eh-timeline-list-choice .eh-editable-text {
   color: var(--eh-ink);
 }
+/* A category's colour picker, as compact as the texts beside it. */
+.eh-timeline-list-choice .eh-colour-picker-button {
+  padding: 2px 6px;
+}
 .eh-timeline-add {
   display: flex;
   gap: var(--eh-space-2);

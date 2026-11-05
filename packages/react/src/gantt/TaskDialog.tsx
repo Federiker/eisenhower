@@ -1,14 +1,20 @@
-import { canDependOn, type Gantt, type GanttProblem, type GanttTask, putGanttTask } from "@eisenhower/model";
+import {
+  type Colour,
+  canDependOn,
+  type Gantt,
+  type GanttProblem,
+  type GanttTask,
+  putGanttTask,
+} from "@eisenhower/model";
 import { useId, useState } from "react";
 
 import { Checkbox } from "../controls/Checkbox";
-import { ColourSwatch, menuColour } from "../controls/ColourSwatch";
+import { ColourPicker } from "../controls/ColourPicker";
 import { Notice } from "../controls/Notice";
 import { Select } from "../controls/Select";
 import { TextField } from "../controls/TextField";
 import { TreeDialog } from "../controls/TreeDialog";
 import { useLocale, useTranslate } from "../strings/translate";
-import { PALETTE } from "../theme/palette";
 import { formatSpan } from "./format";
 
 /**
@@ -38,7 +44,7 @@ export function TaskDialog({
   const [end, setEnd] = useState(task.end);
   const [milestone, setMilestone] = useState(task.milestone);
   const [progress, setProgress] = useState(String(task.progress));
-  const [colour, setColour] = useState(task.colour === null ? "" : String(task.colour));
+  const [colour, setColour] = useState<Colour>(task.colour);
   const [groupId, setGroupId] = useState(task.groupId ?? "");
   const [dependsOn, setDependsOn] = useState<readonly string[]>(task.dependsOn);
   const [problem, setProblem] = useState<GanttProblem | null>(null);
@@ -54,7 +60,7 @@ export function TaskDialog({
       end: milestone ? start : end,
       milestone,
       progress: percentage,
-      colour: menuColour(colour),
+      colour,
       groupId: groupId === "" ? null : groupId,
       dependsOn: [...dependsOn],
     };
@@ -120,17 +126,13 @@ export function TaskDialog({
         </div>
         <div className="eh-gantt-field">
           <label htmlFor={`${id}-colour`}>{t("gantt.fieldColour")}</label>
-          <span className="eh-colour-choice">
-            <ColourSwatch colour={menuColour(colour)} />
-            <Select id={`${id}-colour`} value={colour} onChange={(event) => setColour(event.target.value)}>
-              <option value="">{t("gantt.noColour")}</option>
-              {PALETTE.map((one, index) => (
-                <option key={one.name} value={String(index)}>
-                  {t(one.name)}
-                </option>
-              ))}
-            </Select>
-          </span>
+          <ColourPicker
+            id={`${id}-colour`}
+            value={colour}
+            allowNone
+            noneLabel={t("gantt.noColour")}
+            onChange={setColour}
+          />
         </div>
       </div>
       <div className="eh-gantt-field">
