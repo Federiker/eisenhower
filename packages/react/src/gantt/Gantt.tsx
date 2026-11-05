@@ -33,6 +33,7 @@ import {
   renameGanttTask,
   resizeTask,
   setGanttGroupCollapsed,
+  setGanttGroupColour,
   shiftTask,
   today as localToday,
 } from "@eisenhower/model";
@@ -62,7 +63,9 @@ import { formatDay, formatLength, formatSpan } from "./format";
 import { barEnds, GanttArrows, GanttBackdrop, GanttHeader, GanttLinkPreview } from "./GanttDrawing";
 import { type DragMode, GroupRow, type LinkRole, ROW_HEIGHT, type RowBridge, TaskRow } from "./GanttRows";
 import { type GanttScale, geometryOf, xOfDay, zoomed } from "./scale";
+import { PALETTE } from "../theme/palette";
 import { DependsOnDialog } from "./DependsOnDialog";
+import { GroupColourDialog } from "./GroupColourDialog";
 import { type GroupDrop, groupDrop, type TaskDrop, taskDrop } from "./reorder";
 import { TaskDialog } from "./TaskDialog";
 
@@ -114,7 +117,7 @@ type Reorder = {
   active: boolean;
   drop: TaskDrop | GroupDrop | null;
 };
-type GroupAction = "toggle" | "rename" | "up" | "down" | "newTask" | "delete";
+type GroupAction = "toggle" | "rename" | "colour" | "up" | "down" | "newTask" | "delete";
 
 const taskKey = (id: string) => `task:${id}`;
 const groupKey = (id: string) => `group:${id}`;
@@ -165,6 +168,7 @@ function GanttView({
   const [moving, setMoving] = useState<string | null>(null);
   const [dialog, setDialog] = useState<string | null>(null);
   const [choosingPredecessor, setChoosingPredecessor] = useState<string | null>(null);
+  const [colouring, setColouring] = useState<string | null>(null);
   const [problem, setProblem] = useState<GanttProblem | "milestone" | "early" | LinkRefusal | null>(null);
   const [link, setLink] = useState<Link | null>(null);
   const [reorder, setReorder] = useState<Reorder | null>(null);
@@ -702,6 +706,7 @@ function GanttView({
     return [
       toggle,
       { id: "rename", label: t("common.rename") },
+      { id: "colour", label: t("gantt.groupColour") },
       { id: "up", label: t("common.moveUp"), disabled: index <= 0 },
       { id: "down", label: t("common.moveDown"), disabled: index >= value.groups.length - 1 },
       { id: "newTask", label: t("gantt.newTaskHere") },
@@ -746,6 +751,9 @@ function GanttView({
       case "rename":
         setRenaming(rowKey);
         break;
+      case "colour":
+        setColouring(id);
+        break;
       case "up":
       case "down":
         moveGroupBy(id, action === "up" ? -1 : 1);
@@ -769,6 +777,7 @@ function GanttView({
   const movingTask = moving ? taskOf(moving) : undefined;
   const dialogTask = dialog ? taskOf(dialog) : undefined;
   const linkingTask = choosingPredecessor ? taskOf(choosingPredecessor) : undefined;
+  const colouringGroup = colouring ? groupOf(colouring) : undefined;
   const firstDay = dayOfNumber(geometry.first);
   const linkRole = (rowKey: string): LinkRole | undefined =>
     !link
@@ -1032,6 +1041,26 @@ function GanttView({
           onClose={() => {
             setMoving(null);
             focusRow(taskKey(movingTask.id));
+          }}
+        />
+      )}
+      {colouringGroup && (
+        <GroupColourDialog
+          group={colouringGroup}
+          onSave={(colour) => {
+            setColouring(null);
+            if (apply(setGanttGroupColour(value, colouringGroup.id, colour))) {
+              announce(
+                colour === null
+                  ? t("gantt.groupColourNone", { name: colouringGroup.name })
+                  : t("gantt.groupColourSet", { name: colouringGroup.name, colour: t(PALETTE[colour]!.name) }),
+              );
+            }
+            focusRow(groupKey(colouringGroup.id));
+          }}
+          onClose={() => {
+            setColouring(null);
+            focusRow(groupKey(colouringGroup.id));
           }}
         />
       )}

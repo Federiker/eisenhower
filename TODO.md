@@ -33,9 +33,9 @@ is under **Verification** and **Awaiting owner decisions**.
 
 - [ ] Owner requests of 5 November 2026 (decisions in the gantt, board,
   todo and timeline documents):
-  - [ ] Colours: Eisenhower's own colour picker (swatches in its list) in
+  - [x] Colours: Eisenhower's own colour picker (swatches in its list) in
     every colour field.
-  - [ ] Gantt: a group's colour (optional stored field, Colour… in its
+  - [x] Gantt: a group's colour (optional stored field, Colour… in its
     menu, its summary bar), new tasks in it take it.
   - [x] Gantt: double-click a task's or group's name to rename; only the
     chevron folds on a click.

@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { createTranslate } from "../../../src";
@@ -73,5 +73,43 @@ describe("a group's colour", () => {
     fireEvent.click(screen.getByRole("button", { name: t("gantt.newTask") }));
     const plain = latest.chart.tasks.find((task) => task.groupId === "design" && task.name.startsWith("New task"))!;
     expect(plain.colour).toBeNull();
+  });
+});
+
+describe("Colour… in a group's menu", () => {
+  const openColour = (name: string) => {
+    act(() => group(name).focus());
+    fireEvent.keyDown(group(name), { key: "F10", shiftKey: true });
+    fireEvent.click(screen.getByRole("menuitem", { name: t("gantt.groupColour") }));
+    return screen.getByRole("dialog", { name: t("gantt.groupColourTitle", { name }) });
+  };
+
+  it("gives the group a colour with the picker, says so, and takes it away with None", () => {
+    setup();
+    let dialog = openColour("Build");
+    const picker = within(dialog).getByRole("combobox", { name: t("gantt.fieldColour") });
+    expect(picker).toHaveTextContent(t("common.colour.none"));
+    fireEvent.click(picker);
+    fireEvent.click(screen.getByRole("option", { name: t("common.colour.blue") }));
+    fireEvent.click(within(dialog).getByRole("button", { name: t("common.save") }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(latest.chart.groups[1]!.colour).toBe(4);
+    expect(screen.getByRole("status")).toHaveTextContent("Build: colour Blue");
+    expect(group("Build")).toHaveFocus();
+
+    dialog = openColour("Build");
+    fireEvent.click(within(dialog).getByRole("combobox", { name: t("gantt.fieldColour") }));
+    fireEvent.click(screen.getByRole("option", { name: t("common.colour.none") }));
+    fireEvent.click(within(dialog).getByRole("button", { name: t("common.save") }));
+    expect("colour" in latest.chart.groups[1]!).toBe(false);
+    expect(screen.getByRole("status")).toHaveTextContent("Build: no colour");
+  });
+
+  it("changes nothing on Cancel", () => {
+    setup();
+    const dialog = openColour("Design");
+    fireEvent.click(within(dialog).getByRole("button", { name: t("common.cancel") }));
+    expect(latest.chart).toBe(PLAN);
+    expect(group("Design")).toHaveFocus();
   });
 });
