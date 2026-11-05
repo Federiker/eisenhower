@@ -36,3 +36,18 @@ export async function centreOf(locator: Locator): Promise<{ x: number; y: number
   if (!box) throw new Error("not drawn");
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
+
+/**
+ * A drag with the mouse, from the middle of one element to the middle of another, in steps: the views' drags
+ * are pointer drags, which Playwright's `dragTo` (the browser's drag and drop) does not make.
+ */
+export async function dragWithMouse(page: Page, from: Locator, to: Locator) {
+  const start = await centreOf(from);
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move(start.x + 12, start.y + 12, { steps: 4 });
+  // Where the target is once the drag has begun (the board offers No column then).
+  const end = await centreOf(to);
+  await page.mouse.move(end.x, end.y, { steps: 10 });
+  await page.mouse.up();
+}

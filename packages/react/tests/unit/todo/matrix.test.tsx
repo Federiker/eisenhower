@@ -1,7 +1,8 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { announced, check, current, dataTransfer, find, item, itemOf, LIST, menuTexts, show, t } from "./fixtures";
+import { drag, moveOver, press, release } from "../pointer";
+import { announced, check, current, find, item, itemOf, LIST, menuTexts, show, t, titles } from "./fixtures";
 
 const quadrant = (name: string) => screen.getByRole("region", { name });
 const titlesIn = (name: string) =>
@@ -84,23 +85,57 @@ describe("the Eisenhower matrix", () => {
 
   it("moves an item dragged to a quadrant there", () => {
     show({ layout: "matrix" });
-    const data = dataTransfer();
-    fireEvent.dragStart(itemOf("Book flights"), { dataTransfer: data });
-    fireEvent.dragOver(quadrant(DROP), { dataTransfer: data });
+    const flights = itemOf("Book flights");
+    press(flights);
+    moveOver(flights, quadrant(DROP));
     expect(quadrant(DROP)).toHaveAttribute("data-drop", "inside");
-    fireEvent.dragLeave(quadrant(DROP), { dataTransfer: data });
+    moveOver(flights, null);
     expect(quadrant(DROP)).not.toHaveAttribute("data-drop");
-    fireEvent.dragOver(itemOf("Sand the walls"), { dataTransfer: data });
-    fireEvent.drop(itemOf("Sand the walls"), { dataTransfer: data });
+    moveOver(flights, within(quadrant(DELEGATE)).getByText(t("todo.quadrantAbout.delegate")));
+    expect(quadrant(DELEGATE)).toHaveAttribute("data-drop", "inside");
+    release(flights);
     expect(find("b")).toMatchObject({ urgent: true, important: false });
     expect(titlesIn(DELEGATE)).toEqual(["Sand the walls", "Book flights"]);
-    // Dropped back in its own quadrant, it stays as it was, unannounced.
+    expect(announced()).toBe(t("todo.announce.quadrant", { title: "Book flights", quadrant: DELEGATE }));
+    expect(check("Book flights")).toHaveFocus();
+    // Dropped back in its own quadrant, or onto itself, it stays as it was, unannounced.
     const before = current;
     const said = announced();
-    fireEvent.dragStart(itemOf("Book flights"), { dataTransfer: data });
-    fireEvent.drop(quadrant(DELEGATE), { dataTransfer: data });
+    drag(itemOf("Book flights"), quadrant(DELEGATE));
+    drag(itemOf("Book flights"), itemOf("Book flights"));
+    drag(itemOf("Book flights"), document.body);
     expect(current).toBe(before);
     expect(announced()).toBe(said);
+  });
+
+  it("puts an item dropped onto another just before it in the list's order, in that one's quadrant", () => {
+    show({ layout: "matrix" });
+    // Onto an item of another quadrant: the line is drawn above it, and the item takes its quadrant.
+    const shed = itemOf("Paint the shed");
+    press(shed);
+    moveOver(shed, check("Book flights"));
+    expect(itemOf("Book flights")).toHaveAttribute("data-drop", "before");
+    expect(quadrant(DO)).not.toHaveAttribute("data-drop");
+    release(shed);
+    expect(titlesIn(DO)).toEqual(["Paint the shed", "Book flights"]);
+    expect(find("a")).toMatchObject({ urgent: true, important: true });
+    // Its subtasks keep their own flags.
+    expect(find("a2")).toMatchObject({ urgent: true, important: false });
+    expect(announced()).toBe(t("todo.announce.quadrant", { title: "Paint the shed", quadrant: DO }));
+    expect(check("Paint the shed")).toHaveFocus();
+
+    // Within its own quadrant, it goes before the other, and its place is announced.
+    drag(itemOf("Book flights"), itemOf("Paint the shed"));
+    expect(titlesIn(DO)).toEqual(["Book flights", "Paint the shed"]);
+    expect(titles()).toEqual(["Book flights", "Paint the shed", "-Buy paint", "-Sand the walls", "Read a novel"]);
+    expect(announced()).toBe(t("todo.announce.moved", { title: "Book flights", position: 1, total: 3 }));
+
+    // Onto a subtask, it becomes a subtask just before it, with its quadrant.
+    drag(itemOf("Book flights"), itemOf("Sand the walls"));
+    expect(titlesIn(DELEGATE)).toEqual(["Book flights", "Sand the walls"]);
+    expect(find("b")).toMatchObject({ parentId: "a", urgent: true, important: false });
+    expect(within(itemOf("Book flights")).getByText(t("todo.subtaskOf", { title: "Paint the shed" }))).toBeVisible();
+    expect(announced()).toBe(t("todo.announce.quadrant", { title: "Book flights", quadrant: DELEGATE }));
   });
 
   it("adds an item to a quadrant with its flags", () => {

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { centreOf, leftOf, openApp, saved } from "./app";
+import { centreOf, dragWithMouse, leftOf, openApp, saved } from "./app";
 
 test("shows the sample board, and the same cards as a list", async ({ page }) => {
   const errors = await openApp(page, "Board");
@@ -30,7 +30,7 @@ test("offers No column after the others while a card is dragged, and puts it fir
   const noColumn = board.getByRole("region", { name: "No column" });
   const done = board.getByRole("region", { name: "Done" });
 
-  // A real drag with the mouse: Chromium runs HTML5 drag and drop from the pointer's moves.
+  // A real drag with the mouse: the board's drags are pointer drags.
   const from = await centreOf(card);
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
@@ -58,11 +58,57 @@ test("drags a card onto another column", async ({ page }) => {
   const card = board
     .getByRole("listitem")
     .filter({ has: page.getByRole("button", { name: "Redirect the post", exact: true }) });
-  await card.dragTo(board.getByRole("region", { name: "Booked" }));
+  await dragWithMouse(page, card, board.getByRole("region", { name: "Booked" }));
   await expect(
     board.getByRole("region", { name: "Booked" }).getByRole("button", { name: "Redirect the post", exact: true }),
   ).toBeVisible();
   await expect(board.getByRole("region", { name: "No column" })).toHaveCount(0);
+});
+
+test("drags a card by its title before another, without opening it, and a column by its heading", async ({ page }) => {
+  await openApp(page, "Board");
+  const board = page.getByRole("region", { name: "Board" });
+  const cardTitles = (column: string) =>
+    board.getByRole("region", { name: column }).locator(".eh-board-card-title").allTextContents();
+  const target = board
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("button", { name: "Pack the books", exact: true }) });
+  await dragWithMouse(page, board.getByRole("button", { name: "Hire a van", exact: true }), target);
+  expect(await cardTitles("Under way")).toEqual(["Hire a van", "Pack the books", "Pack the kitchen"]);
+  // The click as the mouse was let go on the title did not open the card.
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("status").first()).toContainText("Hire a van: moved to Under way, 1 of 3");
+  await expect(board.getByRole("button", { name: "Hire a van", exact: true })).toBeFocused();
+
+  const heading = (column: string) => board.getByRole("region", { name: column }).locator(".eh-board-column-heading");
+  await dragWithMouse(page, heading("Done").getByRole("heading", { name: "Done" }), heading("To sort out"));
+  expect(
+    await board.locator(".eh-board-column").evaluateAll((all) => all.map((one) => one.getAttribute("aria-label"))),
+  ).toEqual(["Done", "To sort out", "Under way", "Booked"]);
+  await saved(page);
+});
+
+test("cancels a drag with Escape, and a click on a card's title still opens it", async ({ page }) => {
+  await openApp(page, "Board");
+  const board = page.getByRole("region", { name: "Board" });
+  const title = board.getByRole("button", { name: "Removal firm", exact: true });
+  const from = await centreOf(title);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 12, from.y + 12, { steps: 4 });
+  const to = await centreOf(board.getByRole("button", { name: "New card in Under way" }));
+  await page.mouse.move(to.x, to.y, { steps: 10 });
+  await expect(board.getByRole("region", { name: "Under way" })).toHaveAttribute("data-drop", "inside");
+  await page.keyboard.press("Escape");
+  await expect(board.getByRole("region", { name: "Under way" })).not.toHaveAttribute("data-drop");
+  await page.mouse.up();
+  await expect(
+    board.getByRole("region", { name: "Booked" }).getByRole("button", { name: "Removal firm", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await title.click();
+  await expect(page.getByRole("dialog")).toBeVisible();
 });
 
 test("moves a card with Alt and the arrows, keeping the focus on it, and undoes it with Ctrl+Z", async ({ page }) => {

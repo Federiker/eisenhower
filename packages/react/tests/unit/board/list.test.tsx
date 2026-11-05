@@ -1,7 +1,8 @@
 /** The list layout, columns and cards, from jerome's plot-list.test.tsx, made generic. */
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 
-import { announcement, BOARD, cardOf, groups, layout, renderBoard, t, titleButton } from "./host";
+import { drag, moveOver, press, release } from "../pointer";
+import { announcement, BOARD, cardOf, groups, headingOf, layout, renderBoard, t, titleButton } from "./host";
 
 const key = (element: Element, keyName: string, options: { altKey?: boolean; shiftKey?: boolean } = {}) =>
   fireEvent.keyDown(element, { key: keyName, ...options });
@@ -449,25 +450,28 @@ describe("moving cards in the list", () => {
 
   it("by dragging a card before another, to the end of a column, and a column before another", () => {
     const { view, board } = renderBoard({ layout: "list" });
-    const dataTransfer = { setData: () => undefined, effectAllowed: "", dropEffect: "" };
-    fireEvent.dragStart(cardOf(view, "Ideas"), { dataTransfer });
-    fireEvent.dragOver(cardOf(view, "Review"), { dataTransfer });
+    const ideas = cardOf(view, "Ideas");
+    press(ideas);
+    moveOver(ideas, cardOf(view, "Review"));
     expect(cardOf(view, "Review")).toHaveAttribute("data-drop", "before");
-    fireEvent.dragLeave(cardOf(view, "Review"), { dataTransfer });
+    moveOver(ideas, null);
     expect(cardOf(view, "Review")).not.toHaveAttribute("data-drop");
-    fireEvent.dragOver(cardOf(view, "Review"), { dataTransfer });
-    fireEvent.drop(cardOf(view, "Review"), { dataTransfer });
+    moveOver(ideas, cardOf(view, "Review"));
+    release(ideas);
     expect(layout(board())[2]).toEqual(["Doing", "Draft", "Ideas", "Review"]);
-    // A drop with nothing dragged from this board is not taken.
+    expect(announcement()).toBe(t("board.movedTo", { name: "Ideas", group: "Doing", position: 2, total: 3 }));
+    expect(titleButton(view, "Ideas")).toHaveFocus();
+    // Onto a group, at its end; a column's heading onto another, in its place.
+    drag(cardOf(view, "Draft"), within(view).getByRole("region", { name: "Done" }));
+    expect(layout(board())[3]).toEqual(["Done", "Draft"]);
+    drag(headingOf(view, "Done"), headingOf(view, "To do"));
+    expect(board().columns.map((column) => column.name)).toEqual(["Done", "To do", "Doing"]);
+    // Let go where nothing takes it, nothing moves.
     const before = board();
-    fireEvent.dragOver(cardOf(view, "Review"), { dataTransfer });
-    fireEvent.drop(cardOf(view, "Review"), { dataTransfer });
-    fireEvent.drop(within(view).getByRole("region", { name: "Done" }), { dataTransfer });
-    const heading = within(view).getByRole("region", { name: "Done" }).querySelector(".eh-board-column-heading")!;
-    fireEvent.dragOver(heading, { dataTransfer });
-    fireEvent.drop(heading, { dataTransfer });
+    drag(cardOf(view, "Review"), document.body);
+    drag(headingOf(view, "Doing"), cardOf(view, "Outline"));
     expect(board()).toBe(before);
-    expect(groups(view)).toEqual(["To do", "Doing", "Done"]);
+    expect(groups(view)).toEqual(["Done", "To do", "Doing"]);
   });
 });
 

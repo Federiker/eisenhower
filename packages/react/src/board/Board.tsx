@@ -27,15 +27,7 @@ import {
   placeBefore,
   renameColumn,
 } from "@eisenhower/model";
-import {
-  type DragEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type KeyboardEvent, type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { Button } from "../controls/Button";
 import { ContextMenu, type MenuItem, type MenuPlace, placeBelow } from "../controls/ContextMenu";
@@ -44,6 +36,7 @@ import { InlineQuestion } from "../controls/InlineQuestion";
 import { MoveToDialog } from "../controls/MoveToDialog";
 import { Notice } from "../controls/Notice";
 import { LiveRegion, useAnnouncer } from "../hooks/useAnnouncer";
+import { NOT_DRAGGED, usePointerDrag } from "../hooks/usePointerDrag";
 import { actionOf, type ShortcutAction, shortcutsIn } from "../keyboard/shortcuts";
 import { useTranslate } from "../strings/translate";
 import { type EisenhowerSettings, ViewRoot } from "../theme/EisenhowerProvider";
@@ -84,8 +77,11 @@ type ColumnAction = "rename" | "up" | "down" | "delete";
 /** The menu that is open, for a card or a column, and where the focus goes back when it closes. */
 type Menu = { kind: "card" | "column"; id: string; place: MenuPlace; returnTo: HTMLElement | null };
 
+/** What is dragged: a card, or a column by its heading. */
+type Dragged = { kind: "card" | "column"; id: string };
+
 /** Where a dragged card or column would go: before a card, at the end of a group, or at a column's place. */
-type Drop = { card: string } | { group: string | null } | { column: number } | null;
+type Drop = { card: string } | { group: string | null } | { column: number };
 
 /** Where the focus goes once the board is drawn again. */
 type FocusTarget = { card: string } | { column: string } | "newCard" | "newColumn";
@@ -114,9 +110,6 @@ const FOCUS_MOVES: Partial<Record<ShortcutAction, BoardDirection>> = {
   focusLast: "last",
 };
 
-const CARD_TYPE = "application/x-eisenhower-board-card";
-const COLUMN_TYPE = "application/x-eisenhower-board-column";
-
 /**
  * A board's columns and cards (decision 15), as columns of cards side by side or as a list grouped by
  * column: jerome's plot board and list (PlotList.tsx), made generic. Cards outside every column are a column
@@ -127,7 +120,9 @@ const COLUMN_TYPE = "application/x-eisenhower-board-column";
  * where they go. Cards move by dragging (onto a card to go before it, onto a column to go at its end), by Alt
  * and the arrows (up and down within the column, left and right to the column before or after; the focus
  * stays on the card and its new place is announced), or by their menu; the arrows, Home and End move the
- * focus; Enter opens a card, F2 renames it, and Delete asks first.
+ * focus; Enter opens a card, F2 renames it, and Delete asks first. The drags are pointer drags (they work in
+ * a Tauri window, whose own drag and drop is for files): Escape cancels one, and a press without a move is a
+ * click.
  */
 export function Board({ strings, t, locale, theme, className, ...props }: BoardProps) {
   return (
@@ -157,21 +152,23 @@ function BoardContent({
   const [dialog, setDialog] = useState<CardDialogSubject | null>(null);
   const [opened, setOpened] = useState<string | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
-  const [drop, setDrop] = useState<Drop>(null);
-  const [draggingCard, setDraggingCard] = useState(false);
   const [focus, setFocus] = useState<FocusRequest | null>(null);
   // A column whose name opens for editing once it is drawn (a new column, or F2).
   const [naming, setNaming] = useState<{ id: string; request: number } | null>(null);
   const requests = useRef(0);
-  const dragged = useRef<{ kind: "card" | "column"; id: string } | null>(null);
-  const dragTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const root = useRef<HTMLElement>(null);
   const newCardButton = useRef<HTMLButtonElement>(null);
   const newColumnButton = useRef<HTMLButtonElement>(null);
   const board = layout === "board";
   const selected = selectedId === undefined ? opened : selectedId;
-
-  useEffect(() => () => clearTimeout(dragTimer.current), []);
+  const { drag, handlers: dragHandlers } = usePointerDrag<Dragged, Drop>({
+    enabled: !readOnly,
+    pick: dragFrom,
+    place: dropAt,
+    onDrop: dropped,
+  });
+  const drop = drag?.place ?? null;
+  const draggingCard = drag?.dragged.kind === "card";
 
   // Once the board is drawn again with the change, the focus goes where the change asked (the moved card…).
   useEffect(() => {
@@ -515,104 +512,43 @@ function BoardContent({
     event.preventDefault();
   }
 
-  function endDrag() {
-    clearTimeout(dragTimer.current);
-    dragged.current = null;
-    setDrop(null);
-    setDraggingCard(false);
+  /** What a press drags: the card pressed, or the column whose heading was pressed (not in a text field). */
+  function dragFrom(target: Element): Dragged | null {
+    if (target.closest(NOT_DRAGGED)) return null;
+    const card = target.closest<HTMLElement>("[data-card-id]");
+    if (card?.dataset.cardId) return { kind: "card", id: card.dataset.cardId };
+    const heading = target.closest<HTMLElement>("[data-column-id]");
+    return heading?.dataset.columnId ? { kind: "column", id: heading.dataset.columnId } : null;
   }
 
-  function takeDragged(kind: "card" | "column"): string | null {
-    const current = dragged.current;
-    endDrag();
-    return current?.kind === kind ? current.id : null;
+  /**
+   * Where the element under the pointer takes a drop: a card, before another card or at the end of a group
+   * (No column among them); a column, at the place of the column whose heading it is over.
+   */
+  function dropAt(dragged: Dragged, under: Element | null): Drop | null {
+    if (!under || !root.current?.contains(under)) return null;
+    if (dragged.kind === "column") {
+      const heading = under.closest<HTMLElement>("[data-column-id]");
+      const index = value.columns.findIndex((column) => column.id === heading?.dataset.columnId);
+      return index < 0 || value.columns[index]!.id === dragged.id ? null : { column: index };
+    }
+    const card = under.closest<HTMLElement>("[data-card-id]");
+    if (card) return card.dataset.cardId === dragged.id ? null : { card: card.dataset.cardId! };
+    const group = under.closest<HTMLElement>("[data-group]");
+    return group ? { group: group.dataset.group || null } : null;
   }
 
-  function cardDrag(card: BoardCard) {
-    return {
-      draggable: !readOnly,
-      onDragStart: (event: DragEvent<HTMLElement>) => {
-        event.stopPropagation();
-        dragged.current = { kind: "card", id: card.id };
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData(CARD_TYPE, card.id);
-        // Shown after the drag has begun: changing the page while it starts would end it.
-        clearTimeout(dragTimer.current);
-        dragTimer.current = setTimeout(() => {
-          if (dragged.current?.kind === "card") setDraggingCard(true);
-        }, 0);
-      },
-      onDragOver: (event: DragEvent<HTMLElement>) => {
-        if (dragged.current?.kind !== "card") return;
-        event.preventDefault();
-        event.stopPropagation();
-        setDrop({ card: card.id });
-      },
-      onDragLeave: () => setDrop((old) => (old && "card" in old && old.card === card.id ? null : old)),
-      onDrop: (event: DragEvent<HTMLElement>) => {
-        if (dragged.current?.kind !== "card") return;
-        event.preventDefault();
-        event.stopPropagation();
-        const id = takeDragged("card");
-        if (id && id !== card.id) moveCardTo(id, placeBefore(value, id, card.id));
-      },
-      onDragEnd: endDrag,
-    };
+  function dropped(dragged: Dragged, at: Drop) {
+    if ("card" in at) moveCardTo(dragged.id, placeBefore(value, dragged.id, at.card));
+    else if ("group" in at) moveCardTo(dragged.id, { columnId: at.group, index: Number.MAX_SAFE_INTEGER });
+    else shiftColumn(dragged.id, at.column - value.columns.findIndex((one) => one.id === dragged.id));
   }
 
-  function columnDrag(column: BoardColumn, index: number) {
-    return {
-      draggable: !readOnly,
-      onDragStart: (event: DragEvent<HTMLElement>) => {
-        // The name is a text field while it is edited: a drag there selects text rather than moving the column.
-        if (event.target instanceof HTMLInputElement) {
-          event.preventDefault();
-          return;
-        }
-        dragged.current = { kind: "column", id: column.id };
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData(COLUMN_TYPE, column.id);
-      },
-      onDragOver: (event: DragEvent<HTMLElement>) => {
-        if (dragged.current?.kind !== "column") return;
-        event.preventDefault();
-        event.stopPropagation();
-        setDrop({ column: index });
-      },
-      onDragLeave: () => setDrop((old) => (old && "column" in old && old.column === index ? null : old)),
-      onDrop: (event: DragEvent<HTMLElement>) => {
-        if (dragged.current?.kind !== "column") return;
-        event.preventDefault();
-        event.stopPropagation();
-        const id = takeDragged("column");
-        if (id && id !== column.id) {
-          const from = value.columns.findIndex((one) => one.id === id);
-          shiftColumn(id, index - from);
-        }
-      },
-      onDragEnd: endDrag,
-    };
-  }
-
-  /** A group takes a dragged card at its end. */
+  /** A group takes a dragged card at its end: it says which it is, and is drawn as the place while it would. */
   function groupDrop(columnId: string | null) {
     return {
+      "data-group": columnId ?? "",
       "data-drop": drop && "group" in drop && drop.group === columnId ? "inside" : undefined,
-      onDragOver: (event: DragEvent<HTMLElement>) => {
-        if (dragged.current?.kind !== "card") return;
-        event.preventDefault();
-        setDrop({ group: columnId });
-      },
-      onDragLeave: (event: DragEvent<HTMLElement>) => {
-        if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
-        setDrop((old) => (old && "group" in old && old.group === columnId ? null : old));
-      },
-      onDrop: (event: DragEvent<HTMLElement>) => {
-        if (dragged.current?.kind !== "card") return;
-        event.preventDefault();
-        const id = takeDragged("card");
-        if (id) moveCardTo(id, { columnId, index: Number.MAX_SAFE_INTEGER });
-      },
     };
   }
 
@@ -645,7 +581,7 @@ function BoardContent({
           );
         }}
         onMore={(button) => openMenu("card", card.id, placeBelow(button), button)}
-        drag={cardDrag(card)}
+        moving={drag?.dragged.kind === "card" && drag.dragged.id === card.id}
       >
         {deletingCard === card.id && (
           <InlineQuestion
@@ -688,6 +624,8 @@ function BoardContent({
       ref={root}
       className={board ? "eh-board-view eh-board-layout" : "eh-board-view"}
       aria-label={t("board.label")}
+      data-dragging={drag ? "true" : undefined}
+      {...dragHandlers}
     >
       {!readOnly && (
         <div className="eh-board-tools">
@@ -748,7 +686,7 @@ function BoardContent({
                   );
                 }}
                 onMore={(button) => openMenu("column", column.id, placeBelow(button), button)}
-                drag={columnDrag(column, index)}
+                moving={drag?.dragged.kind === "column" && drag.dragged.id === column.id}
               >
                 {deletingColumn === column.id && (
                   <InlineQuestion

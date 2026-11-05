@@ -1,5 +1,5 @@
 import type { BoardCard, Colour } from "@eisenhower/model";
-import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
+import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
 
 import { Button } from "../controls/Button";
 import { ColourSwatch } from "../controls/ColourSwatch";
@@ -8,16 +8,6 @@ import { InlineRename } from "../controls/InlineRename";
 import { useTranslate } from "../strings/translate";
 import { colourVar, PALETTE } from "../theme/palette";
 import { MoreIcon } from "./icons";
-
-/** What dragging a card or a column's heading does, from the board. */
-export type DragHandlers = {
-  draggable: boolean;
-  onDragStart: (event: DragEvent<HTMLElement>) => void;
-  onDragOver: (event: DragEvent<HTMLElement>) => void;
-  onDragLeave: () => void;
-  onDrop: (event: DragEvent<HTMLElement>) => void;
-  onDragEnd: () => void;
-};
 
 /** A card's colour, named, or nothing when it has none. */
 function CardColour({ colour }: { colour: Colour }) {
@@ -53,7 +43,8 @@ export type CardItemProps = {
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
   onMenu: (event: MouseEvent<HTMLElement>) => void;
   onMore: (button: HTMLButtonElement) => void;
-  drag: DragHandlers;
+  /** Whether the card is the one being dragged (the board's pointer drag starts from any part of it). */
+  moving: boolean;
   /** Shown at the foot of the card or under the row, such as the question before the card is deleted. */
   children?: ReactNode;
 };
@@ -114,7 +105,7 @@ function openOnDoubleClick(onOpen: () => void) {
  * PlotBeatCard.tsx.
  */
 export function CardTile(props: CardItemProps) {
-  const { card, selected, drop, badge, content, onOpen, onMenu, drag, children } = props;
+  const { card, selected, drop, badge, content, onOpen, onMenu, moving, children } = props;
   return (
     <li
       className="eh-board-card"
@@ -123,7 +114,7 @@ export function CardTile(props: CardItemProps) {
       data-drop={drop ? "before" : undefined}
       onContextMenu={onMenu}
       onDoubleClick={openOnDoubleClick(onOpen)}
-      {...drag}
+      data-moving={moving ? "true" : undefined}
     >
       <span
         className="eh-board-card-stripe"
@@ -157,7 +148,7 @@ export function CardTile(props: CardItemProps) {
  * list's. Copied from jerome's PlotBeatRow.tsx.
  */
 export function CardRow(props: CardItemProps) {
-  const { card, selected, drop, badge, content, onOpen, onMenu, drag, children } = props;
+  const { card, selected, drop, badge, content, onOpen, onMenu, moving, children } = props;
   return (
     <li
       className="eh-board-row"
@@ -166,7 +157,7 @@ export function CardRow(props: CardItemProps) {
       data-drop={drop ? "before" : undefined}
       onContextMenu={onMenu}
       onDoubleClick={openOnDoubleClick(onOpen)}
-      {...drag}
+      data-moving={moving ? "true" : undefined}
     >
       <CardColour colour={card.colour} />
       <Title {...props} />

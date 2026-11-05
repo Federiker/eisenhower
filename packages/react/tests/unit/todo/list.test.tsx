@@ -1,20 +1,8 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import {
-  announced,
-  check,
-  current,
-  dataTransfer,
-  find,
-  item,
-  itemOf,
-  LIST,
-  menuTexts,
-  show,
-  t,
-  titles,
-} from "./fixtures";
+import { drag, moveOver, nudge, press, release } from "../pointer";
+import { announced, check, current, find, item, itemOf, LIST, menuTexts, show, t, titles } from "./fixtures";
 
 const items = () => screen.getByRole("list", { name: t("todo.items") });
 
@@ -331,44 +319,101 @@ describe("the tag filter", () => {
 describe("dragging in the todo list", () => {
   it("puts an item dropped on another just before it, among its siblings", () => {
     show();
-    const data = dataTransfer();
-    fireEvent.dragStart(itemOf("Read a novel"), { dataTransfer: data });
-    fireEvent.dragOver(itemOf("Sand the walls"), { dataTransfer: data });
+    const novel = itemOf("Read a novel");
+    press(novel);
+    moveOver(novel, check("Sand the walls"));
     expect(itemOf("Sand the walls")).toHaveAttribute("data-drop", "before");
-    fireEvent.dragLeave(itemOf("Sand the walls"), { dataTransfer: data });
+    expect(novel).toHaveAttribute("data-moving", "true");
+    moveOver(novel, null);
     expect(itemOf("Sand the walls")).not.toHaveAttribute("data-drop");
-    fireEvent.dragOver(itemOf("Sand the walls"), { dataTransfer: data });
-    fireEvent.drop(itemOf("Sand the walls"), { dataTransfer: data });
+    moveOver(novel, itemOf("Sand the walls"));
+    release(novel);
     expect(titles()).toEqual(["Paint the shed", "-Buy paint", "-Read a novel", "-Sand the walls", "Book flights"]);
     expect(announced()).toBe(
       t("todo.announce.movedUnder", { title: "Read a novel", parent: "Paint the shed", position: 2, total: 3 }),
     );
+    expect(check("Read a novel")).toHaveFocus();
+    expect(itemOf("Read a novel")).not.toHaveAttribute("data-moving");
   });
 
   it("puts an item dropped after the items at the end", () => {
     show();
-    const data = dataTransfer();
     const body = items().parentElement!;
-    fireEvent.dragStart(itemOf("Buy paint"), { dataTransfer: data });
-    fireEvent.dragOver(body, { dataTransfer: data });
+    const paint = itemOf("Buy paint");
+    press(paint);
+    moveOver(paint, body);
     expect(body).toHaveAttribute("data-drop", "inside");
-    fireEvent.drop(body, { dataTransfer: data });
+    release(paint);
     expect(titles()).toEqual(["Paint the shed", "-Sand the walls", "Book flights", "Read a novel", "Buy paint"]);
+    expect(body).not.toHaveAttribute("data-drop");
   });
 
-  it("moves nothing dropped on itself, refused, or after the drag ended", () => {
+  it("moves nothing dropped on itself, refused, or let go where nothing takes it", () => {
     show();
-    const data = dataTransfer();
-    fireEvent.dragStart(itemOf("Book flights"), { dataTransfer: data });
-    fireEvent.drop(itemOf("Book flights"), { dataTransfer: data });
-    // A parent dropped among subtasks would make subtasks of subtasks.
-    fireEvent.dragStart(itemOf("Paint the shed"), { dataTransfer: data });
-    fireEvent.drop(itemOf("Buy paint"), { dataTransfer: data });
-    fireEvent.dragStart(itemOf("Book flights"), { dataTransfer: data });
-    fireEvent.dragEnd(itemOf("Book flights"), { dataTransfer: data });
-    fireEvent.dragOver(itemOf("Paint the shed"), { dataTransfer: data });
-    fireEvent.drop(itemOf("Paint the shed"), { dataTransfer: data });
-    fireEvent.drop(items().parentElement!, { dataTransfer: data });
+    drag(itemOf("Book flights"), itemOf("Book flights"));
+    // A parent dropped among subtasks would make subtasks of subtasks: no line is drawn there.
+    const shed = itemOf("Paint the shed");
+    press(shed);
+    moveOver(shed, itemOf("Buy paint"));
+    expect(itemOf("Buy paint")).not.toHaveAttribute("data-drop");
+    release(shed);
+    drag(itemOf("Book flights"), null);
+    drag(itemOf("Book flights"), document.body);
+    drag(itemOf("Book flights"), screen.getByRole("textbox", { name: t("todo.newItem") }));
+    expect(current).toBe(LIST);
+  });
+
+  it("cancels a drag with Escape, keeps a press without a move a click, and makes nothing of the click after a drag", () => {
+    show();
+    const box = check("Book flights");
+    press(box);
+    moveOver(box, itemOf("Paint the shed"));
+    expect(itemOf("Paint the shed")).toHaveAttribute("data-drop", "before");
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(itemOf("Paint the shed")).not.toHaveAttribute("data-drop");
+    moveOver(box, itemOf("Paint the shed"));
+    release(box);
+    // The click as the pointer is let go on the check box does not tick it.
+    fireEvent.click(box);
+    expect(current).toBe(LIST);
+    expect(check("Book flights")).not.toBeChecked();
+
+    // Less than 4 pixels is a click: it ticks the item.
+    nudge(check("Book flights"));
+    fireEvent.click(check("Book flights"));
+    expect(find("b").done).toBe(true);
+
+    // Dragged by its title's text, the item moves, and the click after the drop changes nothing more.
+    const title = within(itemOf("Read a novel")).getByText("Read a novel");
+    press(title);
+    moveOver(title, itemOf("Paint the shed"));
+    release(title);
+    fireEvent.click(title);
+    expect(titles()).toEqual(["Read a novel", "Paint the shed", "-Buy paint", "-Sand the walls", "Book flights"]);
+    expect(find("c").done).toBe(true);
+  });
+
+  it("drags nothing with another button, from a text field, or after a lost pointer", () => {
+    show();
+    const flights = itemOf("Book flights");
+    press(flights, { button: 2 });
+    moveOver(flights, itemOf("Paint the shed"));
+    expect(itemOf("Paint the shed")).not.toHaveAttribute("data-drop");
+    release(flights);
+    // Not from the title's field while it is renamed, where a drag chooses text.
+    fireEvent.keyDown(check("Book flights"), { key: "F2" });
+    const field = within(flights).getByRole("textbox");
+    press(field);
+    moveOver(field, itemOf("Paint the shed"));
+    expect(itemOf("Paint the shed")).not.toHaveAttribute("data-drop");
+    release(field);
+    fireEvent.keyDown(field, { key: "Escape" });
+    const box = check("Book flights");
+    press(box);
+    moveOver(box, itemOf("Paint the shed"));
+    fireEvent.pointerCancel(box, { pointerId: 1 });
+    expect(itemOf("Paint the shed")).not.toHaveAttribute("data-drop");
+    release(box);
     expect(current).toBe(LIST);
   });
 });
@@ -379,7 +424,12 @@ describe("a read-only todo list", () => {
     expect(screen.queryByRole("textbox", { name: t("todo.newItem") })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: t("todo.actionsNamed", { title: "Book flights" }) })).toBeNull();
     expect(check("Book flights")).toHaveAttribute("aria-readonly", "true");
-    expect(itemOf("Book flights")).toHaveAttribute("draggable", "false");
+    // Nothing is dragged: no line is drawn, and nothing moves.
+    const flights = itemOf("Book flights");
+    press(flights);
+    moveOver(flights, itemOf("Paint the shed"));
+    expect(itemOf("Paint the shed")).not.toHaveAttribute("data-drop");
+    release(flights);
     fireEvent.click(check("Book flights"));
     expect(check("Book flights")).not.toBeChecked();
     for (const key of ["Delete", "F2", "Enter", "ContextMenu"]) fireEvent.keyDown(check("Book flights"), { key });

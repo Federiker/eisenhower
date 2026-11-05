@@ -65,7 +65,9 @@ The edits return a new list or a problem code (`Problem`), never throwing:
 item; a new subtask takes its parent's flags unless given its own),
 `renameItem`, `setItemNotes`, `setItemDue`, `setItemTags`, `addItemTag`,
 `removeItemTag`, `setItemDone` and `toggleItemDone`, `setItemQuadrant`,
-`moveItem` (to a place under any parent, as a drop does), `stepItem` (up or
+`moveItem` (to a place under any parent, as a drop does), `placeItemBefore`
+(just before another item and into its quadrant, as a drop onto an item in
+the matrix does), `stepItem` (up or
 down among its siblings, a parent with its subtasks), `indentItem` (the last
 subtask of the top-level item above), `outdentItem` (a top-level item just
 after its parent and the parent's other subtasks) and `deleteItem` (with its
@@ -122,10 +124,14 @@ Dragging an item onto another puts it just before that one, among its
 siblings (the list); onto the space after the items, at the end; onto a
 quadrant, into that quadrant (the matrix, where the order is the list's).
 In the matrix an item dropped onto another, in its quadrant or another,
-goes just before it (in the list's order too) and takes that quadrant's
-flags. A line shows where it goes. The drags are pointer drags (the owner's
-decision of 5 November 2026), working in a Tauri window as in a browser;
-Escape cancels one, and a press without a move is still a click.
+goes just before it (in the list's order too, among its siblings: a subtask
+dropped onto a top-level item becomes one, and an item dropped onto a
+subtask becomes a subtask, except an item with subtasks, which goes before
+that subtask's parent) and takes that quadrant's flags. A line shows where
+it goes, and nothing is drawn where a drop would be refused. The drags are
+pointer drags (the owner's decision of 5 November 2026), working in a Tauri
+window as in a browser; Escape cancels one, a press without a move is still
+a click (the check box ticks), and a drag does not start in a text field.
 
 The menu: Details…, Rename, Add a subtask (top-level items), Move up, Move
 down, Make it a subtask or Make it a top-level item (the list), Move to each
@@ -143,7 +149,8 @@ other quadrant, and Delete.
   item, it goes to the next item shown (or the one before, or the field that
   adds items); a closed menu or dialog gives it back to the item.
 - Deleting asks in place; a parent's question asks whether its subtasks go
-  too. Overdue is said in words, and underlined in forced colours.
+  too. Overdue is said in words, and underlined in forced colours, where the
+  line a drag draws is a border.
 
 ## Decisions taken with the view
 
@@ -162,7 +169,8 @@ These change what the user sees and are open to the owner:
 - Notes may have several lines; the 250 characters count the line breaks.
 - A new item (from a field or Add a subtask) takes the filter's tags, so
   that it stays in sight.
-- In the matrix, the order within a quadrant is the list's: dragging and
-  Alt+arrows only change the quadrant.
+- In the matrix, the order within a quadrant is the list's: Alt+arrows and
+  a drop onto a quadrant only change the quadrant (a drop onto an item also
+  changes the order, the owner's decision of 5 November 2026).
 - Outdenting puts the item after its parent's other subtasks.
 - Hide done starts off in the list and on in the matrix.

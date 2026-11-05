@@ -30,6 +30,14 @@
 .eh-board-group[data-drop="inside"] {
   border-color: var(--eh-accent);
 }
+/* While a card or a column is dragged (a pointer drag): no text is chosen on the way, and what moves is faint. */
+.eh-board-view[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+.eh-board-view [data-moving] {
+  opacity: 0.55;
+}
 .eh-board-group-heading {
   margin: 4px 0;
   font-size: inherit;
@@ -343,6 +351,13 @@
 @media (forced-colors: active) {
   .eh-board-card[data-drop="before"] {
     border-top: 3px solid Highlight;
+  }
+  .eh-board-row[data-drop="before"],
+  .eh-board-column-heading[data-drop="before"] {
+    border-top-color: Highlight;
+  }
+  .eh-board-group[data-drop="inside"] {
+    border-color: Highlight;
   }
   .eh-board-card-stripe {
     display: none;
