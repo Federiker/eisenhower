@@ -41,7 +41,7 @@ is under **Verification** and **Awaiting owner decisions**.
     chevron folds on a click.
   - [ ] Todo and board: pointer drags (no HTML5 drag and drop), a drop
     line, the matrix reordering within and across quadrants.
-  - [ ] Timeline: the entries' table grouped by category, folding.
+  - [x] Timeline: the entries' table grouped by category, folding.
   - [ ] Pictures, end to end, checks.
 
 ## Verification
