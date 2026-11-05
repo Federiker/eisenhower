@@ -1,6 +1,7 @@
 export { Board, type BoardLayout, type BoardProps } from "./board/Board";
 export { Button, type ButtonProps, type ButtonVariant } from "./controls/Button";
 export { Checkbox, type CheckboxProps } from "./controls/Checkbox";
+export { ColourPicker, type ColourPickerProps } from "./controls/ColourPicker";
 export { ContextMenu, type MenuItem, type MenuPlace, opensMenu, placeBelow } from "./controls/ContextMenu";
 export {
   type EditableChoice,

@@ -13,8 +13,13 @@ const menuTexts = (menu: HTMLElement) =>
     .map((item) => item.textContent);
 const dialog = () => screen.getByRole("dialog");
 const field = (label: string) => within(dialog()).getByLabelText(label);
-/** The box beside a colour menu that shows the colour chosen. */
-const swatch = (menu: HTMLElement) => menu.closest(".eh-colour-choice")!.querySelector<HTMLElement>(".eh-swatch")!;
+/** The swatch on a colour picker's button, showing the colour chosen. */
+const swatch = (picker: HTMLElement) => picker.querySelector<HTMLElement>(".eh-swatch")!;
+/** Opens a colour picker and chooses a colour in its list. */
+function pick(picker: HTMLElement, name: string) {
+  fireEvent.click(picker);
+  fireEvent.click(within(screen.getByRole("listbox")).getByRole("option", { name }));
+}
 
 function columnMenu(view: HTMLElement, name: string) {
   fireEvent.click(more(view, name));
@@ -185,12 +190,14 @@ describe("a board's cards", () => {
     fireEvent.click(titleButton(view, "Draft"));
     fireEvent.change(field(t("board.card.summary")), { target: { value: " Everything turns. " } });
     fireEvent.change(field(t("board.card.column")), { target: { value: "todo" } });
-    const colour = field(t("board.card.colour"));
-    // The box beside the colour menu shows the colour chosen as the menu changes: none, then vermilion.
+    const colour = within(dialog()).getByRole("combobox", { name: t("board.card.colour") });
+    // The colour picker shows the colour chosen with its swatch: none, then vermilion.
+    expect(colour).toHaveTextContent(t("board.card.noColour"));
     expect(swatch(colour)).toHaveAttribute("aria-hidden", "true");
     expect(swatch(colour)).toHaveAttribute("data-none", "true");
     expect(swatch(colour).style.background).toBe("");
-    fireEvent.change(colour, { target: { value: "5" } });
+    pick(colour, t("common.colour.vermilion"));
+    expect(colour).toHaveTextContent(t("common.colour.vermilion"));
     expect(swatch(colour)).not.toHaveAttribute("data-none");
     expect(swatch(colour).style.background).toBe("var(--eh-colour-5)");
     fireEvent.click(within(dialog()).getByRole("button", { name: t("common.save") }));
@@ -209,7 +216,7 @@ describe("a board's cards", () => {
 
     fireEvent.keyDown(titleButton(view, "Draft"), { key: "Enter" });
     expect(swatch(field(t("board.card.colour"))).style.background).toBe("var(--eh-colour-5)");
-    fireEvent.change(field(t("board.card.colour")), { target: { value: "" } });
+    pick(field(t("board.card.colour")), t("board.card.noColour"));
     expect(swatch(field(t("board.card.colour")))).toHaveAttribute("data-none", "true");
     fireEvent.change(field(t("board.card.column")), { target: { value: "" } });
     fireEvent.submit(dialog());

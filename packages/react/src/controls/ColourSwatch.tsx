@@ -8,8 +8,8 @@ function isPaletteColour(colour: number | null): colour is number {
 
 /**
  * A palette colour as a small box, following the theme; hidden from assistive technology, so its colour's
- * name is always written beside it (in the text or the menu it sits by). No colour, or one outside the
- * palette, draws an empty dashed box. Beside a colour menu, it shows the colour chosen as the menu changes.
+ * name is always written beside it (in the text, or the colour picker and its list). No colour, or one outside
+ * the palette, draws an empty dashed box.
  */
 export function ColourSwatch({ colour, className }: { colour: number | null; className?: string }) {
   const shown = isPaletteColour(colour);
@@ -23,7 +23,7 @@ export function ColourSwatch({ colour, className }: { colour: number | null; cla
   );
 }
 
-/** A colour menu's value as a colour: "" (no colour) is null, a palette index its number. */
+/** A colour as a form keeps it, as a colour: "" (no colour) is null, a palette index its number. */
 export function menuColour(value: string): number | null {
   return value === "" ? null : Number(value);
 }

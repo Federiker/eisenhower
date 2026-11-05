@@ -2,7 +2,8 @@ import type { Board, BoardCard, Problem } from "@eisenhower/model";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { Button } from "../controls/Button";
-import { ColourSwatch, menuColour } from "../controls/ColourSwatch";
+import { ColourPicker } from "../controls/ColourPicker";
+import { menuColour } from "../controls/ColourSwatch";
 import { InlineQuestion } from "../controls/InlineQuestion";
 import { Notice } from "../controls/Notice";
 import { Select } from "../controls/Select";
@@ -10,7 +11,6 @@ import { TextField } from "../controls/TextField";
 import { TreeDialog } from "../controls/TreeDialog";
 import type { MessageKey } from "../strings/en-GB";
 import { useTranslate } from "../strings/translate";
-import { PALETTE } from "../theme/palette";
 import { type CardDraft, type CardProblem, cardDraft, cardFromDraft } from "./draft";
 
 const CARD_PROBLEM_LABELS = {
@@ -166,22 +166,14 @@ export function CardDialog({
           </div>
           <div className="eh-board-field">
             <label htmlFor={`${id}-colour`}>{t("board.card.colour")}</label>
-            <span className="eh-colour-choice">
-              <ColourSwatch className="eh-board-swatch" colour={menuColour(draft.colour)} />
-              <Select
-                id={`${id}-colour`}
-                value={draft.colour}
-                disabled={readOnly}
-                onChange={(event) => edit({ colour: event.target.value })}
-              >
-                <option value="">{t("board.card.noColour")}</option>
-                {PALETTE.map((option, value) => (
-                  <option key={option.name} value={String(value)}>
-                    {t(option.name)}
-                  </option>
-                ))}
-              </Select>
-            </span>
+            <ColourPicker
+              id={`${id}-colour`}
+              value={menuColour(draft.colour)}
+              allowNone
+              noneLabel={t("board.card.noColour")}
+              disabled={readOnly}
+              onChange={(colour) => edit({ colour: colour === null ? "" : String(colour) })}
+            />
           </div>
         </div>
       </div>

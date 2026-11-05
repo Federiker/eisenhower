@@ -111,7 +111,7 @@ focus goes to.
 ## The card dialog
 
 Without `onOpenCard`, a card opens in a modal dialog: its title, summary,
-column and colour (with a swatch beside it). Save lists every reason it
+column and colour (a colour picker, its swatch and name on its button). Save lists every reason it
 cannot save (a blank or too long title, a summary too long, a column no
 longer there), else saves and closes, the focus on the card; a card given
 another column goes to its end. Cancel or Escape discards the changes,

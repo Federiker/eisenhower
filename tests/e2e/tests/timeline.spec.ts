@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { openApp } from "./app";
+import { openApp, saved } from "./app";
 
 test("shows the Dates sample with BCE and approximate dates, and the Sequence one", async ({ page }) => {
   const errors = await openApp(page, "Timeline");
@@ -38,6 +38,18 @@ test("folds and unfolds a category's entries in the table with the keyboard", as
   await expect(page.getByRole("button", { name: /^Medicine: The Hippocratic writings/ })).toBeVisible();
   await page.keyboard.press("Enter");
   await expect(hippocrates).toContainText("c. 430 BCE");
+});
+
+test("recolours a category with its colour picker, which saves the colour chosen at once", async ({ page }) => {
+  await openApp(page, "Timeline");
+  const picker = page.getByRole("combobox", { name: "Colour: Medicine" });
+  await expect(picker).toHaveText("Vermilion");
+  await picker.click();
+  await page.getByRole("listbox", { name: "Colour: Medicine" }).getByRole("option", { name: "Bluish green" }).click();
+  await expect(page.getByRole("listbox")).toHaveCount(0);
+  await expect(picker).toHaveText("Bluish green");
+  await expect(picker).toBeFocused();
+  await saved(page);
 });
 
 test("zooms the drawing in and back to its width", async ({ page }) => {

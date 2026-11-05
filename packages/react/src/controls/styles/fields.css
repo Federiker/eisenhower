@@ -13,9 +13,9 @@
 }
 
 /*
- * ColourSwatch: a palette colour as a small box, dashed and empty for no colour; beside a colour menu
- * (.eh-colour-choice) it shows the colour chosen. Forced colours draw every palette colour in the text colour
- * and would empty the box, so it keeps its own fill there: a filled box is a colour, a dashed one none.
+ * ColourSwatch: a palette colour as a small box, dashed and empty for no colour. Forced colours draw every
+ * palette colour in the text colour and would empty the box, so it keeps its own fill there: a filled box is a
+ * colour, a dashed one none.
  */
 .eh-swatch {
   display: inline-block;
@@ -29,16 +29,88 @@
   background: transparent;
   border-style: dashed;
 }
-.eh-colour-choice {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.eh-colour-choice select {
-  flex: 1;
-}
 @media (forced-colors: active) {
   .eh-swatch {
     forced-color-adjust: none;
+  }
+}
+
+/*
+ * ColourPicker: a field-like button with the colour's swatch, its name and a chevron, and its list, fixed under
+ * (or above) it so that a dialog's scrolling does not cut it off. The chosen option is ticked, the current one
+ * highlighted.
+ */
+.eh-colour-picker {
+  display: inline-flex;
+  min-width: 0;
+}
+.eh-colour-picker-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: start;
+  cursor: pointer;
+}
+.eh-colour-picker-button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.eh-colour-picker-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eh-colour-picker-chevron {
+  flex-shrink: 0;
+  width: 10px;
+  height: 6px;
+}
+.eh-colour-picker-list {
+  position: fixed;
+  z-index: 60;
+  box-sizing: border-box;
+  margin: 2px 0;
+  padding: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--eh-panel);
+  color: var(--eh-ink);
+  border: 1px solid var(--eh-muted);
+  border-radius: var(--eh-radius);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 20%);
+  font: calc(13px * var(--eh-scale)) / 1.4 var(--eh-font);
+}
+.eh-colour-picker-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 24px;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.eh-colour-picker-option[data-active="true"] {
+  background: var(--eh-selected);
+}
+/* The chosen colour is ticked, not told by its highlight alone (screen readers say it is selected). */
+.eh-colour-picker-option[aria-selected="true"]::before {
+  content: "✓" / "";
+  position: absolute;
+  left: 8px;
+}
+/*
+ * Forced colours: the current option is drawn as the system draws a highlighted one, without the backplate the
+ * browser would put behind its name (which would hide the highlighted text).
+ */
+@media (forced-colors: active) {
+  .eh-colour-picker-option[data-active="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
   }
 }

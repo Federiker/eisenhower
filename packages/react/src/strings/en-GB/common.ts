@@ -23,6 +23,7 @@ export const common = {
   "common.colour.vermilion": "Vermilion",
   "common.colour.reddishPurple": "Reddish purple",
   "common.colour.black": "Black",
+  "common.colour.none": "None",
 
   "common.keys.focusUp": "Focus the item above",
   "common.keys.focusDown": "Focus the item below",

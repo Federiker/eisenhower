@@ -110,3 +110,34 @@ test("adds cards at a column's end from the field at its foot", async ({ page })
   await expect(cards.last()).toContainText("Paint the shed");
   await expect(cards.nth(-2)).toContainText("Fix the gate");
 });
+
+test("picks a card's colour in the colour picker, its list drawn whole over the dialog", async ({ page }) => {
+  await openApp(page, "Board");
+  const board = page.getByRole("region", { name: "Board" });
+  await board.getByRole("button", { name: "Hire a van", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Hire a van" });
+  const picker = dialog.getByRole("combobox", { name: "Colour" });
+  await picker.click();
+  const list = page.getByRole("listbox", { name: "Colour" });
+  await expect(list.getByRole("option")).toHaveCount(9);
+  // Every option is drawn inside the window, none cut off by the dialog's edges.
+  const size = page.viewportSize()!;
+  for (const option of await list.getByRole("option").all()) {
+    const box = (await option.boundingBox())!;
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(size.height);
+  }
+  await expect(list.getByRole("option", { name: "Vermilion" })).toBeVisible();
+  // Escape closes the list and leaves the dialog open, the focus on the picker.
+  await picker.press("Escape");
+  await expect(list).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  await expect(picker).toBeFocused();
+  await picker.press("v");
+  await picker.press("Enter");
+  await expect(picker).toHaveText("Vermilion");
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(board.getByRole("listitem").filter({ hasText: "Hire a van" })).toContainText("Vermilion");
+  await saved(page);
+});

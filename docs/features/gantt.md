@@ -147,8 +147,8 @@ it).
 
 The built-in task dialog edits the name, the first and last day (date
 fields), the milestone switch (which disables the end), the percentage
-done, the colour (a menu with a box beside it showing the colour chosen,
-as the board's card dialog has), the group and the tasks it depends on: those that depend
+done, the colour (the colour picker, None included, as the board's card
+dialog has), the group and the tasks it depends on: those that depend
 on it, through others too, cannot be chosen. Save stores it all at once,
 saying why when it is refused; Cancel and Escape change nothing.
 
