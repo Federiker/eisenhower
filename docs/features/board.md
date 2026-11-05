@@ -138,8 +138,9 @@ adds none of its own.
 
 ## Dragging
 
-A card is dragged onto a card (it goes before it), onto a column (it goes at
-its end) or onto the No column offered while it is dragged; a column's
+A card is dragged onto a card (it goes before it), onto a column, its
+heading included (it goes at its end) or onto the No column offered while
+it is dragged; a column's
 heading onto another (it takes its place). The place it would go is drawn: a
 line above the card or heading, a border round the column. A drag that ends
 without a drop changes nothing. Drags from elsewhere are not taken.
@@ -147,7 +148,9 @@ without a drop changes nothing. Drags from elsewhere are not taken.
 The drags are pointer drags (the owner's decision of 5 November 2026), not
 the browser's drag and drop, which a Tauri window catches for dropped files
 on Windows: they work in any host without a window setting. Escape cancels
-one, and a press without a move is still a click.
+one, a press without a move is still a click (the click that ends a drag
+opens nothing), and a drag does not start in a text field or the question
+asked before a delete.
 
 ## Accessibility
 

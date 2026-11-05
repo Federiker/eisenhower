@@ -3,78 +3,65 @@
  * a card is dragged and it has none, offered after the other columns on the board (first in the list); a card
  * dropped there makes it first. jerome's 6cece75, checked case by case.
  */
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 
-import {
-  BOARD,
-  card,
-  cardOf,
-  columns,
-  drag,
-  groups,
-  layout,
-  NO_LOOSE,
-  renderBoard,
-  t,
-  tick,
-  titleButton,
-  transfer,
-} from "./host";
+import { drag, moveOver, nudge, press, release } from "../pointer";
+import { BOARD, card, cardOf, columns, groups, headingOf, layout, NO_LOOSE, renderBoard, t, titleButton } from "./host";
 
 const NO_COLUMN = t("board.noColumn");
 const noColumns = (view: HTMLElement) => within(view).queryAllByRole("region", { name: NO_COLUMN });
 
 describe("the No column column on the board", () => {
-  it("is offered after the columns while a card is dragged, and once dropped there it is first (jerome 6cece75)", async () => {
+  it("is offered after the columns while a card is dragged, and once dropped there it is first (jerome 6cece75)", () => {
     const { view, board } = renderBoard();
     // Moving the only loose card away leaves no No column.
     drag(cardOf(view, "Ideas"), cardOf(view, "Draft"));
     expect(layout(board())[0]).toEqual(["-"]);
     expect(columns(view)).toEqual(["To do", "Doing", "Done"]);
 
-    const dataTransfer = transfer();
-    fireEvent.dragStart(cardOf(view, "Review"), { dataTransfer });
-    const outside = await within(view).findByRole("region", { name: NO_COLUMN });
+    const review = cardOf(view, "Review");
+    press(review);
+    moveOver(review, null);
+    const outside = within(view).getByRole("region", { name: NO_COLUMN });
     expect(outside).toHaveClass("eh-board-column");
     expect(outside).toHaveTextContent(t("board.dropOutside"));
     expect(columns(view)).toEqual(["To do", "Doing", "Done", NO_COLUMN]);
-    fireEvent.dragOver(outside, { dataTransfer });
+    moveOver(review, within(outside).getByText(t("board.dropOutside")));
     expect(outside).toHaveAttribute("data-drop", "inside");
-    fireEvent.drop(outside, { dataTransfer });
+    release(review);
     expect(layout(board())[0]).toEqual(["-", "Review"]);
     expect(columns(view)).toEqual([NO_COLUMN, "To do", "Doing", "Done"]);
     expect(noColumns(view)).toHaveLength(1);
+    expect(titleButton(view, "Review")).toHaveFocus();
   });
 
-  it("stays first while its only card is the one dragged, and goes once that card is dropped elsewhere", async () => {
+  it("stays first while its only card is the one dragged, and goes once that card is dropped elsewhere", () => {
     const { view, board } = renderBoard();
     expect(columns(view)).toEqual([NO_COLUMN, "To do", "Doing", "Done"]);
-    const dataTransfer = transfer();
     const ideas = cardOf(view, "Ideas");
-    fireEvent.dragStart(ideas, { dataTransfer });
-    await act(tick);
+    press(ideas);
+    moveOver(ideas, null);
     expect(columns(view)).toEqual([NO_COLUMN, "To do", "Doing", "Done"]);
     expect(noColumns(view)).toHaveLength(1);
     // The card is still in it, not a notice to drop one there.
     expect(within(noColumns(view)[0]!).queryByText(t("board.dropOutside"))).not.toBeInTheDocument();
-    const done = within(view).getByRole("region", { name: "Done" });
-    fireEvent.dragOver(done, { dataTransfer });
-    fireEvent.drop(done, { dataTransfer });
-    fireEvent.dragEnd(ideas, { dataTransfer });
+    moveOver(ideas, within(view).getByRole("region", { name: "Done" }));
+    release(ideas);
     expect(layout(board())[3]).toEqual(["Done", "Ideas"]);
     expect(columns(view)).toEqual(["To do", "Doing", "Done"]);
   });
 
-  it("is the only column of a board without columns, first, and not offered twice while a card is dragged", async () => {
+  it("is the only column of a board without columns, first, and not offered twice while a card is dragged", () => {
     const { view } = renderBoard({
       initial: { columns: [], cards: [card("a", "Alpha", null), card("b", "Beta", null)] },
     });
     expect(columns(view)).toEqual([NO_COLUMN]);
     expect(within(noColumns(view)[0]!).getByRole("heading", { name: NO_COLUMN })).toBeInTheDocument();
-    fireEvent.dragStart(cardOf(view, "Alpha"), { dataTransfer: transfer() });
-    await act(tick);
+    const alpha = cardOf(view, "Alpha");
+    press(alpha);
+    moveOver(alpha, null);
     expect(columns(view)).toEqual([NO_COLUMN]);
-    fireEvent.dragEnd(cardOf(view, "Alpha"));
+    release(alpha);
     expect(columns(view)).toEqual([NO_COLUMN]);
   });
 
@@ -84,55 +71,61 @@ describe("the No column column on the board", () => {
     expect(within(view).getByText(t("board.empty"))).toBeInTheDocument();
   });
 
-  it("is not offered while a column is dragged", async () => {
+  it("is not offered while a column is dragged", () => {
     const { view, board } = renderBoard({ initial: NO_LOOSE });
-    const heading = within(view).getByRole("region", { name: "Done" }).querySelector(".eh-board-column-heading")!;
-    const dataTransfer = transfer();
-    fireEvent.dragStart(heading, { dataTransfer });
-    await act(tick);
+    const heading = headingOf(view, "Done");
+    press(heading);
+    moveOver(heading, null);
     expect(noColumns(view)).toHaveLength(0);
     // A dragged column is not taken by a column's card area either.
     const doing = within(view).getByRole("region", { name: "Doing" });
-    fireEvent.dragOver(doing, { dataTransfer });
+    moveOver(heading, doing);
     expect(doing).not.toHaveAttribute("data-drop");
-    const target = within(view).getByRole("region", { name: "To do" }).querySelector(".eh-board-column-heading")!;
-    fireEvent.dragOver(target, { dataTransfer });
+    const target = headingOf(view, "To do");
+    moveOver(heading, target);
     expect(target).toHaveAttribute("data-drop", "before");
-    fireEvent.drop(target, { dataTransfer });
-    fireEvent.dragEnd(heading, { dataTransfer });
+    release(heading);
     expect(board().columns.map((column) => column.name)).toEqual(["Done", "To do", "Doing"]);
     expect(noColumns(view)).toHaveLength(0);
   });
 
-  it("goes when the drag ends without a drop (the pointer let go elsewhere, or Escape), changing nothing", async () => {
+  it("goes when the drag ends without a drop (the pointer let go elsewhere, or Escape), changing nothing", () => {
     const { view, onChange } = renderBoard({ initial: NO_LOOSE });
     const review = cardOf(view, "Review");
-    const dataTransfer = transfer();
-    fireEvent.dragStart(review, { dataTransfer });
-    const outside = await within(view).findByRole("region", { name: NO_COLUMN });
-    fireEvent.dragOver(outside, { dataTransfer });
-    fireEvent.dragLeave(outside, { dataTransfer });
+    press(review);
+    moveOver(review, null);
+    const outside = within(view).getByRole("region", { name: NO_COLUMN });
+    moveOver(review, outside);
+    moveOver(review, document.body);
     expect(outside).not.toHaveAttribute("data-drop");
-    // A browser ends a drag cancelled with Escape, or let go outside any target, with dragend alone.
-    fireEvent.dragEnd(review, { dataTransfer });
+    release(review);
     expect(noColumns(view)).toHaveLength(0);
+    expect(columns(view)).toEqual(["To do", "Doing", "Done"]);
+
+    press(review);
+    moveOver(review, null);
+    moveOver(review, within(view).getByRole("region", { name: NO_COLUMN }));
+    expect(within(view).getByRole("region", { name: NO_COLUMN })).toHaveAttribute("data-drop", "inside");
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(noColumns(view)).toHaveLength(0);
+    release(review);
     expect(columns(view)).toEqual(["To do", "Doing", "Done"]);
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("is shown only once the drag has begun, and not at all when it ended first", async () => {
+  it("is shown only once the press has become a drag, and not at all for a click", () => {
     const { view } = renderBoard({ initial: NO_LOOSE });
     const review = cardOf(view, "Review");
-    fireEvent.dragStart(review, { dataTransfer: transfer() });
-    // Not in the dragstart itself: changing the page while a drag starts would end it.
+    press(review);
+    // Less than 4 pixels is not yet a drag.
+    fireEvent.pointerMove(review, { clientX: 12, clientY: 13, pointerId: 1 });
     expect(noColumns(view)).toHaveLength(0);
-    await act(tick);
+    moveOver(review, null);
     expect(columns(view)).toEqual(["To do", "Doing", "Done", NO_COLUMN]);
-    fireEvent.dragEnd(review);
+    release(review);
+    expect(noColumns(view)).toHaveLength(0);
 
-    fireEvent.dragStart(review, { dataTransfer: transfer() });
-    fireEvent.dragEnd(review);
-    await act(tick);
+    nudge(review);
     expect(noColumns(view)).toHaveLength(0);
   });
 
@@ -155,23 +148,28 @@ describe("the No column column on the board", () => {
     expect(columns(view)).toEqual(["To do", "Doing", "Done"]);
   });
 
-  it("is never offered to a read-only board, whose cards are not draggable", () => {
+  it("is never offered to a read-only board, whose cards are not dragged", () => {
     const { view } = renderBoard({ initial: NO_LOOSE, readOnly: true });
-    expect(cardOf(view, "Review")).toHaveAttribute("draggable", "false");
+    const review = cardOf(view, "Review");
+    press(review);
+    moveOver(review, null);
+    expect(noColumns(view)).toHaveLength(0);
+    release(review);
   });
 });
 
 describe("the No column group in the list", () => {
-  it("is offered first while a card is dragged, and keeps its place once it has the card", async () => {
+  it("is offered first while a card is dragged, and keeps its place once it has the card", () => {
     const { view, board } = renderBoard({ initial: NO_LOOSE, layout: "list" });
     expect(groups(view)).toEqual(["To do", "Doing", "Done"]);
-    const dataTransfer = transfer();
-    fireEvent.dragStart(cardOf(view, "Review"), { dataTransfer });
-    const outside = await within(view).findByRole("region", { name: NO_COLUMN });
+    const review = cardOf(view, "Review");
+    press(review);
+    moveOver(review, null);
+    const outside = within(view).getByRole("region", { name: NO_COLUMN });
     expect(outside).not.toHaveClass("eh-board-column");
     expect(groups(view)).toEqual([NO_COLUMN, "To do", "Doing", "Done"]);
-    fireEvent.dragOver(outside, { dataTransfer });
-    fireEvent.drop(outside, { dataTransfer });
+    moveOver(review, outside);
+    release(review);
     expect(layout(board())[0]).toEqual(["-", "Review"]);
     expect(groups(view)).toEqual([NO_COLUMN, "To do", "Doing", "Done"]);
   });

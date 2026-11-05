@@ -1,5 +1,5 @@
 import type { Board as BoardValue, BoardCard } from "@eisenhower/model";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { useState } from "react";
 import { type Mock, vi } from "vitest";
 
@@ -97,20 +97,6 @@ export const titleButton = (view: HTMLElement, name: string) =>
 export const cardOf = (view: HTMLElement, name: string) => titleButton(view, name).closest("li") as HTMLElement;
 export const announcement = () => screen.getByRole("status").textContent?.trim();
 
-export const transfer = (): { setData: () => void; effectAllowed: string; dropEffect: string } => ({
-  setData: () => undefined,
-  effectAllowed: "",
-  dropEffect: "",
-});
-
-/** A whole drag: start, over and drop on the target, end. */
-export function drag(from: Element, to: Element) {
-  const dataTransfer = transfer();
-  fireEvent.dragStart(from, { dataTransfer });
-  fireEvent.dragOver(to, { dataTransfer });
-  fireEvent.drop(to, { dataTransfer });
-  fireEvent.dragEnd(from, { dataTransfer });
-}
-
-/** Lets a timer of 0 ms run (the No column shown after a drag has begun). */
-export const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+/** A column's heading, by the column's name: what a column is dragged by. */
+export const headingOf = (view: HTMLElement, name: string) =>
+  within(view).getByRole("region", { name }).querySelector<HTMLElement>(".eh-board-column-heading")!;

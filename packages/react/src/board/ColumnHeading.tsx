@@ -5,7 +5,6 @@ import { EditableText } from "../controls/EditableText";
 import { IconButton } from "../controls/IconButton";
 import { Notice } from "../controls/Notice";
 import { useTranslate } from "../strings/translate";
-import type { DragHandlers } from "./CardItem";
 import { MoreIcon, PencilIcon } from "./icons";
 
 /**
@@ -25,7 +24,7 @@ export function ColumnHeading({
   onKeyDown,
   onMenu,
   onMore,
-  drag,
+  moving,
   children,
 }: {
   column: BoardColumn;
@@ -41,7 +40,8 @@ export function ColumnHeading({
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
   onMenu: (event: MouseEvent<HTMLElement>) => void;
   onMore: (button: HTMLButtonElement) => void;
-  drag: DragHandlers;
+  /** Whether the column is the one being dragged by its heading. */
+  moving: boolean;
   /** Shown under the heading, such as the question before the column is deleted. */
   children?: ReactNode;
 }) {
@@ -54,7 +54,7 @@ export function ColumnHeading({
       data-drop={drop ? "before" : undefined}
       onKeyDown={onKeyDown}
       onContextMenu={onMenu}
-      {...drag}
+      data-moving={moving ? "true" : undefined}
     >
       <EditableText
         className="eh-board-column-name"
