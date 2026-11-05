@@ -535,12 +535,14 @@ function GanttView({
     const after = focused?.startsWith("task:") && inGroup === undefined ? taskOf(idOf(focused)) : undefined;
     const groupId = inGroup ?? (after ? after.groupId : focused?.startsWith("group:") ? idOf(focused) : null);
     const start = after ? addDays(after.end, 1) : today;
+    // A task made in a group takes the group's colour.
     const task = blankGanttTask(
       newId(),
       freeName(value.tasks, t("gantt.newTaskName")),
       start,
       addDays(start, 4),
       groupId,
+      groupId === null ? null : (groupOf(groupId)?.colour ?? null),
     );
     const place = after ? ganttTaskPlace(value, after.id) : null;
     const result = addGanttTask(value, task, place ? place.index + 1 : undefined);
@@ -555,6 +557,10 @@ function GanttView({
     if (!apply(addGanttGroup(value, id, freeName(value.groups, t("gantt.newGroupName"))))) return;
     setFocusKey(groupKey(id));
     setRenaming(groupKey(id));
+  }
+
+  function beginRename(rowKey: string) {
+    if (!readOnly) setRenaming(rowKey);
   }
 
   function rename(rowKey: string, name: string | null) {
@@ -632,7 +638,7 @@ function GanttView({
 
   // The rows' bridge is made once; it calls the latest of these through a ref, so the rows never draw again
   // only because the chart's own functions are new.
-  const own = { rowKeyDown, open, setCollapsed, isCollapsed, moveDays, rename, setMenu, setFocusKey };
+  const own = { rowKeyDown, open, setCollapsed, isCollapsed, moveDays, rename, beginRename, setMenu, setFocusKey };
   const linkHandlers = { linkMove, linkEnd, setLink, drawingPoint };
   const latest = useRef({ ...own, ...linkHandlers });
   latest.current = { ...own, ...linkHandlers };
@@ -656,6 +662,7 @@ function GanttView({
       },
       drag: (id, mode, days) => latest.current.moveDays(id, mode, days),
       rename: (rowKey, name) => latest.current.rename(rowKey, name),
+      beginRename: (rowKey) => latest.current.beginRename(rowKey),
       linkStart: (id, x, y) =>
         latest.current.setLink({ from: id, ...latest.current.drawingPoint(x, y), over: null, refusal: null }),
       linkMove: (x, y) => latest.current.linkMove(x, y),

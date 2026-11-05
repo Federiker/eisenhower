@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 
+import { ColourSwatch } from "../controls/ColourSwatch";
 import { InlineRename } from "../controls/InlineRename";
 import { isMac } from "../keyboard/shortcuts";
 import { useLocale, useTranslate } from "../strings/translate";
@@ -39,6 +40,8 @@ export type RowBridge = {
   menu: (rowKey: string, event: MouseEvent<HTMLElement>) => void;
   drag: (id: string, mode: DragMode, days: number) => void;
   rename: (rowKey: string, name: string | null) => void;
+  /** Opens a row's name for renaming in place (a double-click on it). */
+  beginRename: (rowKey: string) => void;
   /** A link drag (Ctrl, or ⌘ on macOS, held as it starts): from a task, the pointer's place, the drop, a cancel. */
   linkStart: (id: string, x: number, y: number) => void;
   linkMove: (x: number, y: number) => void;
@@ -234,7 +237,8 @@ export const TaskRow = memo(function TaskRow({
           />
         ) : (
           <>
-            <span className="eh-gantt-task-name" title={task.name}>
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut for F2, the row's rename key. */}
+            <span className="eh-gantt-task-name" title={task.name} onDoubleClick={() => bridge.beginRename(rowKey)}>
               {task.name}
             </span>
             {late && <span className="eh-gantt-badge">{t("gantt.conflictBadge")}</span>}
@@ -349,12 +353,21 @@ export const GroupRow = memo(function GroupRow({
             tabIndex={tabbable ? 0 : -1}
             ref={toggle}
             onFocus={() => bridge.focused(rowKey)}
-            onClick={() => bridge.toggle(group.id)}
+            onClick={(event) => {
+              // A pointer folds the group by its chevron only (its name renames on a double-click); a key on the
+              // button (no pointer detail) folds it from anywhere.
+              const chevron = (event.target as HTMLElement).closest(".eh-gantt-chevron");
+              if (chevron || event.detail === 0) bridge.toggle(group.id);
+            }}
+            onDoubleClick={(event) => {
+              if (!(event.target as HTMLElement).closest(".eh-gantt-chevron")) bridge.beginRename(rowKey);
+            }}
             onKeyDown={(event) => bridge.key(event, rowKey)}
           >
             <span className="eh-gantt-chevron" aria-hidden="true">
               {collapsed ? "▸" : "▾"}
             </span>
+            {group.colour != null && <ColourSwatch colour={group.colour} className="eh-gantt-group-swatch" />}
             {!renaming && <span className="eh-gantt-group-name">{group.name}</span>}
           </button>
           {renaming && (
@@ -371,10 +384,13 @@ export const GroupRow = memo(function GroupRow({
         span && (
           <span
             className="eh-gantt-summary"
-            style={{
-              left: xOfDay(geometry, span.start),
-              width: (daysBetween(span.start, span.end) + 1) * geometry.dayWidth,
-            }}
+            style={
+              {
+                left: xOfDay(geometry, span.start),
+                width: (daysBetween(span.start, span.end) + 1) * geometry.dayWidth,
+                ...(group.colour != null && { "--eh-gantt-summary": colourVar(group.colour) }),
+              } as object
+            }
           />
         )
       }

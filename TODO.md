@@ -37,7 +37,7 @@ is under **Verification** and **Awaiting owner decisions**.
     every colour field.
   - [ ] Gantt: a group's colour (optional stored field, Colour… in its
     menu, its summary bar), new tasks in it take it.
-  - [ ] Gantt: double-click a task's or group's name to rename; only the
+  - [x] Gantt: double-click a task's or group's name to rename; only the
     chevron folds on a click.
   - [ ] Todo and board: pointer drags (no HTML5 drag and drop), a drop
     line, the matrix reordering within and across quadrants.

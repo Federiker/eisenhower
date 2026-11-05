@@ -158,7 +158,8 @@ Drag a bar to move it and its ends to resize it, snapping to whole days on
 every scale; the bar shows its new days in its tooltip while dragged, and
 only that row draws until the drop (the arrows follow on the drop). Escape
 during a drag cancels it. A milestone moves and never resizes. A double
-click opens a task; a right click opens its menu (Open, Rename, Move up,
+click on a bar opens its task, and on a task's or a group's name renames
+it in place (a group folds by its chevron); a right click opens its menu (Open, Rename, Move up,
 Move down, Move to group…, Depends on…, Delete task) or a group's
 (Collapse or Expand, Rename, Move up, Move down, New task in this group,
 Delete group). Ctrl+wheel changes the scale.

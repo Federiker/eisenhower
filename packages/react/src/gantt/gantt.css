@@ -368,7 +368,7 @@
   position: absolute;
   top: 12px;
   height: 6px;
-  background: var(--eh-ink);
+  background: var(--eh-gantt-summary, var(--eh-ink));
 }
 .eh-gantt-summary::before,
 .eh-gantt-summary::after {
@@ -376,16 +376,16 @@
   position: absolute;
   top: 0;
   border: 5px solid transparent;
-  border-top: 6px solid var(--eh-ink);
+  border-top: 6px solid var(--eh-gantt-summary, var(--eh-ink));
   transform: translateY(6px);
 }
 .eh-gantt-summary::before {
   left: 0;
-  border-left-color: var(--eh-ink);
+  border-left-color: var(--eh-gantt-summary, var(--eh-ink));
 }
 .eh-gantt-summary::after {
   right: 0;
-  border-right-color: var(--eh-ink);
+  border-right-color: var(--eh-gantt-summary, var(--eh-ink));
 }
 
 /* The task dialog. */
@@ -501,4 +501,15 @@
   .eh-gantt-drop-line {
     border-top-color: Highlight;
   }
+}
+
+/* Only a group's chevron folds it on a click; its name is renamed on a double-click. */
+.eh-gantt-toggle {
+  cursor: default;
+}
+.eh-gantt-chevron {
+  cursor: pointer;
+}
+.eh-gantt-group-swatch {
+  flex: none;
 }
