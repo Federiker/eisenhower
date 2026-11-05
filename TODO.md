@@ -31,19 +31,6 @@ is under **Verification** and **Awaiting owner decisions**.
   - [ ] A throwaway host installs the three tarballs by URL (`bun add`) and
     the plugin by git at the tag, and builds.
 
-- [ ] Owner requests of 5 November 2026 (decisions in the gantt, board,
-  todo and timeline documents):
-  - [x] Colours: Eisenhower's own colour picker (swatches in its list) in
-    every colour field.
-  - [x] Gantt: a group's colour (optional stored field, Colour… in its
-    menu, its summary bar), new tasks in it take it.
-  - [x] Gantt: double-click a task's or group's name to rename; only the
-    chevron folds on a click.
-  - [x] Todo and board: pointer drags (no HTML5 drag and drop), a drop
-    line, the matrix reordering within and across quadrants.
-  - [x] Timeline: the entries' table grouped by category, folding.
-  - [ ] Pictures, end to end, checks.
-
 ## Verification
 
 - [ ] The demo app's window (`mise run tauri:dev`), clicked through: each
@@ -57,6 +44,8 @@ is under **Verification** and **Awaiting owner decisions**.
   window's title, and closing with unsaved changes (Save, Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
   names, roles and the announcements of moves.
+- [ ] The board's and the todo list's pointer drags in the desktop app's
+  window on Windows (WebView2), where the HTML5 drags did nothing.
 - [ ] The gantt chart's ⌘+drag link on macOS (the tests only press Ctrl),
   and its links and pushes in the Tauri window on Windows (WebView2).
 
