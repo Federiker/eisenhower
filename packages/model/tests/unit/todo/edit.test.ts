@@ -8,6 +8,7 @@ import {
   MAX_TODO_TITLE_LENGTH,
   moveItem,
   outdentItem,
+  placeItemBefore,
   removeItemTag,
   renameItem,
   setItemDone,
@@ -283,6 +284,72 @@ describe("moving an item", () => {
     expect(indentItem(LIST, "gone")).toEqual({ ok: false, reason: "missing" });
     expect(outdentItem(LIST, "b")).toEqual({ ok: false, reason: "order" });
     expect(outdentItem(LIST, "gone")).toEqual({ ok: false, reason: "missing" });
+  });
+});
+
+describe("placing an item before another, as a drop onto an item in the matrix does", () => {
+  const flags = (list: TodoList, id: string) => ({
+    urgent: find(list, id).urgent,
+    important: find(list, id).important,
+  });
+
+  it("puts it just before the other among the other's siblings, with the other's flags", () => {
+    const before = valid(ok(placeItemBefore(LIST, "c", "a")));
+    expect(titles(before)).toEqual(["Read a novel", "Paint the shed", "-Buy paint", "-Sand the walls", "Book flights"]);
+    expect(flags(before, "c")).toEqual({ urgent: false, important: true });
+
+    const intoAnother = valid(ok(placeItemBefore(LIST, "c", "b")));
+    expect(titles(intoAnother)).toEqual([
+      "Paint the shed",
+      "-Buy paint",
+      "-Sand the walls",
+      "Read a novel",
+      "Book flights",
+    ]);
+    expect(flags(intoAnother, "c")).toEqual({ urgent: true, important: true });
+    // The rest keep their flags.
+    expect(flags(intoAnother, "a")).toEqual({ urgent: false, important: true });
+  });
+
+  it("makes a subtask of an item dropped onto a subtask, and a top-level item of a subtask dropped onto one", () => {
+    const under = valid(ok(placeItemBefore(LIST, "c", "a2")));
+    expect(titles(under)).toEqual(["Paint the shed", "-Buy paint", "-Read a novel", "-Sand the walls", "Book flights"]);
+    expect(find(under, "c").parentId).toBe("a");
+    expect(flags(under, "c")).toEqual({ urgent: true, important: false });
+
+    const out = valid(ok(placeItemBefore(LIST, "a2", "b")));
+    expect(titles(out)).toEqual(["Paint the shed", "-Buy paint", "Sand the walls", "Book flights", "Read a novel"]);
+    expect(find(out, "a2").parentId).toBeNull();
+    expect(flags(out, "a2")).toEqual({ urgent: true, important: true });
+  });
+
+  it("puts an item with subtasks dropped onto a subtask before that subtask's parent, its subtasks keeping their flags", () => {
+    const list: TodoList = {
+      items: [
+        item("x", "Plan the trip", { urgent: true }),
+        item("x1", "Pack", { parentId: "x" }),
+        item("a", "Paint the shed", { important: true }),
+        item("a1", "Buy paint", { parentId: "a", important: true }),
+      ],
+    };
+    const moved = valid(ok(placeItemBefore(list, "a", "x1")));
+    expect(titles(moved)).toEqual(["Paint the shed", "-Buy paint", "Plan the trip", "-Pack"]);
+    expect(flags(moved, "a")).toEqual({ urgent: false, important: false });
+    expect(flags(moved, "a1")).toEqual({ urgent: false, important: true });
+
+    // Dropped onto its own subtask, it stays where it is and takes that subtask's flags.
+    const own = valid(ok(placeItemBefore(LIST, "a", "a2")));
+    expect(titles(own)).toEqual(titles(LIST));
+    expect(flags(own, "a")).toEqual({ urgent: true, important: false });
+  });
+
+  it("changes nothing for an item placed before itself, and refuses items that are not there", () => {
+    expect(ok(placeItemBefore(LIST, "b", "b")).items).toEqual(LIST.items);
+    expect(placeItemBefore(LIST, "gone", "b")).toEqual({ ok: false, reason: "missing" });
+    expect(placeItemBefore(LIST, "b", "gone")).toEqual({ ok: false, reason: "missing" });
+    // A subtask whose parent is missing (a list that is not valid) gives no place for an item with subtasks.
+    const broken: TodoList = { items: [...LIST.items, item("o", "Orphan", { parentId: "nobody" })] };
+    expect(placeItemBefore(broken, "a", "o")).toEqual({ ok: false, reason: "missing" });
   });
 });
 

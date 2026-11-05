@@ -1,36 +1,29 @@
 import { QUADRANTS, type Quadrant, type TodoItem } from "@eisenhower/model";
-import { type DragEvent, type ReactNode, useId } from "react";
+import { type ReactNode, useId } from "react";
 
 import { Notice } from "../controls/Notice";
 import { useTranslate } from "../strings/translate";
 import { QuickAdd } from "./QuickAdd";
 
-/** What makes an element take a dragged item: its drop handlers, and `data-drop` while one is over it. */
-export type DropZone = {
-  "data-drop": "inside" | undefined;
-  onDragOver: (event: DragEvent<HTMLElement>) => void;
-  onDragLeave: (event: DragEvent<HTMLElement>) => void;
-  onDrop: (event: DragEvent<HTMLElement>) => void;
-};
-
 /**
  * The Eisenhower matrix (decision 18): the four quadrants in a 2×2 grid, urgent on the left and important at
  * the top (Do, Schedule; Delegate, Drop). Each is a region named by its heading and described ("Urgent and
  * important"…), with its items or "Nothing here.", and a field that adds an item to it; each takes a dragged
- * item.
+ * item (`data-quadrant` says which it is to the list's drag).
  */
 export function TodoMatrix({
   quadrants,
   readOnly,
   row,
-  dropZone,
+  dropInto,
   onAdd,
 }: {
   /** The items shown in each quadrant, in order. */
   quadrants: Readonly<Record<Quadrant, readonly TodoItem[]>>;
   readOnly: boolean;
   row: (item: TodoItem) => ReactNode;
-  dropZone: (quadrant: Quadrant) => DropZone;
+  /** The quadrant a dragged item would be dropped into (drawn with a border round it), if any. */
+  dropInto: Quadrant | null;
   /** Adds an item to a quadrant: null when it was added, otherwise why not. */
   onAdd: (title: string, quadrant: Quadrant) => string | null;
 }) {
@@ -48,7 +41,7 @@ export function TodoMatrix({
             data-quadrant={quadrant}
             aria-labelledby={`${id}-${quadrant}`}
             aria-describedby={`${id}-${quadrant}-about`}
-            {...dropZone(quadrant)}
+            data-drop={dropInto === quadrant ? "inside" : undefined}
           >
             <h3 id={`${id}-${quadrant}`} className="eh-todo-quadrant-heading">
               {name}

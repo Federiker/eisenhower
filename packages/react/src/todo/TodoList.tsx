@@ -13,6 +13,7 @@ import {
   moveItem,
   newId,
   outdentItem,
+  placeItemBefore,
   type Problem,
   QUADRANTS,
   type Quadrant,
@@ -30,21 +31,22 @@ import {
   toggleItemDone,
   today as localToday,
 } from "@eisenhower/model";
-import { type DragEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { ContextMenu, type MenuItem, type MenuPlace, placeBelow } from "../controls/ContextMenu";
 import { DeleteQuestion } from "./DeleteQuestion";
 import { Notice } from "../controls/Notice";
 import { classNames } from "../controls/classNames";
 import { LiveRegion, useAnnouncer } from "../hooks/useAnnouncer";
+import { NOT_DRAGGED, usePointerDrag } from "../hooks/usePointerDrag";
 import { actionOf, shortcutsIn } from "../keyboard/shortcuts";
 import { type Translate, useTranslate } from "../strings/translate";
 import { type EisenhowerSettings, ViewRoot } from "../theme/EisenhowerProvider";
 import { type FocusAction, listNeighbour, matrixNeighbour } from "./navigation";
 import { QuickAdd } from "./QuickAdd";
-import { type RowDrag, TodoRow } from "./TodoRow";
+import { TodoRow } from "./TodoRow";
 import { TodoItemDialog } from "./TodoItemDialog";
-import { TodoMatrix, type DropZone } from "./TodoMatrix";
+import { TodoMatrix } from "./TodoMatrix";
 import { TodoToolbar } from "./TodoToolbar";
 
 /** How the todo list is shown: as a list, or as the Eisenhower matrix's four quadrants (decision 18). */
@@ -75,11 +77,11 @@ export type TodoListProps = EisenhowerSettings & {
 };
 
 const KEYS = shortcutsIn("todo");
-const DRAG_TYPE = "application/x-eisenhower-todo-item";
 
 type Menu = { id: string; place: MenuPlace; returnTo: HTMLElement | null };
 type MenuAction = "details" | "rename" | "subtask" | "up" | "down" | "indent" | "outdent" | Quadrant | "delete";
-type Drop = { before: string } | { end: true } | { quadrant: Quadrant } | null;
+/** Where a dragged item would go: just before an item, at the end of the list, or into a quadrant. */
+type Drop = { before: string } | { end: true } | { quadrant: Quadrant };
 type Focus = { item: string } | { add: string };
 
 /** The words for a title that cannot be used. */
@@ -104,7 +106,11 @@ const quadrantName = (t: Translate, quadrant: Quadrant) => t(`todo.quadrant.${qu
  * The matrix: the four quadrants (Do, Schedule, Delegate, Drop) in a 2×2 grid, urgent on the left and
  * important at the top, each a region with its heading, its description, its items (subtasks among them,
  * each saying its parent) and a field that adds an item to it. Dragging an item to a quadrant, or Alt and an
- * arrow, moves it there, which changes its flags; the order within a quadrant is the list's.
+ * arrow, moves it there, which changes its flags; the order within a quadrant is the list's, and an item
+ * dragged onto another goes just before it in that order, taking its quadrant.
+ *
+ * The drags are pointer drags (they work in a Tauri window, whose own drag and drop is for files): Escape
+ * cancels one, and a press without a move is a click.
  *
  * In both, the arrows, Home and End move the focus, Enter opens the item's details, F2 renames it, Delete
  * asks before deleting it (and what becomes of its subtasks), and the Menu key, Shift+F10, a right-click or
@@ -140,8 +146,6 @@ function TodoListContent({
   const [details, setDetails] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; nonce: number } | null>(null);
   const [focus, setFocus] = useState<Focus | null>(null);
-  const [drop, setDrop] = useState<Drop>(null);
-  const dragged = useRef<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
   const layout = layoutProp ?? ownLayout;
@@ -149,6 +153,13 @@ function TodoListContent({
   const hideDone = hideProp ?? ownHide[layout];
   const today = todayProp ?? localToday();
   const matrix = layout === "matrix";
+  const { drag, handlers: dragHandlers } = usePointerDrag<string, Drop>({
+    enabled: !readOnly,
+    pick: dragFrom,
+    place: dropAt,
+    onDrop: dropped,
+  });
+  const drop = drag?.place ?? null;
 
   /** The item's check box: its focus point. */
   const checkOf = (id: string) =>
@@ -415,74 +426,54 @@ function TodoListContent({
     }
   }
 
-  function endDrag() {
-    dragged.current = null;
-    setDrop(null);
+  /** What a press drags: the item whose row it is on (the innermost, for a subtask), not from a text field. */
+  function dragFrom(target: Element): string | null {
+    if (target.closest(NOT_DRAGGED)) return null;
+    return target.closest<HTMLElement>("[data-item-id]")?.dataset.itemId ?? null;
   }
 
-  /** The dragged item's id, once, as a drop takes it. */
-  function take(): string | null {
-    const id = dragged.current;
-    endDrag();
-    return id;
+  /** In the list, an item dropped onto another goes just before it, among its siblings (or is refused). */
+  function beforeInList(id: string, beforeId: string): EditResult<TodoData> {
+    const target = find(value, beforeId)!;
+    const siblings = todoOutline(value).filter((one) => one.parentId === target.parentId && one.id !== id);
+    return moveItem(value, id, target.parentId, siblings.indexOf(target));
   }
 
-  function dragStart(item: TodoItem) {
-    return (event: DragEvent<HTMLElement>) => {
-      event.stopPropagation();
-      dragged.current = item.id;
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData(DRAG_TYPE, item.id);
-    };
+  /**
+   * Where the element under the pointer takes a dragged item: in the list, before another item (where the
+   * list allows it) or at the end over the space after the items; in the matrix, before another item, or into
+   * the quadrant it is over.
+   */
+  function dropAt(id: string, under: Element | null): Drop | null {
+    if (!under || !root.current?.contains(under)) return null;
+    const over = under.closest<HTMLElement>("[data-item-id]")?.dataset.itemId;
+    if (matrix) {
+      if (over && over !== id) return { before: over };
+      const quadrant = under.closest<HTMLElement>("[data-quadrant]")?.dataset.quadrant as Quadrant | undefined;
+      return quadrant ? { quadrant } : null;
+    }
+    if (over) return over !== id && beforeInList(id, over).ok ? { before: over } : null;
+    return under.closest(".eh-todo-body") ? { end: true } : null;
   }
 
-  /** Dragging in the list: an item dropped on another goes just before it, among its siblings. */
-  function listDrag(item: TodoItem): RowDrag {
-    return {
-      draggable: !readOnly,
-      onDragStart: dragStart(item),
-      onDragEnd: endDrag,
-      onDragOver: (event) => {
-        if (!dragged.current) return;
-        event.preventDefault();
-        event.stopPropagation();
-        setDrop({ before: item.id });
-      },
-      onDragLeave: () => setDrop((old) => (old && "before" in old && old.before === item.id ? null : old)),
-      onDrop: (event) => {
-        if (!dragged.current) return;
-        event.preventDefault();
-        event.stopPropagation();
-        const id = take();
-        if (!id || id === item.id) return;
-        const siblings = todoOutline(value).filter((one) => one.parentId === item.parentId && one.id !== id);
-        const result = moveItem(value, id, item.parentId, siblings.indexOf(item));
-        if (result.ok) move(id, result);
-      },
-    };
+  function dropped(id: string, at: Drop) {
+    if ("quadrant" in at) moveToQuadrant(id, at.quadrant);
+    else if ("end" in at) move(id, moveItem(value, id, null, Infinity));
+    else if (matrix) placeInMatrix(id, at.before);
+    else move(id, beforeInList(id, at.before));
   }
 
-  /** A place that takes a dragged item: the end of the list, or a quadrant. */
-  function dropZone(zone: Exclude<Drop, null>, onDropped: (id: string) => void): DropZone {
-    const here = (old: Drop) => JSON.stringify(old) === JSON.stringify(zone);
-    return {
-      "data-drop": here(drop) ? "inside" : undefined,
-      onDragOver: (event: DragEvent<HTMLElement>) => {
-        if (!dragged.current) return;
-        event.preventDefault();
-        setDrop(zone);
-      },
-      onDragLeave: (event: DragEvent<HTMLElement>) => {
-        if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
-        setDrop((old) => (here(old) ? null : old));
-      },
-      onDrop: (event: DragEvent<HTMLElement>) => {
-        if (!dragged.current) return;
-        event.preventDefault();
-        const id = take();
-        if (id) onDropped(id);
-      },
-    };
+  /**
+   * In the matrix, an item dropped onto another goes just before it in the list's order and takes its
+   * quadrant; announced as a move to that quadrant, or as its new place when it stays in its own.
+   */
+  function placeInMatrix(id: string, beforeId: string) {
+    focusItem(id);
+    const result = placeItemBefore(value, id, beforeId);
+    if (!commit(result)) return;
+    const quadrant = quadrantOf(find(result.value, id)!);
+    if (quadrantOf(find(value, id)!) === quadrant) announcePlace(result.value, id);
+    else announce(t("todo.announce.quadrant", { title: find(value, id)!.title, quadrant: quadrantName(t, quadrant) }));
   }
 
   function row(item: TodoItem, subtasks?: TodoItem[]) {
@@ -507,7 +498,7 @@ function TodoListContent({
           openMenu(item.id, { left: event.clientX, top: event.clientY }, checkOf(item.id));
         }}
         onMore={(button) => openMenu(item.id, placeBelow(button), button)}
-        drag={matrix ? { draggable: !readOnly, onDragStart: dragStart(item), onDragEnd: endDrag } : listDrag(item)}
+        moving={drag?.dragged === item.id}
         subtasks={
           subtasks &&
           subtasks.length > 0 && (
@@ -536,10 +527,7 @@ function TodoListContent({
     const nested = (item: TodoItem) => item.parentId !== null && find(value, item.parentId)?.parentId === null;
     return (
       <>
-        <div
-          className="eh-todo-body"
-          {...dropZone({ end: true }, (id) => move(id, moveItem(value, id, null, Infinity)))}
-        >
+        <div className="eh-todo-body" data-drop={drop && "end" in drop ? "inside" : undefined}>
           {shown.length > 0 ? (
             <ol className="eh-todo-items" aria-label={t("todo.items")}>
               {shown
@@ -583,7 +571,7 @@ function TodoListContent({
   const detailsItem = details ? find(value, details) : undefined;
 
   return (
-    <div ref={root} className="eh-todo-content">
+    <div ref={root} className="eh-todo-content" data-dragging={drag ? "true" : undefined} {...dragHandlers}>
       <TodoToolbar
         matrix={matrix}
         onLayout={(toMatrix) => chooseLayout(toMatrix ? "matrix" : "list")}
@@ -598,7 +586,7 @@ function TodoListContent({
           quadrants={quadrantItems(value)}
           readOnly={readOnly}
           row={(item) => row(item)}
-          dropZone={(quadrant) => dropZone({ quadrant }, (id) => moveToQuadrant(id, quadrant))}
+          dropInto={drop && "quadrant" in drop ? drop.quadrant : null}
           onAdd={add}
         />
       ) : (

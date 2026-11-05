@@ -6,7 +6,7 @@ import {
   type TodoItem,
   type TodoList as TodoData,
 } from "@eisenhower/model";
-import { type DragEvent, type KeyboardEvent, type MouseEvent, type ReactNode, useId } from "react";
+import { type KeyboardEvent, type MouseEvent, type ReactNode, useId } from "react";
 
 import { Checkbox } from "../controls/Checkbox";
 import { EditableText } from "../controls/EditableText";
@@ -14,16 +14,6 @@ import { IconButton } from "../controls/IconButton";
 import { ariaKeyShortcuts } from "../keyboard/shortcuts";
 import { useLocale, useTranslate } from "../strings/translate";
 import { MoreIcon, PencilIcon } from "./icons";
-
-/** What dragging a row does: the row's drag handlers (all of them, or only the start and end). */
-export type RowDrag = {
-  draggable: boolean;
-  onDragStart: (event: DragEvent<HTMLElement>) => void;
-  onDragEnd: () => void;
-  onDragOver?: (event: DragEvent<HTMLElement>) => void;
-  onDragLeave?: () => void;
-  onDrop?: (event: DragEvent<HTMLElement>) => void;
-};
 
 /** An item's due day as the locale writes it ("2 Nov 2026"), the same day wherever the user is. */
 function useDayText(): (day: CalendarDay) => string {
@@ -51,7 +41,7 @@ export function TodoRow({
   onKeyDown,
   onMenu,
   onMore,
-  drag,
+  moving = false,
   children,
   subtasks,
 }: {
@@ -70,7 +60,8 @@ export function TodoRow({
   onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   onMenu: (event: MouseEvent<HTMLElement>) => void;
   onMore: (button: HTMLButtonElement) => void;
-  drag: RowDrag;
+  /** Whether the item is the one being dragged (the list's pointer drag starts from any part of its row). */
+  moving?: boolean;
   /** Shown under the row, such as the question before the item is deleted. */
   children?: ReactNode;
   /** The item's subtasks, as a list of their own (the list layout). */
@@ -118,7 +109,7 @@ export function TodoRow({
       data-done={item.done ? "true" : undefined}
       data-drop={drop ? "before" : undefined}
       onContextMenu={readOnly ? undefined : onMenu}
-      {...drag}
+      data-moving={moving ? "true" : undefined}
     >
       <div className="eh-todo-row">
         <Checkbox

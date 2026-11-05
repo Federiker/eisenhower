@@ -2,7 +2,7 @@ import { isCalendarDay } from "../common/days";
 import { idSchema } from "../common/ids";
 import { done, type EditResult, type Problem, refused } from "../common/result";
 import { characterCount, nameProblem } from "../common/text";
-import { hasTag, todoOutline, type Quadrant, quadrantFlags, subtasksOf } from "./items";
+import { hasTag, todoOutline, type Quadrant, quadrantFlags, quadrantOf, subtasksOf } from "./items";
 import {
   MAX_TODO_NOTES_LENGTH,
   MAX_TAG_LENGTH,
@@ -215,6 +215,25 @@ export function moveItem(list: TodoList, id: string, parentId: string | null, in
   const at = insertionIndex(rest, parentId, index);
   const moved = [{ ...item, parentId }, ...moving.slice(1)];
   return done({ items: [...rest.slice(0, at), ...moved, ...rest.slice(at)] });
+}
+
+/**
+ * Puts an item just before another in the list's order, among that one's siblings, and in its quadrant (it
+ * takes the other's urgent and important flags; its own subtasks keep theirs), as a drop onto an item in the
+ * matrix does. An item with subtasks cannot become a subtask: dropped onto one, it goes just before that
+ * subtask's parent. Refused when either item is not there.
+ */
+export function placeItemBefore(list: TodoList, id: string, beforeId: string): Result {
+  const item = find(list, id);
+  const target = find(list, beforeId);
+  if (!item || !target) return refused("missing");
+  const flagged = setItemQuadrant(list, id, quadrantOf(target));
+  if (!flagged.ok || id === beforeId) return flagged;
+  const anchor = target.parentId !== null && subtasksOf(list, id).length > 0 ? find(list, target.parentId) : target;
+  if (!anchor) return refused("missing");
+  if (anchor.id === id) return flagged;
+  const siblings = siblingsOf(list, anchor).filter((one) => one.id !== id);
+  return moveItem(flagged.value, id, anchor.parentId, siblings.indexOf(anchor));
 }
 
 /** The items beside an item: the top level's, or its parent's subtasks. */

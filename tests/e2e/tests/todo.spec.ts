@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { openApp, saved } from "./app";
+import { dragWithMouse, openApp, saved } from "./app";
 
 test("shows the sample list with its subtasks, tags and overdue items", async ({ page }) => {
   const errors = await openApp(page, "Todo");
@@ -49,7 +49,7 @@ test("drags an item between the matrix's quadrants, and moves one with Alt and t
   const item = quadrant("Drop")
     .getByRole("listitem")
     .filter({ has: page.getByRole("checkbox", { name: "Sort the old magazines" }) });
-  await item.dragTo(quadrant("Do").getByRole("heading", { name: "Do" }));
+  await dragWithMouse(page, item, quadrant("Do").getByRole("heading", { name: "Do" }));
   await expect(quadrant("Do").getByRole("checkbox", { name: "Sort the old magazines" })).toBeVisible();
   await expect(quadrant("Drop").getByRole("checkbox", { name: "Sort the old magazines" })).toHaveCount(0);
 
@@ -57,5 +57,36 @@ test("drags an item between the matrix's quadrants, and moves one with Alt and t
   await quadrant("Do").getByRole("checkbox", { name: "Sort the old magazines" }).focus();
   await page.keyboard.press("Alt+ArrowRight");
   await expect(quadrant("Schedule").getByRole("checkbox", { name: "Sort the old magazines" })).toBeFocused();
+  await saved(page);
+});
+
+test("drags an item in the list before another, and a press without a move still ticks it", async ({ page }) => {
+  await openApp(page, "Todo");
+  const items = page.getByRole("list", { name: "Items" });
+  const seeds = items.getByRole("checkbox", { name: "Look at seed catalogues" });
+  const tax = items.getByRole("listitem").filter({ has: page.getByRole("checkbox", { name: "Send the tax return" }) });
+  await dragWithMouse(page, seeds, tax);
+  await expect(items.getByRole("checkbox").first()).toHaveAccessibleName("Look at seed catalogues");
+  // The click as the mouse was let go on the check box did not tick it.
+  await expect(seeds).not.toBeChecked();
+  await expect(seeds).toBeFocused();
+  await expect(page.getByRole("status").first()).toContainText("Look at seed catalogues: 1 of");
+  await seeds.click();
+  await expect(seeds).toBeChecked();
+  await saved(page);
+});
+
+test("drags an item in the matrix onto another, before it and into its quadrant", async ({ page }) => {
+  await openApp(page, "Todo");
+  await page.getByRole("button", { name: "Matrix", exact: true }).click();
+  const quadrant = (name: string) => page.getByRole("region", { name, exact: true });
+  const row = (title: string) =>
+    page.getByRole("listitem").filter({ has: page.getByRole("checkbox", { name: title }) });
+  await dragWithMouse(page, row("Return the parcel"), row("Plan a first-aid course"));
+  const schedule = quadrant("Schedule").getByRole("checkbox");
+  await expect(schedule.first()).toHaveAccessibleName("Return the parcel");
+  await expect(schedule.nth(1)).toHaveAccessibleName("Plan a first-aid course");
+  await expect(quadrant("Delegate").getByRole("checkbox", { name: "Return the parcel" })).toHaveCount(0);
+  await expect(page.getByRole("status").first()).toContainText("Return the parcel: moved to Schedule");
   await saved(page);
 });

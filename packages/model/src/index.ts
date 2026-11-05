@@ -152,6 +152,7 @@ export {
   moveItem,
   type NewTodoItem,
   outdentItem,
+  placeItemBefore,
   removeItemTag,
   renameItem,
   setItemDone,

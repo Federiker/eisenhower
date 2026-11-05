@@ -80,13 +80,3 @@ export const menuTexts = (menu: HTMLElement) =>
   within(menu)
     .getAllByRole("menuitem")
     .map((one) => one.textContent);
-
-/** A drag's data, shared by its events. */
-export function dataTransfer() {
-  const data = new Map<string, string>();
-  return {
-    effectAllowed: "",
-    setData: (type: string, value: string) => data.set(type, value),
-    getData: (type: string) => data.get(type) ?? "",
-  };
-}

@@ -67,6 +67,14 @@
 .eh-todo-item[data-drop="before"] {
   border-top-color: var(--eh-accent);
 }
+/* While an item is dragged (a pointer drag): no text is chosen on the way, and the item moved is faint. */
+.eh-todo-content[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+.eh-todo-item[data-moving] {
+  opacity: 0.55;
+}
 .eh-todo-row {
   display: flex;
   flex-wrap: wrap;
@@ -213,5 +221,14 @@
 @media (forced-colors: active) {
   .eh-todo-due[data-overdue] {
     text-decoration: underline;
+  }
+  /* No shadows in forced colours: the line where a dragged item would go is a border. */
+  .eh-todo-item[data-drop="before"],
+  .eh-todo-quadrant .eh-todo-item[data-drop="before"] {
+    border-top: 3px solid Highlight;
+  }
+  .eh-todo-body[data-drop="inside"],
+  .eh-todo-quadrant[data-drop="inside"] {
+    border-color: Highlight;
   }
 }
