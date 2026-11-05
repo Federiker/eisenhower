@@ -35,6 +35,7 @@ export const timeline = {
   "timeline.entriesEmpty": "No entries yet. Choose New entry to add one.",
   "timeline.entriesHelp":
     "Choose a title to open the entry; right-click it, or use the Menu key, to edit or delete it. Delete also deletes it.",
+  "timeline.entriesGroup": { one: "{name}, {count} entry", other: "{name}, {count} entries" },
   "timeline.when": "When",
   "timeline.newEntry": "New entry",
   "timeline.needCategory": "Add a category first: every entry belongs to one.",

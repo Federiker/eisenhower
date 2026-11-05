@@ -19,6 +19,27 @@ test("shows the Dates sample with BCE and approximate dates, and the Sequence on
   expect(errors).toEqual([]);
 });
 
+test("folds and unfolds a category's entries in the table with the keyboard", async ({ page }) => {
+  await openApp(page, "Timeline");
+  const table = page.getByRole("table");
+  const astronomy = table.getByRole("button", { name: "Astronomy, 6 entries" });
+  const medicine = table.getByRole("button", { name: "Medicine, 5 entries" });
+  const hippocrates = table.getByRole("row", { name: /The Hippocratic writings/ });
+  await astronomy.focus();
+  await page.keyboard.press("Enter");
+  await expect(astronomy).toHaveAttribute("aria-expanded", "false");
+  // Folded, the group's titles are gone, so Tab goes on to the next heading.
+  await page.keyboard.press("Tab");
+  await expect(medicine).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(medicine).toHaveAttribute("aria-expanded", "false");
+  await expect(hippocrates).toHaveCount(0);
+  // The drawing is unchanged.
+  await expect(page.getByRole("button", { name: /^Medicine: The Hippocratic writings/ })).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(hippocrates).toContainText("c. 430 BCE");
+});
+
 test("zooms the drawing in and back to its width", async ({ page }) => {
   await openApp(page, "Timeline");
   const zoomOut = page.getByRole("button", { name: "Zoom out", exact: true });

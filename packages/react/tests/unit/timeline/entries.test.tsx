@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { d, e, harbour, id } from "./fixtures";
-import { Host, held, nextTick } from "./host";
+import { Host, held, nextTick, tableRows } from "./host";
 
 const dialog = () => screen.getByRole("dialog");
 const list = () => screen.getByRole("region", { name: "Entries" });
@@ -45,17 +45,12 @@ describe("timeline entries", () => {
       end: null,
       summary: "The first ship comes in",
     });
-    const rows = within(list())
-      .getAllByRole("row")
-      .slice(1)
-      .map((row) =>
-        within(row)
-          .getAllByRole("cell")
-          .map((cell) => cell.textContent),
-      );
-    expect(rows).toEqual([
-      ["14 October 1066", "Opening", "Harbour", "The first ship comes in"],
-      ["1086", "Survey", "Ships", ""],
+    // Grouped by category, in the categories' order.
+    expect(tableRows(list())).toEqual([
+      "Ships, 1 entry",
+      ["1086", "Survey", ""],
+      "Harbour, 1 entry",
+      ["14 October 1066", "Opening", "The first ship comes in"],
     ]);
     // The new entry's title on the drawing takes the focus.
     await act(nextTick);
