@@ -84,3 +84,20 @@ test("writes the dates in the locale chosen", async ({ page }) => {
   await page.getByLabel("Dates and numbers").selectOption("it-IT");
   await expect(page.getByRole("table").getByRole("row", { name: /Galileo/ })).toContainText("gennaio 1610");
 });
+
+test("drags a category to another place in the categories' list with the mouse", async ({ page }) => {
+  await openApp(page, "Timeline");
+  const categories = page.getByRole("list", { name: "Categories" }).getByRole("listitem");
+  const names = () => categories.evaluateAll((rows) => rows.map((row) => row.textContent ?? ""));
+  const before = await names();
+  await categories.last().scrollIntoViewIfNeeded();
+  // Pressed by the row's left edge, clear of its fields.
+  const from = (await categories.last().boundingBox())!;
+  const to = (await categories.first().boundingBox())!;
+  await page.mouse.move(from.x + 4, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + 4, to.y + 6, { steps: 10 });
+  await page.mouse.up();
+  await expect.poll(async () => (await names())[0]).toBe(before.at(-1));
+  await saved(page);
+});

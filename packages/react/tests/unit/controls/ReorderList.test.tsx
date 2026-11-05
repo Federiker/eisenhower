@@ -1,7 +1,8 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { createTranslate, ReorderList } from "../../../src";
+import { drag, moveOver, press, release } from "../pointer";
 
 const t = createTranslate();
 
@@ -100,33 +101,47 @@ describe("ReorderList", () => {
 
   it("moves a row dropped on another to that row's place, and marks where it would go", () => {
     const { onMove } = list();
-    const data = new Map<string, string>();
-    const dataTransfer = {
-      effectAllowed: "",
-      setData: (type: string, value: string) => data.set(type, value),
-      getData: (type: string) => data.get(type) ?? "",
-    };
-    fireEvent.dragStart(row("Act 3"), { dataTransfer });
-    expect(data.get("application/x-test")).toBe("c");
-    fireEvent.dragOver(row("Act 1"), { dataTransfer });
+    press(row("Act 3"));
+    moveOver(row("Act 3"), screen.getByText("Act 1"));
     expect(row("Act 1")).toHaveAttribute("data-drop", "before");
-    fireEvent.dragLeave(row("Act 1"), { dataTransfer });
+    expect(row("Act 3")).toHaveAttribute("data-moving", "true");
+    // Over nothing, no place is marked.
+    moveOver(row("Act 3"), null);
     expect(row("Act 1")).not.toHaveAttribute("data-drop");
-    fireEvent.dragOver(row("Act 1"), { dataTransfer });
-    fireEvent.drop(row("Act 1"), { dataTransfer });
+    moveOver(row("Act 3"), row("Act 1"));
+    release(row("Act 3"));
     expect(onMove).toHaveBeenCalledWith("c", 0);
-    // A row dropped on itself, or a drag that ends elsewhere, moves nothing.
-    fireEvent.dragStart(row("Act 2"), { dataTransfer });
-    fireEvent.drop(row("Act 2"), { dataTransfer });
-    fireEvent.dragStart(row("Act 2"), { dataTransfer });
-    fireEvent.dragEnd(row("Act 2"), { dataTransfer });
-    fireEvent.dragOver(row("Act 1"), { dataTransfer });
-    expect(onMove).toHaveBeenCalledTimes(1);
+    expect(row("Act 1")).not.toHaveAttribute("data-drop");
+    expect(row("Act 3")).not.toHaveAttribute("data-moving");
+    // Going down, the line is under the row it takes the place of.
+    press(row("Act 1"));
+    moveOver(row("Act 1"), row("Act 2"));
+    expect(row("Act 2")).toHaveAttribute("data-drop", "after");
+    release(row("Act 1"));
+    expect(onMove).toHaveBeenLastCalledWith("a", 1);
+  });
+
+  it("moves nothing dropped on the row itself, outside the list, after Escape, or from a press without a move", () => {
+    const { onMove } = list();
+    drag(row("Act 2"), row("Act 2"));
+    drag(row("Act 2"), document.body);
+    press(row("Act 2"));
+    moveOver(row("Act 2"), row("Act 1"));
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    });
+    expect(row("Act 1")).not.toHaveAttribute("data-drop");
+    release(row("Act 2"));
+    press(row("Act 2"));
+    fireEvent.pointerUp(row("Act 2"), { pointerId: 1 });
+    // A press in a row's text field starts no drag.
+    drag(screen.getByRole("textbox", { name: "Name of Act 2" }), row("Act 1"));
+    expect(onMove).not.toHaveBeenCalled();
   });
 
   it("does nothing while disabled", () => {
     const { onMove } = list({ disabled: true });
-    expect(row("Act 1")).toHaveAttribute("draggable", "false");
+    drag(row("Act 1"), row("Act 2"));
     fireEvent.keyDown(row("Act 1"), { key: "ArrowDown", altKey: true });
     fireEvent.contextMenu(row("Act 1"));
     expect(onMove).not.toHaveBeenCalled();

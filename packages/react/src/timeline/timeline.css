@@ -298,6 +298,29 @@ g[data-selected="true"] .eh-timeline-bar {
 .eh-timeline-list li[data-drop="before"] {
   border-top-color: var(--eh-accent);
 }
+.eh-timeline-list li[data-drop="after"] {
+  box-shadow: inset 0 -2px 0 var(--eh-accent);
+}
+.eh-timeline-list .eh-reorder-list:not([data-disabled]) > li {
+  cursor: grab;
+}
+.eh-timeline-list .eh-reorder-list[data-dragging] > li {
+  cursor: grabbing;
+}
+.eh-timeline-list li[data-moving] {
+  opacity: 0.55;
+}
+.eh-timeline-list .eh-reorder-list[data-dragging] {
+  user-select: none;
+}
+@media (forced-colors: active) {
+  .eh-timeline-list li[data-drop="before"] {
+    border-top-color: Highlight;
+  }
+  .eh-timeline-list li[data-drop="after"] {
+    box-shadow: inset 0 -2px 0 Highlight;
+  }
+}
 .eh-timeline-list li:focus-visible {
   outline: 2px solid var(--eh-focus);
   outline-offset: -2px;

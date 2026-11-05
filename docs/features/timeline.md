@@ -115,7 +115,9 @@ swatch and number of entries, that folds and unfolds its rows; the fold
 lasts while the view is open and is not stored; categories without entries
 are left out), each group in time order (when, title and summary), the
 steps (a Sequence) and the categories, each in a list put in order by
-dragging, Alt+↑ ↓ or its menu. A category's colour is a colour picker (its
+dragging (a pointer drag, so it works in a Tauri window too; a row is
+pressed anywhere but its fields, and a line marks where it goes), Alt+↑ ↓
+or its menu. A category's colour is a colour picker (its
 swatch and name), which saves the colour chosen at once; Esc keeps it.
 
 The view never stores anything: jerome kept each drawing's zoom in

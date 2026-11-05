@@ -230,7 +230,8 @@ From jerome's components, with their tests, their keys and their ARIA:
 `Button`, `IconButton`, `TextField`, `TextArea`, `Select`, `Checkbox`,
 `Notice`, `InlineQuestion` (a question asked in place), `EditableText`
 (text with a pencil that becomes a field), `LabelledField`, `InlineRename`,
-`NameField`, `ReorderList` (rows put in order by dragging, Alt+↑ ↓ or their
+`NameField`, `ReorderList` (rows put in order by dragging, a pointer drag that a Tauri
+window does not catch, Alt+↑ ↓ or their
 menu), `ContextMenu` with `opensMenu` and `placeBelow`, `TreeDialog` (a
 small modal form) and `MoveToDialog`. Eisenhower's own `ColourPicker` is
 every view's colour field: a select-only `combobox` button with the

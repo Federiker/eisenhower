@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { type KeyboardEvent, type MouseEvent, type ReactNode, useEffect, useRef, useState } from "react";
 
+import { NOT_DRAGGED, usePointerDrag } from "../hooks/usePointerDrag";
 import { ariaKeyShortcuts } from "../keyboard/shortcuts";
 import { useTranslate } from "../strings/translate";
 
@@ -15,7 +16,9 @@ function inField(target: EventTarget): boolean {
 
 /**
  * A list a page's items are put in order in (a timeline's steps or categories): without Move up, Move down
- * or Delete buttons. A row moves by dragging it onto another, with Alt+Up and Alt+Down while it (or something
+ * or Delete buttons. A row moves by dragging it onto another (a pointer drag, not the browser's drag and drop,
+ * which a Tauri window catches on Windows; a line marks where it goes, Escape cancels, a press without a move
+ * is still a click, and a text field in a row never starts one), with Alt+Up and Alt+Down while it (or something
  * in it) has the focus, or with Move up and Move down in its menu: right-click, the Menu key or Shift+F10.
  * The menu also offers the caller's own actions (such as Delete); the Delete key asks the caller to delete the
  * focused row. The focus stays on a moved row, comes back to the row when its menu closes, and goes to the row
@@ -45,7 +48,7 @@ export function ReorderList<Item, Action extends string>({
   /** The row's own menu items, after Move up and Move down. */
   actions?: (item: Item) => MenuItem<Action>[];
   disabled?: boolean;
-  /** The drag data type, so that a row is only dropped on its own list. */
+  /** The list's own mark (once the browser's drag data type), so that a row is only dropped on its own list. */
   dragType: string;
   /** Moves a row to a place in the list (0 is the first). */
   onMove: (id: string, to: number) => void;
@@ -58,8 +61,24 @@ export function ReorderList<Item, Action extends string>({
 }) {
   const t = useTranslate();
   const rows = useRef(new Map<string, HTMLLIElement>());
-  const dragged = useRef<string | null>(null);
-  const [dropAt, setDropAt] = useState<number | null>(null);
+  const list = useRef<HTMLOListElement>(null);
+  const ids = items.map(idOf);
+  /** This list's row holding an element, or null. */
+  const rowOf = (element: Element | null) => {
+    const row = element?.closest<HTMLElement>("li[data-reorder-id]");
+    return row && row.parentElement === list.current ? row : null;
+  };
+  // A row dragged onto another takes that row's place.
+  const { drag, handlers } = usePointerDrag<string, number>({
+    enabled: !disabled,
+    pick: (target) => (target.closest(NOT_DRAGGED) ? null : (rowOf(target)?.dataset.reorderId ?? null)),
+    place: (dragged, under) => {
+      const index = ids.indexOf(rowOf(under)?.dataset.reorderId ?? "");
+      return index < 0 || ids[index] === dragged ? null : index;
+    },
+    onDrop: (dragged, index) => onMove(dragged, index),
+  });
+  const draggedIndex = drag ? ids.indexOf(drag.dragged) : -1;
   const [menu, setMenu] = useState<{ id: string; place: MenuPlace } | null>(null);
   // The row last holding the focus, so that the focus can go to the row in its place when it is removed.
   const focused = useRef<{ id: string; index: number } | null>(null);
@@ -118,7 +137,15 @@ export function ReorderList<Item, Action extends string>({
 
   return (
     <>
-      <ol className={classNames("eh-reorder-list", className)} aria-label={label}>
+      <ol
+        className={classNames("eh-reorder-list", className)}
+        aria-label={label}
+        ref={list}
+        data-reorder-list={dragType}
+        data-dragging={drag ? true : undefined}
+        data-disabled={disabled || undefined}
+        {...handlers}
+      >
         {items.map((item, index) => {
           const id = idOf(item);
           return (
@@ -131,35 +158,14 @@ export function ReorderList<Item, Action extends string>({
               // biome-ignore lint/a11y/noNoninteractiveTabindex: a row takes the focus so that Alt+arrows and the Menu key move it.
               tabIndex={0}
               aria-keyshortcuts={ariaKeyShortcuts(["moveUp", "moveDown"])}
-              data-drop={dropAt === index ? "before" : undefined}
-              draggable={!disabled}
+              data-reorder-id={id}
+              data-drop={drag?.place === index ? (index > draggedIndex ? "after" : "before") : undefined}
+              data-moving={drag?.dragged === id ? true : undefined}
               onKeyDown={(event) => key(event, id, index)}
               onFocus={() => {
                 focused.current = { id, index };
               }}
               onContextMenu={(event) => contextMenu(event, id)}
-              onDragStart={(event) => {
-                dragged.current = id;
-                event.dataTransfer.effectAllowed = "move";
-                event.dataTransfer.setData(dragType, id);
-              }}
-              onDragOver={(event) => {
-                if (!dragged.current) return;
-                event.preventDefault();
-                setDropAt(index);
-              }}
-              onDragLeave={() => setDropAt((old) => (old === index ? null : old))}
-              onDrop={(event) => {
-                event.preventDefault();
-                const from = dragged.current;
-                dragged.current = null;
-                setDropAt(null);
-                if (from && from !== id) onMove(from, index);
-              }}
-              onDragEnd={() => {
-                dragged.current = null;
-                setDropAt(null);
-              }}
             >
               {children(item, index)}
             </li>
