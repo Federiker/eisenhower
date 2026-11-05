@@ -1,4 +1,5 @@
 import type { Timeline as TimelineValue } from "@eisenhower/model";
+import { within } from "@testing-library/react";
 import { useState } from "react";
 
 import { Timeline, TimelineEditor, type TimelineProps } from "../../../src";
@@ -25,6 +26,22 @@ export function Host({
       }}
     />
   );
+}
+
+/**
+ * The entries' table below its column headings, row by row: a category's heading as its button's name
+ * ("Harbour, 3 entries"), an entry as its cells' text.
+ */
+export function tableRows(entries: HTMLElement): (string | (string | null)[])[] {
+  return within(entries)
+    .getAllByRole("row")
+    .slice(1)
+    .map((row) => {
+      const cells = within(row).queryAllByRole("cell");
+      return cells.length === 0
+        ? (within(row).getByRole("button").getAttribute("aria-label") ?? "")
+        : cells.map((cell) => cell.textContent);
+    });
 }
 
 /** Lets the view's timers run (the focus after a dialog or a deletion is given in one). */

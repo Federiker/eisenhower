@@ -113,7 +113,7 @@ jerome's timeline page below it: the entries as a table grouped by
 category (a heading row a category, in the categories' order, with its
 swatch and number of entries, that folds and unfolds its rows; the fold
 lasts while the view is open and is not stored; categories without entries
-are left out), each group in time order, the
+are left out), each group in time order (when, title and summary), the
 steps (a Sequence) and the categories, each in a list put in order by
 dragging, Alt+↑ ↓ or its menu. A box beside a category's colour shows it,
 and the colour chosen while its menu is open.

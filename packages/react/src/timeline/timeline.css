@@ -226,7 +226,7 @@ g[data-selected="true"] .eh-timeline-bar {
   font-weight: 600;
 }
 
-/* The entries' table, in time order. */
+/* The entries' table: a heading row for each category, which folds its rows, then its entries in time order. */
 .eh-timeline-entries table {
   width: 100%;
   border-collapse: collapse;
@@ -250,6 +250,31 @@ g[data-selected="true"] .eh-timeline-bar {
 }
 .eh-timeline-entries tr[data-selected="true"] {
   background: var(--eh-selected);
+}
+.eh-timeline-entries .eh-timeline-entries-group th {
+  padding: 8px 0 2px;
+  color: var(--eh-ink);
+}
+.eh-timeline-entries-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--eh-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.eh-timeline-chevron {
+  width: 1em;
+  color: var(--eh-muted);
+}
+.eh-timeline-entries-count {
+  color: var(--eh-muted);
+  font-weight: 400;
 }
 
 /* The steps and categories lists. */
