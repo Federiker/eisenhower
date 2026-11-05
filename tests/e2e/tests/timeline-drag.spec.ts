@@ -7,6 +7,14 @@ import { centreOf, openApp } from "./app";
 
 const entry = (page: Page, name: RegExp) => page.getByRole("button", { name });
 const row = (page: Page, title: RegExp) => page.getByRole("table").getByRole("row", { name: title });
+/** The category an entry is listed under in the entries' table: its group's heading button. */
+const categoryOf = (page: Page, title: RegExp) =>
+  page
+    .getByRole("table")
+    .getByRole("rowgroup")
+    .filter({ has: page.getByRole("row", { name: title }) })
+    .getByRole("button")
+    .first();
 /** An entry's dates in the entries' table: its row's first cell. */
 const when = (page: Page, title: RegExp) => row(page, title).getByRole("cell").first();
 /** The strip over a span's end that resizes it (hidden from screen readers: the keys do the same). */
@@ -59,7 +67,7 @@ test("drags an entry to another lane, changing its category and keeping its date
   await page.mouse.up();
   const moved = entry(page, /^Physics and chemistry: Harvey: the blood circulates, 1628 CE$/);
   await expect(moved).toBeFocused();
-  await expect(row(page, /Harvey/)).toContainText("Physics and chemistry");
+  await expect(categoryOf(page, /Harvey/)).toHaveAccessibleName(/^Physics and chemistry,/);
   await expect(when(page, /Harvey/)).toHaveText("1628 CE");
   // The click that ended the drag opened nothing; the next one opens the entry.
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -98,7 +106,7 @@ test("Escape during a drag drops nothing", async ({ page }) => {
   await expect(page.locator(".eh-timeline-preview")).toHaveCount(0);
   await page.mouse.up();
   await expect(entry(page, /^Medicine: Harvey: the blood circulates, 1628 CE$/)).toBeVisible();
-  await expect(row(page, /Harvey/)).toContainText("Medicine");
+  await expect(categoryOf(page, /Harvey/)).toHaveAccessibleName(/^Medicine,/);
   await expect(when(page, /Harvey/)).toHaveText("1628 CE");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   // The next click opens the entry.
