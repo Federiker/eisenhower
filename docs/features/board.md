@@ -80,7 +80,10 @@ focus goes to.
 - **Columns**, 15rem wide, scrolling sideways inside the board, each with
   its heading: the name, read as text with a pencil (a double-click also
   edits it), how many cards it has, and its menu (Rename, Move left, Move
-  right, Delete column; in the list, Move up and Move down).
+  right, Delete column; in the list, Move up and Move down). The name is a
+  Tab stop itself (`EditableText`'s `focusable`, as a timeline's names):
+  Enter, F2 or Space there edits it and the focus comes back to it after;
+  its pencil is the pointer's, out of the Tab order.
 - **Cards**: a stripe of the card's colour, the title (the button that opens
   the card), its menu, the summary (up to three lines), then the colour's
   name (never the colour alone) and the host's badge. In the list a card is
@@ -133,7 +136,7 @@ adds none of its own.
 | Home, End | The first or last card of its column (in the list, of all) | |
 | Alt+↑, Alt+↓ | Move the card within its column | Move the column before or after |
 | Alt+←, Alt+→ | Move the card to the end of the column before or the start of the one after; the cards outside every column count as the column before the first | Move the column before or after |
-| Enter | Open the card | |
+| Enter | Open the card | Rename the column (on its name) |
 | F2 | Rename the card in place (Enter saves, Escape keeps it) | Rename the column |
 | Delete | Delete the card, asking first | Delete the column (at once when it is empty; else asking where its cards go) |
 | Menu, Shift+F10 | The card's menu: Open, Rename, Move up, Move down, Move to column…, Delete card | The column's menu |
@@ -157,7 +160,9 @@ asked before a delete.
 ## Accessibility
 
 The board is a region named "Board"; each column a region named by its
-name, with its name as a heading; cards are list items whose title is a
+name, with its name as a heading (while the name is editable, a heading for
+assistive technology beside it, as a button's content is presentational);
+cards are list items whose title is a
 button (`aria-current` on the chosen one). Menus, dialogues and questions
 are named. Every move (by keys, menu, Move to or dragging) is announced in
 the polite live region ("Draft: moved to Doing, 2 of 3"; a column "Doing:

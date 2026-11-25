@@ -10,8 +10,11 @@ import { MoreIcon, PencilIcon } from "./icons";
 /**
  * A column's heading on the board or in the list: its name read as text with a pencil (a double-click also
  * edits it; Enter or leaving the field saves, Escape puts it back), how many cards it has, and its menu. The
- * heading is dragged to move the column; Alt and the arrows, F2, the Delete key and the Menu key act on it
- * (see Board). Copied from jerome's PlotPartHeading.tsx.
+ * name itself takes the focus (`EditableText`'s `focusable`): Enter, F2 or Space there edits it, and its
+ * pencil is the pointer's, out of the Tab order. A button's content is presentational, so the name's heading
+ * is then one for assistive technology only, beside it; read-only, the name is the heading itself. The heading
+ * is dragged to move the column; Alt and the arrows, the Delete key and the Menu key act on it (see Board).
+ * Copied from jerome's PlotPartHeading.tsx.
  */
 export function ColumnHeading({
   column,
@@ -56,13 +59,15 @@ export function ColumnHeading({
       onContextMenu={onMenu}
       data-moving={moving ? "true" : undefined}
     >
+      {!readOnly && <h3 className="eh-visually-hidden">{column.name}</h3>}
       <EditableText
         className="eh-board-column-name"
         text={column.name}
-        shown={<h3>{column.name}</h3>}
+        shown={readOnly ? <h3>{column.name}</h3> : column.name}
         label={t("board.columnName", { number: index + 1 })}
         editLabel={t("board.editColumn", { name: column.name })}
         editIcon={<PencilIcon />}
+        focusable
         pencilVisible={readOnly ? "hidden" : "visible"}
         editRequest={editRequest}
         disabled={readOnly}

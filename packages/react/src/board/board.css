@@ -64,6 +64,8 @@
 .eh-board-column-name h3 {
   margin: 0;
   font-size: inherit;
+}
+.eh-board-column-name .eh-editable-text {
   overflow-wrap: anywhere;
 }
 .eh-board-column-heading .eh-board-column-name[data-editing] {

@@ -130,6 +130,52 @@ describe("the board", () => {
     expect(within(view).getByRole("button", { name: t("board.moreActionsNamed", { name: "Underway" }) })).toHaveFocus();
   });
 
+  it("takes the focus on a column's name, which Enter, F2 or Space edits, its pencil out of the Tab order", async () => {
+    const { view, board } = renderBoard();
+    const heading = headingOf(view, "Doing");
+    const tabStops = [...heading.querySelectorAll<HTMLElement>("[tabindex='0'], button:not([tabindex='-1'])")];
+    expect(tabStops.map((each) => each.getAttribute("aria-label"))).toEqual([
+      t("board.editColumn", { name: "Doing" }),
+      t("board.moreActionsNamed", { name: "Doing" }),
+    ]);
+    const pencil = heading.querySelector(".eh-editable-edit")!;
+    expect(pencil).toHaveAttribute("tabindex", "-1");
+    expect(pencil).toHaveAttribute("aria-hidden", "true");
+    // The name is still the column's heading.
+    expect(within(heading).getByRole("heading", { level: 3, name: "Doing" })).toBeInTheDocument();
+
+    const name = within(heading).getByRole("button", { name: t("board.editColumn", { name: "Doing" }) });
+    expect(name).toHaveAttribute("aria-keyshortcuts", "Enter F2");
+    name.focus();
+    key(name, "Enter");
+    const field = within(view).getByRole("textbox", { name: t("board.columnName", { number: 2 }) });
+    expect(field).toHaveFocus();
+    fireEvent.change(field, { target: { value: "Underway" } });
+    key(field, "Enter");
+    expect(board().columns[1]!.name).toBe("Underway");
+    const renamed = () => within(view).getByRole("button", { name: t("board.editColumn", { name: "Underway" }) });
+    await waitFor(() => expect(renamed()).toHaveFocus());
+
+    for (const keyName of ["F2", " "]) {
+      key(renamed(), keyName);
+      const open = within(view).getByRole("textbox", { name: t("board.columnName", { number: 2 }) });
+      expect(open).toHaveFocus();
+      key(open, "Escape");
+      await waitFor(() => expect(renamed()).toHaveFocus());
+    }
+
+    // The heading's other keys still act on the column from its name.
+    key(renamed(), "ArrowLeft", { altKey: true });
+    expect(board().columns.map((column) => column.name)).toEqual(["Underway", "To do", "Done"]);
+  });
+
+  it("keeps a read-only column's name a heading, without a Tab stop", () => {
+    const { view } = renderBoard({ readOnly: true });
+    const heading = headingOf(view, "Doing");
+    expect(within(heading).getByRole("heading", { level: 3, name: "Doing" })).toBeInTheDocument();
+    expect(heading.querySelectorAll("[tabindex='0'], button")).toHaveLength(0);
+  });
+
   it("moves a card dragged onto a card or onto a column, and a column dragged onto another", () => {
     const { view, board } = renderBoard();
     drag(cardOf(view, "Ideas"), cardOf(view, "Review"));

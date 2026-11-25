@@ -81,10 +81,41 @@ test("drags a card by its title before another, without opening it, and a column
   await expect(board.getByRole("button", { name: "Hire a van", exact: true })).toBeFocused();
 
   const heading = (column: string) => board.getByRole("region", { name: column }).locator(".eh-board-column-heading");
-  await dragWithMouse(page, heading("Done").getByRole("heading", { name: "Done" }), heading("To sort out"));
+  await dragWithMouse(
+    page,
+    heading("Done").getByRole("button", { name: "Rename the column Done" }),
+    heading("To sort out"),
+  );
   expect(
     await board.locator(".eh-board-column").evaluateAll((all) => all.map((one) => one.getAttribute("aria-label"))),
   ).toEqual(["Done", "To sort out", "Under way", "Booked"]);
+  // The drag's click on the name did not open it for editing.
+  await expect(board.getByRole("textbox")).toHaveCount(0);
+  await saved(page);
+});
+
+test("reaches a column's name with Tab, renames it with Enter and gives the focus back to it", async ({ page }) => {
+  await openApp(page, "Board");
+  const board = page.getByRole("region", { name: "Board" });
+  const column = board.getByRole("region", { name: "Under way" });
+  await expect(column.getByRole("heading", { level: 3, name: "Under way" })).toHaveCount(1);
+  const name = column.getByRole("button", { name: "Rename the column Under way" });
+  await board
+    .getByRole("region", { name: "To sort out" })
+    .getByRole("button", { name: "More actions: To sort out" })
+    .focus();
+  // Past To sort out's cards and its New card, Tab comes to the next column's name, not its pencil.
+  for (let presses = 0; presses < 20 && !(await name.evaluate((one) => one === document.activeElement)); presses++) {
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => document.activeElement?.classList.contains("eh-editable-edit"))).toBe(false);
+  }
+  await expect(name).toBeFocused();
+  await page.keyboard.press("Enter");
+  const field = column.getByRole("textbox", { name: "Name of column 2" });
+  await expect(field).toBeFocused();
+  await field.fill("Packing");
+  await page.keyboard.press("Enter");
+  await expect(board.getByRole("button", { name: "Rename the column Packing" })).toBeFocused();
   await saved(page);
 });
 

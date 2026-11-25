@@ -44,8 +44,9 @@ is under **Verification** and **Awaiting owner decisions**.
   window's title, and closing with unsaved changes (Save, Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
   names, roles and the announcements of moves; a timeline's step and
-  category names and lines as buttons ("Edit category: Ships"), edited with
-  Enter or F2, their pencils silent.
+  category names and lines and a board's column names as buttons ("Edit
+  category: Ships", "Rename the column Doing"), edited with Enter or F2,
+  their pencils silent, and each column still found by its heading (H).
 - [ ] The desktop app's `.ike` files, with its installers (`mise run
   app:release`; NSIS and MSI on Windows, the `.app`/`.dmg` on macOS, `.deb`
   on Linux) installed: a `.ike` file shows Eisenhower's icon in Explorer
