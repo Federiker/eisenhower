@@ -71,6 +71,11 @@
   background: var(--eh-panel);
   font-weight: 600;
 }
+/* A row's line under its name, drawn by the name itself: the weekends drawn behind the rows and in the header
+   (the Days scale) would otherwise hide it where they pass under the names, and the column would look narrower. */
+.eh-gantt-row > .eh-gantt-name {
+  box-shadow: 0 1px 0 var(--eh-line);
+}
 .eh-gantt-cell {
   position: relative;
   flex: 1 0 auto;
