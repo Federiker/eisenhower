@@ -20,12 +20,13 @@ import {
 import { Button } from "../controls/Button";
 import { placeBelow } from "../controls/ContextMenu";
 import { Notice } from "../controls/Notice";
+import { useTextScale } from "../hooks/useTextScale";
 import { actionOf, ariaKeyShortcuts, shortcutsIn } from "../keyboard/shortcuts";
 import { axisOf } from "./axis";
 import { type TimelineView, useTimelineView } from "./context";
 import { type DateWords, formatPoint, formatWhen } from "./format";
 import { CategorySwatch } from "./labels";
-import { type Lane, LANE_PADDING, lanesOf, MARK_Y, MAX_LABEL_WIDTH, ROW_HEIGHT } from "./layout";
+import { type Lane, LANE_PADDING, lanesOf, MAX_LABEL_WIDTH, rowsAt } from "./layout";
 import { DASHES, MARGIN, Mark } from "./marks";
 import { pointAt, type Scale, scaleOf, valueAt, xOf } from "./scale";
 import { EntryLabel } from "./TimelineEntryLabel";
@@ -33,9 +34,12 @@ import { TimelineNarrowList } from "./TimelineNarrowList";
 
 /** Below this width the drawing becomes a list. */
 const NARROW = 600;
-/** The column of lane names beside the drawing. */
+/** The column of lane names beside the drawing, and the axis above it, at the views' own text size. */
 const NAMES_WIDTH = 140;
 const AXIS_HEIGHT = 44;
+
+/** How tall the axis is at a text size: room for its two lines of labels above the ticks. */
+const axisHeightAt = (text: number) => Math.round(AXIS_HEIGHT * text);
 /** How much each zoom step multiplies or divides by. */
 export const ZOOM_STEP = 1.5;
 const KEYS = shortcutsIn("timeline");
@@ -82,23 +86,27 @@ function Axis({
   words: DateWords;
 }) {
   const { ticks, breaks } = axisOf(timeline, scale, showCe, words);
+  // Two lines of labels, as far apart as the text is large, above the ticks.
+  const axis = axisHeightAt(scale.text);
+  const lower = axis - 12;
+  const upper = lower - Math.round(14 * scale.text);
   const tickX = (x: number) => (timeline.kind === "sequence" ? x - scale.unit / 2 : x) + MARGIN;
   return (
     <g className="eh-timeline-axis">
       {ticks.map((tick) => (
         <g key={`${tick.x}:${tick.main}`}>
-          <line x1={tickX(tick.x)} x2={tickX(tick.x)} y1={AXIS_HEIGHT - 8} y2={AXIS_HEIGHT} />
+          <line x1={tickX(tick.x)} x2={tickX(tick.x)} y1={axis - 8} y2={axis} />
           {tick.centred ? (
-            <text x={tick.x + MARGIN} y={AXIS_HEIGHT - 16} textAnchor="middle">
+            <text x={tick.x + MARGIN} y={axis - 16} textAnchor="middle">
               {tick.main}
             </text>
           ) : (
-            <text x={tick.x + MARGIN + 3} y={AXIS_HEIGHT - 26}>
+            <text x={tick.x + MARGIN + 3} y={upper}>
               {tick.main}
             </text>
           )}
           {tick.context && (
-            <text className="eh-timeline-axis-context" x={tick.x + MARGIN + 3} y={AXIS_HEIGHT - 12}>
+            <text className="eh-timeline-axis-context" x={tick.x + MARGIN + 3} y={lower}>
               {tick.context}
             </text>
           )}
@@ -106,10 +114,10 @@ function Axis({
       ))}
       {breaks.map((gap) => (
         <g key={gap.x} className="eh-timeline-break-label">
-          <text x={gap.x + MARGIN - 2} y={AXIS_HEIGHT - 12} textAnchor="end">
+          <text x={gap.x + MARGIN - 2} y={lower} textAnchor="end">
             {gap.before}
           </text>
-          <text x={gap.x + gap.width + MARGIN + 2} y={AXIS_HEIGHT - 12}>
+          <text x={gap.x + gap.width + MARGIN + 2} y={lower}>
             {gap.after}
           </text>
         </g>
@@ -143,10 +151,16 @@ export function TimelineDrawing() {
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   // The entry just moved with the keys, which keeps the focus.
   const moving = useRef<string | null>(null);
+  // The lane names, the axis, the rows and the labels grow with the host's text size.
+  const { text, probe } = useTextScale();
+  const namesWidth = Math.round(NAMES_WIDTH * text);
   // Fitted Dates leave room after the axis for the labels of the last entries.
-  const fitWidth = Math.max(width - NAMES_WIDTH - MARGIN * 2 - (timeline.kind === "dates" ? MAX_LABEL_WIDTH : 0), 200);
-  const scale = useMemo(() => scaleOf(timeline, fitWidth, zoom), [timeline, fitWidth, zoom]);
-  const lanes = useMemo(() => (scale ? lanesOf(timeline, scale, AXIS_HEIGHT) : []), [timeline, scale]);
+  const fitWidth = Math.max(
+    width - namesWidth - MARGIN * 2 - (timeline.kind === "dates" ? MAX_LABEL_WIDTH * text : 0),
+    200,
+  );
+  const scale = useMemo(() => scaleOf(timeline, fitWidth, zoom, text), [timeline, fitWidth, zoom, text]);
+  const lanes = useMemo(() => (scale ? lanesOf(timeline, scale, axisHeightAt(text)) : []), [timeline, scale, text]);
   const canAdd =
     !readOnly && timeline.categories.length > 0 && (timeline.kind === "dates" || timeline.steps.length > 0);
 
@@ -180,6 +194,7 @@ export function TimelineDrawing() {
   if (width > 0 && width < NARROW)
     return (
       <div ref={ref} className="eh-timeline-drawing-wrap">
+        {probe}
         {newButton && <div className="eh-timeline-tools">{newButton}</div>}
         {needs}
         <TimelineNarrowList />
@@ -188,6 +203,7 @@ export function TimelineDrawing() {
   if (!scale) {
     return (
       <div ref={ref} className="eh-timeline-drawing-wrap">
+        {probe}
         {newButton && <div className="eh-timeline-tools">{newButton}</div>}
         {needs}
         <Notice>{t(timeline.kind === "sequence" ? "timeline.drawingNoSteps" : "timeline.drawingEmpty")}</Notice>
@@ -206,7 +222,8 @@ export function TimelineDrawing() {
     .flatMap((lane) => lane.entries.map((placed) => ({ placed, lane })))
     .sort((a, b) => a.placed.x1 - b.placed.x1 || a.lane.top - b.lane.top || a.placed.row - b.placed.row);
   const last = lanes.at(-1);
-  const height = last ? last.top + last.height : AXIS_HEIGHT;
+  const height = last ? last.top + last.height : axisHeightAt(text);
+  const rows = rowsAt(text);
   // Wide enough for the last labels, which may reach past the end of the axis.
   const planeWidth = Math.max(
     scale.width + MARGIN * 2,
@@ -295,6 +312,7 @@ export function TimelineDrawing() {
 
   return (
     <div ref={ref} className="eh-timeline-drawing-wrap">
+      {probe}
       <div className="eh-timeline-tools">
         <fieldset className="eh-group eh-timeline-zoom" aria-label={t("timeline.zoom")}>
           <Button disabled={zoom <= 1} onClick={() => setZoom(zoom / ZOOM_STEP)}>
@@ -312,7 +330,7 @@ export function TimelineDrawing() {
       {needs}
       <Notice>{t(readOnly ? "timeline.drawingHelpReadOnly" : "timeline.drawingHelp")}</Notice>
       <div className="eh-timeline-drawing" data-area="drawing" style={{ height: height + 16 }}>
-        <div className="eh-timeline-lane-names" style={{ width: NAMES_WIDTH }}>
+        <div className="eh-timeline-lane-names" style={{ width: namesWidth }}>
           {lanes.map((lane) => (
             <div key={lane.category.id} style={{ top: lane.top, height: lane.height }}>
               <CategorySwatch category={lane.category} /> <span>{lane.category.name}</span>
@@ -344,7 +362,7 @@ export function TimelineDrawing() {
                 .map((segment) => (
                   <g key={segment.x} className="eh-timeline-break">
                     <rect x={segment.x + MARGIN} y={0} width={segment.width} height={height} />
-                    <path d={`M ${segment.x + MARGIN + 8} ${AXIS_HEIGHT - 4} l 6 -6 l 6 12 l 6 -6`} />
+                    <path d={`M ${segment.x + MARGIN + 8} ${axisHeightAt(text) - 4} l 6 -6 l 6 12 l 6 -6`} />
                   </g>
                 ))}
               <Axis timeline={timeline} scale={scale} showCe={showCe} words={words} />
@@ -361,8 +379,8 @@ export function TimelineDrawing() {
                     className="eh-timeline-lane-line"
                     x1={MARGIN}
                     x2={planeWidth - MARGIN}
-                    y1={lane.top + LANE_PADDING + MARK_Y}
-                    y2={lane.top + LANE_PADDING + MARK_Y}
+                    y1={lane.top + LANE_PADDING + rows.mark}
+                    y2={lane.top + LANE_PADDING + rows.mark}
                     strokeDasharray={DASHES[lane.category.line]}
                   />
                   {lane.entries.map((placed) => (
@@ -372,7 +390,7 @@ export function TimelineDrawing() {
                     >
                       <Mark
                         placed={placed}
-                        top={lane.top + LANE_PADDING + placed.row * ROW_HEIGHT}
+                        top={lane.top + LANE_PADDING + placed.row * rows.height}
                         scale={scale}
                         selected={placed.entry.id === selectedId}
                       />

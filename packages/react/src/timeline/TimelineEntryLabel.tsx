@@ -11,7 +11,7 @@ import {
 
 import { Button } from "../controls/Button";
 import { DRAG_THRESHOLD, dragCount, laneAt } from "./drag";
-import { LABEL_HEIGHT, type Lane, LANE_PADDING, MARK_Y, type PlacedEntry, ROW_HEIGHT } from "./layout";
+import { type Lane, LANE_PADDING, type PlacedEntry, rowsAt } from "./layout";
 import { DASHES, MARGIN, Mark } from "./marks";
 import { extentOf, type Scale, valueAt, xOf } from "./scale";
 
@@ -80,7 +80,8 @@ export function EntryLabel({
   const skipClick = useRef(false);
   const [drag, setDrag] = useState<{ drag: EntryDrag; entry: TimelineEntry } | null>(null);
   const dragging = drag !== null;
-  const top = lane.top + LANE_PADDING + placed.row * ROW_HEIGHT;
+  const rows = rowsAt(scale.text);
+  const top = lane.top + LANE_PADDING + placed.row * rows.height;
 
   useEffect(() => {
     if (!dragging) return undefined;
@@ -152,7 +153,7 @@ export function EntryLabel({
         };
 
   const span = entry.end !== null;
-  const markTop = top + MARK_Y - GRIP;
+  const markTop = top + rows.mark - GRIP;
   return (
     <>
       {!readOnly && (
@@ -203,7 +204,8 @@ export function EntryLabel({
           left: Math.max(placed.labelX + MARGIN, 0),
           top,
           maxWidth: placed.labelWidth,
-          height: LABEL_HEIGHT,
+          height: rows.label,
+          lineHeight: `${rows.label}px`,
         }}
         onClick={(event) => {
           if (skipClick.current) {
@@ -241,7 +243,8 @@ function Preview({
   const target = lanes.find((each) => each.category.id === moved.categoryId) ?? lane;
   if (!extent) return null;
   const x1 = xOf(scale, extent.from);
-  const top = target.top + LANE_PADDING + (target === lane ? placed.row : 0) * ROW_HEIGHT;
+  const rows = rowsAt(scale.text);
+  const top = target.top + LANE_PADDING + (target === lane ? placed.row : 0) * rows.height;
   const { category } = target;
   return (
     <svg className="eh-timeline-preview" width={width} height={height} aria-hidden="true">
@@ -257,7 +260,7 @@ function Preview({
             selected
           />
         </g>
-        <text className="eh-timeline-preview-when" x={x1 + MARGIN} y={top + LABEL_HEIGHT - 4}>
+        <text className="eh-timeline-preview-when" x={x1 + MARGIN} y={top + rows.label - 4}>
           {when(moved)}
         </text>
       </g>

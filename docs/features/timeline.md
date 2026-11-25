@@ -25,6 +25,14 @@ its title above it. An approximate end is drawn hollow and dashed; a year
 or a month alone has its whole period drawn faintly behind its dot. Entries
 that would overlap take more rows in their lane.
 
+The axis marks years, months or days, as finely as leaves room between its
+labels; the month or year beside the first label is left out when the next
+one follows too closely to read both. The drawing grows with the host's
+text size (`--eh-scale`, measured as it changes): the lane names' column,
+the axis and its two lines of labels, the room between ticks, the rows and
+each title's box (18 pixels high at the views' own size), so no title is
+cut and no labels overlap.
+
 Dates read "14 October 1066", "March 1066", "1066", "c. 43 BCE"; CE is
 written beside the others only when some date is BCE. Years from 10 000 are
 grouped ("12,000 BCE"). Month names come from `Intl` in the view's locale;

@@ -296,3 +296,26 @@ describe("a timeline's part", () => {
     expect(() => render(<TimelineNarrowList />)).toThrow("inside <Timeline> or <TimelineEditor>");
   });
 });
+
+describe("at a larger text size", () => {
+  it("draws taller rows, labels and axis, and a wider names column, measured from the host's --eh-scale", () => {
+    // The probe is 100px times the text size high: 150px is half as large again.
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains("eh-text-probe") ? 150 : 0;
+    });
+    render(<Timeline value={acts} />);
+    const label = document.querySelector<HTMLElement>(".eh-timeline-label")!;
+    expect(label.style.height).toBe("27px");
+    expect(label.style.lineHeight).toBe("27px");
+    expect(document.querySelector<HTMLElement>(".eh-timeline-lane-names")!.style.width).toBe("210px");
+    // The first lane starts under an axis of 66px; its title is at the top of its first row.
+    expect(label.style.top).toBe(`${66 + 8}px`);
+  });
+
+  it("keeps the views' own measures where the text size cannot be measured", () => {
+    render(<Timeline value={acts} />);
+    const label = document.querySelector<HTMLElement>(".eh-timeline-label")!;
+    expect(label.style.height).toBe("18px");
+    expect(label.style.top).toBe(`${44 + 8}px`);
+  });
+});

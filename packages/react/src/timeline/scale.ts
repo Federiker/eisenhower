@@ -94,6 +94,11 @@ export type Scale = {
   width: number;
   /** The zoom that fits the drawing to the width it was made for (1), and the most zoom allows. */
   maxZoom: number;
+  /**
+   * The text size it was made for, as a factor of the views' own (the host's `--eh-scale`): the room between the
+   * axis's ticks, a step's narrowest column and the rows of the lanes grow with it.
+   */
+  text: number;
 };
 
 /** Where a time falls on the drawing; a time inside a collapsed stretch is at its break. */
@@ -117,13 +122,13 @@ export function valueAt(scale: Scale, x: number): number | null {
  * Sequence; in Dates, real time between the first and last entries with a little room either side, and
  * every empty stretch longer than {@link GAP_SHARE} of the whole collapsed into a break, when entries on
  * one side of it are at more than one place. Null when there
- * is nothing to draw.
+ * is nothing to draw. `text` is the text size it is drawn at ({@link Scale}).
  */
-export function scaleOf(timeline: Timeline, width: number, zoom: number): Scale | null {
+export function scaleOf(timeline: Timeline, width: number, zoom: number, text = 1): Scale | null {
   if (timeline.kind === "sequence") {
     const steps = timeline.steps.length;
     if (steps === 0) return null;
-    const fitted = Math.max(MIN_STEP_WIDTH, width / steps);
+    const fitted = Math.max(MIN_STEP_WIDTH * text, width / steps);
     const maxZoom = Math.max(1, MAX_STEP_WIDTH / fitted);
     const unit = fitted * Math.min(Math.max(zoom, 1), maxZoom);
     return {
@@ -131,6 +136,7 @@ export function scaleOf(timeline: Timeline, width: number, zoom: number): Scale 
       unit,
       width: steps * unit,
       maxZoom,
+      text,
     };
   }
   const extents = timeline.entries
@@ -190,7 +196,7 @@ export function scaleOf(timeline: Timeline, width: number, zoom: number): Scale 
     x += segment.width;
     return segment;
   });
-  return { segments, unit, width: x, maxZoom };
+  return { segments, unit, width: x, maxZoom, text };
 }
 
 /** How fine the axis is: the unit its ticks mark and how many of them each tick is apart. */
@@ -199,20 +205,27 @@ export type Precision = { unit: "day" | "month" | "year"; every: number };
 const YEAR_STEPS = [
   1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10_000, 20_000, 50_000, 100_000, 200_000, 500_000,
 ];
-/** The least room between two ticks. */
+/** The least room between two ticks, at the views' own text size. */
 const TICK_ROOM = 72;
 
-/** The finest axis that leaves room between ticks at this many pixels per day. */
-export function precisionOf(pixelsPerDay: number): Precision {
-  if (pixelsPerDay >= TICK_ROOM) return { unit: "day", every: 1 };
-  if (pixelsPerDay * 30.44 >= TICK_ROOM) return { unit: "month", every: 1 };
-  const every = YEAR_STEPS.find((years) => years * 365.25 * pixelsPerDay >= TICK_ROOM) ?? 1_000_000;
+/**
+ * The finest axis that leaves room between ticks at this many pixels per day, for labels at a text size
+ * (a factor of the views' own: larger text wants ticks further apart).
+ */
+export function precisionOf(pixelsPerDay: number, text = 1): Precision {
+  const room = TICK_ROOM * text;
+  if (pixelsPerDay >= room) return { unit: "day", every: 1 };
+  if (pixelsPerDay * 30.44 >= room) return { unit: "month", every: 1 };
+  const every = YEAR_STEPS.find((years) => years * 365.25 * pixelsPerDay >= room) ?? 1_000_000;
   return { unit: "year", every };
 }
 
+/** The precision of a scale's axis, at the text size it was made for. */
+export const precisionOfScale = (scale: Scale): Precision => precisionOf(scale.unit, scale.text);
+
 /** The ticks of the axis within the stretches drawn to scale, each with the date it marks. */
 export function ticksOf(scale: Scale): { value: number; date: TimelineDate }[] {
-  const precision = precisionOf(scale.unit);
+  const precision = precisionOfScale(scale);
   const ticks: { value: number; date: TimelineDate }[] = [];
   for (const segment of scale.segments.filter((each) => !each.collapsed)) {
     const first = civilDate(segment.from);
@@ -264,7 +277,7 @@ export function pointAt(timeline: Timeline, scale: Scale, x: number): TimelinePo
     return step ? { step: step.id } : null;
   }
   const { year, month, day } = civilDate(value);
-  const precision = precisionOf(scale.unit);
+  const precision = precisionOfScale(scale);
   return {
     year,
     month: precision.unit === "year" ? null : month,

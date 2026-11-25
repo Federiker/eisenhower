@@ -118,4 +118,17 @@ describe("the axis", () => {
     const dayAxis = axisOf(days, scaleOf(days, 1000, 1)!, false, words);
     expect(dayAxis.ticks.find((tick) => tick.main === "1")?.context).toBe("November 1066");
   });
+
+  it("leaves out the first tick's month when the next month's follows too closely to read both", () => {
+    // Ten days and a day either side across 1000 pixels: 83 a day, less than "October 1890" takes.
+    const days = dated([e(20, d(1890, 11, 1)), e(21, d(1890, 11, 10))]);
+    const axis = axisOf(days, scaleOf(days, 1000, 1)!, false, words);
+    expect(axis.ticks[0]).toMatchObject({ main: "31", context: null });
+    expect(axis.ticks[1]).toMatchObject({ main: "1", context: "November 1890" });
+    // Wider, both are written; at a larger text size, again only the later one.
+    const wider = scaleOf(days, 1300, 1)!;
+    expect(axisOf(days, wider, false, words).ticks[0]).toMatchObject({ main: "31", context: "October 1890" });
+    const larger = { ...wider, text: 1.5 };
+    expect(axisOf(days, larger, false, words).ticks[0]!.context).toBeNull();
+  });
 });

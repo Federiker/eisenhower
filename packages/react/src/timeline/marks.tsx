@@ -1,6 +1,6 @@
 import type { TimelinePoint } from "@eisenhower/model";
 
-import { MARK_Y, type PlacedEntry } from "./layout";
+import { type PlacedEntry, rowsAt } from "./layout";
 import { type Scale, xOf } from "./scale";
 
 /** The room left of the axis on the drawing, and right of it. */
@@ -20,7 +20,7 @@ export function Mark({
   scale: Scale;
   selected: boolean;
 }) {
-  const y = top + MARK_Y;
+  const y = top + rowsAt(scale.text).mark;
   const { entry, extent } = placed;
   const approximate = (point: TimelinePoint | null) => point !== null && "approximate" in point && point.approximate;
   const band =

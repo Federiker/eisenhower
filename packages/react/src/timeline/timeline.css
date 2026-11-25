@@ -150,7 +150,8 @@ g[data-selected="true"] .eh-timeline-bar {
   border-radius: 3px;
   background: transparent;
   color: var(--eh-ink);
-  font: calc(12px * var(--eh-scale)) / 18px var(--eh-font);
+  /* Its height and line height are set from the row (rowsAt), which grows with the text. */
+  font: calc(12px * var(--eh-scale)) / calc(18px * var(--eh-scale)) var(--eh-font);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;

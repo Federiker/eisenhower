@@ -1,7 +1,7 @@
 import type { Timeline } from "@eisenhower/model";
 import { describe, expect, it } from "vitest";
 
-import { lanesOf } from "../../../src/timeline/layout";
+import { lanesOf, rowsAt } from "../../../src/timeline/layout";
 import {
   BREAK_WIDTH,
   civilDate,
@@ -11,12 +11,13 @@ import {
   periodOf,
   pointAt,
   precisionOf,
+  precisionOfScale,
   scaleOf,
   ticksOf,
   valueAt,
   xOf,
 } from "../../../src/timeline/scale";
-import { d, dated, e, id } from "./fixtures";
+import { acts, d, dated, e, id } from "./fixtures";
 
 // Copied from jerome's timeline-scale.test.ts, made generic.
 describe("days", () => {
@@ -136,5 +137,32 @@ describe("lanes", () => {
     expect(lanes[0]!.rows).toBe(2);
     expect(lanes[1]!.top).toBe(40 + lanes[0]!.height);
     expect(lanes[1]!.entries[0]!.x2).toBeGreaterThan(lanes[1]!.entries[0]!.x1);
+  });
+});
+
+describe("a larger text size", () => {
+  it("wants the axis's ticks further apart and a step's column wider", () => {
+    expect(precisionOf(2.5).unit).toBe("month");
+    expect(precisionOf(2.5, 20 / 14).unit).toBe("year");
+    expect(precisionOf(80, 1.5).unit).toBe("month");
+    const days = scaleOf(dated([e(20, d(1066, 10, 14)), e(21, d(1066, 10, 20))]), 1000, 1, 1.5)!;
+    expect(days.text).toBe(1.5);
+    expect(precisionOfScale(days)).toEqual(precisionOf(days.unit, 1.5));
+    const narrow = { ...acts, steps: Array.from({ length: 20 }, (_, n) => ({ id: id(n + 100), name: `${n}` })) };
+    expect(scaleOf(narrow, 1000, 1)!.unit).toBe(MIN_STEP_WIDTH);
+    expect(scaleOf(narrow, 1000, 1, 1.5)!.unit).toBe(MIN_STEP_WIDTH * 1.5);
+  });
+
+  it("makes the rows and the labels taller, so that the label holds its text", () => {
+    expect(rowsAt(1)).toEqual({ height: 36, label: 18, mark: 26 });
+    // 12px text at jerome's Largest (20px for 14) is 17px: its label is 26px high, not 18.
+    expect(rowsAt(20 / 14)).toEqual({ height: 44, label: 26, mark: 34 });
+    const timeline = dated([e(20, d(1066)), e(21, d(1066, 10))]);
+    const lanes = lanesOf(timeline, scaleOf(timeline, 1000, 1, 1.5)!, 40);
+    expect(lanes[0]!.height).toBe(lanes[0]!.rows * rowsAt(1.5).height + 16);
+    expect(lanes[0]!.height).toBeGreaterThan(lanesOf(timeline, scaleOf(timeline, 1000, 1)!, 40)[0]!.height);
+    // A title's room grows with its text, as far as the larger limit.
+    const plain = lanesOf(timeline, scaleOf(timeline, 1000, 1)!, 40)[0]!.entries[0]!.labelWidth;
+    expect(lanes[0]!.entries[0]!.labelWidth).toBe(plain * 1.5);
   });
 });

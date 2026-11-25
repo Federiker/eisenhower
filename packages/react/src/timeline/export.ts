@@ -3,7 +3,7 @@ import { sortedEntries, type Timeline, type TimelinePoint } from "@eisenhower/mo
 import { PALETTE } from "../theme/palette";
 import { axisOf } from "./axis";
 import { type DateWords, formatPoint, hasBce } from "./format";
-import { LANE_PADDING, lanesOf, MARK_Y, ROW_HEIGHT } from "./layout";
+import { LANE_PADDING, lanesOf, rowsAt } from "./layout";
 import { scaleOf, xOf } from "./scale";
 
 /** A point in ISO 8601 form, which sorts as text: 1066-10-14, -0399 (400 BCE), +12000; a step's number in a Sequence. */
@@ -76,6 +76,7 @@ export function timelineSvg(timeline: Timeline, name: string, width: number, zoo
   const showCe = hasBce(timeline);
   const top = TITLE + AXIS;
   const lanes = lanesOf(timeline, scale, top, Number.POSITIVE_INFINITY);
+  const rows = rowsAt(scale.text);
   const plane =
     Math.max(scale.width, ...lanes.flatMap((lane) => lane.entries.map((placed) => placed.labelX + placed.labelWidth))) +
     MARGIN * 2;
@@ -115,7 +116,7 @@ export function timelineSvg(timeline: Timeline, name: string, width: number, zoo
   for (const lane of lanes) {
     const colour = PALETTE[lane.category.colour]!.light;
     const dash = DASHES[lane.category.line];
-    const lineY = lane.top + LANE_PADDING + MARK_Y;
+    const lineY = lane.top + LANE_PADDING + rows.mark;
     parts.push(`<line x1="0" x2="${total}" y1="${lane.top}" y2="${lane.top}" stroke="${LINE}"/>`);
     parts.push(
       `<line x1="12" x2="40" y1="${lane.top + lane.height / 2}" y2="${lane.top + lane.height / 2}" stroke="${colour}" stroke-width="4"${dash}/>`,
@@ -127,8 +128,8 @@ export function timelineSvg(timeline: Timeline, name: string, width: number, zoo
       `<line x1="${at(0)}" x2="${NAMES + plane - MARGIN}" y1="${lineY}" y2="${lineY}" stroke="${colour}" stroke-width="1.5" stroke-opacity="0.45"${dash}/>`,
     );
     for (const placed of lane.entries) {
-      const rowTop = lane.top + LANE_PADDING + placed.row * ROW_HEIGHT;
-      const y = rowTop + MARK_Y;
+      const rowTop = lane.top + LANE_PADDING + placed.row * rows.height;
+      const y = rowTop + rows.mark;
       const { entry, extent } = placed;
       const approximate = (point: TimelinePoint | null) =>
         point !== null && "approximate" in point && point.approximate;

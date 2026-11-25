@@ -67,7 +67,7 @@ overrides any of them on `.eh-root`, on the provider (`style` or
 | `--eh-radius` | Corners | `6px` | |
 | `--eh-space-1` … `-4` | Spacing | `4px`, `8px`, `12px`, `16px` | |
 | `--eh-font` | Font family | `system-ui, sans-serif` | |
-| `--eh-scale` | Text size, as a factor of 13px: every font size in the views is `calc(<px> * var(--eh-scale))` | `1` | |
+| `--eh-scale` | Text size, as a factor of 13px: every font size in the views is `calc(<px> * var(--eh-scale))`, and the timeline's drawing grows with it | `1` | |
 | `--eh-font-size` | Text size | `calc(13px * var(--eh-scale))` | |
 
 The colours are jerome's workspace colours.
