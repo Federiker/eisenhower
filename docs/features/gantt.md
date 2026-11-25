@@ -130,7 +130,8 @@ place, and the drawing, which scrolls under a header that stays in place:
   fold is stored in the chart) and a bar from its first task's start to
   its last task's end, in the group's colour (black without one), solid as
   far as its tasks are done and faint for the rest, with that percentage
-  right of it ("38%"): the tasks' percentages weighted by their lengths, a
+  at the end of its name ("38%"), in view wherever the chart is scrolled:
+  the tasks' percentages weighted by their lengths, a
   milestone counting as a day (`groupProgress`). A group's tasks are
   indented under it.
 - **Dependencies**: an arrow from the end of each predecessor to the start
@@ -268,7 +269,8 @@ its groups for itself without changing the chart.
 The owner's decisions of 5 November 2026:
 
 - A group shows how far its tasks are done, weighted by their lengths: a
-  percentage right of its summary bar, and the bar solid that far and
+  percentage at the end of its name (19 November 2026: right of its summary
+  bar it was often scrolled out of view), and the bar solid that far and
   faint for the rest; its tasks' names are indented further under it.
 
 - A group may have a colour (`colour`, optional in the stored group, so

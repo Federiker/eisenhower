@@ -115,11 +115,12 @@ describe("Colour… in a group's menu", () => {
 });
 
 describe("a group's progress", () => {
-  it("shows beside its summary bar and fills the bar as far, weighted by the tasks' lengths", () => {
+  it("shows in the group's name, never scrolled away, and fills its bar as far, weighted by the tasks' lengths", () => {
     setup();
     // Design: Sketch, three days at 50%, and Review, a day at 0%: 150 of 400, so 38%.
     const design = group("Design").closest("[role=row]")!;
-    expect(design.querySelector(".eh-gantt-group-progress")).toHaveTextContent("38%");
+    expect(design.querySelector(".eh-gantt-name .eh-gantt-group-progress")).toHaveTextContent("38%");
+    expect(design.querySelector(".eh-gantt-cell .eh-gantt-group-progress")).toBeNull();
     expect(design.querySelector<HTMLElement>(".eh-gantt-summary")!.style.getPropertyValue("--eh-gantt-done")).toBe(
       "38%",
     );

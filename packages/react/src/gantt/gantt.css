@@ -521,11 +521,10 @@
   flex: none;
 }
 
-/* A group's percentage done, right of its summary bar. */
+/* A group's percentage done, at the end of its name's cell, so that no scrolling of the chart hides it. */
 .eh-gantt-group-progress {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  margin-inline-start: auto;
   color: var(--eh-muted);
   font-size: calc(11px * var(--eh-scale, 1));
   font-variant-numeric: tabular-nums;

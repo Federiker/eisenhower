@@ -386,30 +386,27 @@ export const GroupRow = memo(function GroupRow({
               onCancel={() => bridge.rename(rowKey, null)}
             />
           )}
+          {/* At the name column's end, so it is in view wherever the chart is scrolled. */}
+          {span && !renaming && (
+            <span className="eh-gantt-group-progress" aria-hidden="true">
+              {t("gantt.groupProgress", { progress: progress ?? 0 })}
+            </span>
+          )}
         </>
       }
       drawing={
         span && (
-          <>
-            <span
-              className="eh-gantt-summary"
-              style={
-                {
-                  left: xOfDay(geometry, span.start),
-                  width: (daysBetween(span.start, span.end) + 1) * geometry.dayWidth,
-                  "--eh-gantt-done": `${progress ?? 0}%`,
-                  ...(group.colour != null && { "--eh-gantt-summary": colourVar(group.colour) }),
-                } as object
-              }
-            />
-            <span
-              className="eh-gantt-group-progress"
-              aria-hidden="true"
-              style={{ left: xOfDay(geometry, span.end) + geometry.dayWidth + 8 }}
-            >
-              {t("gantt.groupProgress", { progress: progress ?? 0 })}
-            </span>
-          </>
+          <span
+            className="eh-gantt-summary"
+            style={
+              {
+                left: xOfDay(geometry, span.start),
+                width: (daysBetween(span.start, span.end) + 1) * geometry.dayWidth,
+                "--eh-gantt-done": `${progress ?? 0}%`,
+                ...(group.colour != null && { "--eh-gantt-summary": colourVar(group.colour) }),
+              } as object
+            }
+          />
         )
       }
     />
