@@ -230,6 +230,39 @@ export function App({ host, keep = windowStorage() }: { host: Host; keep?: Stora
     };
   }, [host, report]);
 
+  // A document the system gives the app (double-clicked, or opened with Eisenhower, at start or later) opens as
+  // Open… opens one, asking first about unsaved changes.
+  const openGiven = useRef<(path: string) => Promise<void>>(async () => undefined);
+  openGiven.current = async (path) => {
+    try {
+      if (await mayLeave()) await load(path);
+    } catch (error) {
+      console.error(error);
+      report(fill(text.openFailed, { name: baseName(path) }), "error");
+    }
+  };
+  useEffect(() => {
+    if (!host.launched) return undefined;
+    let stop: (() => void) | undefined;
+    let gone = false;
+    host
+      .launched((path) => void openGiven.current(path))
+      .then(
+        (unlisten) => {
+          if (gone) unlisten();
+          else stop = unlisten;
+        },
+        (error: unknown) => {
+          console.error(error);
+          report(text.launchUnheard, "error");
+        },
+      );
+    return () => {
+      gone = true;
+      stop?.();
+    };
+  }, [host, report]);
+
   return (
     <EisenhowerProvider theme={settings.theme} locale={settings.locale} className="app">
       <header className="app-header">

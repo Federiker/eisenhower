@@ -74,6 +74,8 @@ export const appStrings = {
   closeDiscard: "Don't save",
   closeFailed: "The window could not ask about the unsaved changes, so it stays open. Save them, then close it.",
   closeUnguarded: "The window will not ask about unsaved changes when it closes; save them before closing it.",
+  /** The window could not listen for the documents the system opens with the app (double-clicked ones). */
+  launchUnheard: "Documents opened from the file manager cannot reach this window; open them with Open… instead.",
 
   // The preview's dialogues, answered in the page.
   previewOpen: "The path of the document to open:",

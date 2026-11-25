@@ -355,3 +355,61 @@ describe("the window's close", () => {
     );
   });
 });
+
+describe("the documents the system gives the app", () => {
+  it("opens each, asking first about unsaved changes, and stops listening when it goes", async () => {
+    putFile("/Preview/Given.ike", boardText);
+    putFile("/Preview/Later.json", boardText);
+    let open: ((path: string) => void) | undefined;
+    const stop = vi.fn();
+    const host: Host = {
+      ...previewHost(),
+      launched: async (given) => {
+        open = given;
+        return stop;
+      },
+    };
+    const { unmount } = renderApp(host);
+    await waitFor(() => expect(open).toBeDefined());
+    act(() => open?.("/Preview/Given.ike"));
+    await screen.findByRole("heading", { level: 2, name: "Given.ike" });
+    expect(status()).toHaveTextContent("Opened Given.ike.");
+
+    fireEvent.click(screen.getByRole("button", { name: "New column" }));
+    confirm.mockReturnValueOnce(false);
+    act(() => open?.("/Preview/Later.json"));
+    await waitFor(() => expect(confirm).toHaveBeenCalledWith(expect.stringContaining("Given.ike has changes")));
+    expect(screen.getByRole("heading", { level: 2, name: /Given.ike/ })).toBeInTheDocument();
+    confirm.mockReturnValueOnce(true);
+    act(() => open?.("/Preview/Later.json"));
+    await screen.findByRole("heading", { level: 2, name: "Later.json" });
+
+    act(() => open?.("/Preview/Missing.ike"));
+    await saysError("Missing.ike is no longer there");
+    unmount();
+    expect(stop).toHaveBeenCalled();
+  });
+
+  it("says when a question before opening fails, or when it cannot listen", async () => {
+    let open: ((path: string) => void) | undefined;
+    const host: Host = {
+      ...previewHost(),
+      ask: () => Promise.reject(new Error("no dialogue")),
+      launched: async (given) => {
+        open = given;
+        return () => undefined;
+      },
+    };
+    renderApp(host);
+    await create("Board", "Busy", "/Preview/Busy.ike");
+    fireEvent.click(screen.getByRole("button", { name: "New column" }));
+    await waitFor(() => expect(open).toBeDefined());
+    act(() => open?.("/Preview/Other.ike"));
+    await saysError("Other.ike could not be opened.");
+
+    renderApp({ ...previewHost(), launched: () => Promise.reject(new Error("not allowed")) });
+    await waitFor(() =>
+      expect(screen.getAllByRole("alert").at(-1)).toHaveTextContent("Documents opened from the file manager"),
+    );
+  });
+});

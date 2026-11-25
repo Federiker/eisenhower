@@ -25,5 +25,6 @@ export function previewHost(storage?: Storage): Host {
       document.title = title;
     },
     guardClose: undefined,
+    launched: undefined,
   };
 }

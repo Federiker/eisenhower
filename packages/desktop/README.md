@@ -67,9 +67,15 @@ None of them works in a dialogue; undo and redo are left to a text field.
 ## The native side
 
 `src-tauri/` is the crate `eisenhower_desktop` (a member of the root Cargo
-workspace, identifier `org.eisenhower.desktop`, program `eisenhower`): it
-registers `tauri_plugin_eisenhower::init()` and Tauri's dialog plugin, and
-its capability (`capabilities/main.json`) grants `core:default`,
+workspace, identifier `org.eisenhower.desktop`, program `eisenhower`; the
+library `eisenhower_desktop_lib`, which the program runs and the tests
+test): it registers `tauri-plugin-single-instance` (one window, which a
+second launch hands its document to), `tauri_plugin_eisenhower::init()`
+and Tauri's dialog plugin, and the command `launch_file_take` (`launch.rs`:
+the `.ike` or `.json` document the app was opened with). `tauri.conf.json`
+registers `.ike` files to open with it (`bundle.fileAssociations`, with the
+program's icon). `build.rs` asks the linker for the common controls'
+manifest, so the test binary starts on Windows too. Its capability (`capabilities/main.json`) grants `core:default`,
 `core:window:allow-set-title` (the window's title is the document's name),
 `core:window:allow-destroy` (the window closes itself once it has asked
 about unsaved changes), `dialog:default` and `eisenhower:default`. Its icons
@@ -80,5 +86,7 @@ are the demo's.
 `tests/` (`bun run --filter @eisenhower/desktop test`, counted in the
 coverage measure): the screens on the preview host with Testing Library,
 the Tauri host with Tauri's IPC mocks (`tests/ipc.ts`), the recent list,
-the settings, the keys and the documents. The preview is tested end to end
+the settings, the keys and the documents. The crate's tests
+(`src-tauri/tests/unit`, `cargo test -p eisenhower_desktop`) take the
+documents given to the app on Tauri's mock runtime. The preview is tested end to end
 in [tests/e2e](../../tests/e2e) (`desktop.spec.ts`).

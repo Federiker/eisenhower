@@ -28,6 +28,9 @@ tauri-plugin = "2"
 # The demo app's open and save dialogs (MIT OR Apache-2.0).
 tauri-plugin-dialog = "2"
 tauri-plugin-eisenhower = { path = "crates/tauri-plugin" }
+# The desktop app: one window at a time, which a second launch (a double-clicked document) hands its
+# arguments to (MIT OR Apache-2.0).
+tauri-plugin-single-instance = "2"
 # Atomic writes (a temporary file beside the target, then renamed over it) and the tests' folders.
 tempfile = "3.23.0"
 

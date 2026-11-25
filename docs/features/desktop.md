@@ -50,6 +50,29 @@ and a new document suggest `.ike`. The library's packages are unchanged:
 hosts that embed the documents in their own files (jerome) never read or
 write `.ike`.
 
+`.ike` files open with Eisenhower and show its icon, as jerome's projects
+do with jerome (owner, 25 November 2026): the bundle registers the type
+(`bundle.fileAssociations` in `tauri.conf.json`: "Eisenhower document",
+`Eisenhower.Document`, role Editor). On Windows the installers (NSIS and
+MSI) associate it with the program and give its files the program's own
+icon (no document variant; jerome's project icon is its app icon too); on
+macOS it is an exported type, `org.eisenhower.desktop.document`, conforming
+to `public.json`, and Finder draws its documents with the app's icon; on
+Linux the `.desktop` file declares `application/x-eisenhower`, which file
+managers know only where something maps `*.ike` to it (the bundle does not
+install a MIME definition).
+
+A document double-clicked, or opened with Eisenhower, opens in the window:
+as an argument when the app starts (Windows and Linux) or, on macOS, as
+the system's `Opened` event; a second launch hands its arguments to the
+window already open (`tauri-plugin-single-instance`), which comes to the
+front. The first argument ending `.ike` or `.json` (either case; a
+`file://` URL too, a relative path from the launch's folder) is kept until
+the window takes it (`launch_file_take`), and one given later is sent as
+the event `eisenhower://launch-file`. The window opens it as Open… does:
+asking first about unsaved changes, and saying why when it cannot be
+opened. Jerome's `launch_file.rs`, adapted, is the crate's `launch.rs`.
+
 ## A document open
 
 The window holds one document at a time, in its view (`<Board>`,

@@ -1,4 +1,6 @@
 import { tauriStorage } from "@eisenhower/tauri";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ask, message, open, save } from "@tauri-apps/plugin-dialog";
 
@@ -10,6 +12,9 @@ import { DOCUMENT_EXTENSION, OPEN_EXTENSIONS } from "./names";
 /** Open… takes the app's .ike documents and the .json ones saved before; Save as… and new documents are .ike. */
 const OPEN_FILTERS = [{ name: text.documentFiles, extensions: [...OPEN_EXTENSIONS] }];
 const SAVE_FILTERS = [{ name: text.documentFiles, extensions: [DOCUMENT_EXTENSION] }];
+
+/** The event a document given to the app while the window listens arrives by (the crate's `launch.rs`). */
+export const LAUNCH_FILE_EVENT = "eisenhower://launch-file";
 
 const askQuestion = ({ title, message, ok, cancel }: Question) =>
   ask(message, { title, kind: "warning", okLabel: ok, cancelLabel: cancel });
@@ -55,6 +60,18 @@ export function tauriHost(): Host {
           asking = false;
         }
       });
+    },
+    // Listening first, then taking the document the app started with: one given in between is sent as an event.
+    launched: async (openPath) => {
+      const stop = await listen<string>(LAUNCH_FILE_EVENT, (event) => openPath(event.payload));
+      try {
+        const waiting = await invoke<string | null>("launch_file_take");
+        if (waiting !== null) openPath(waiting);
+      } catch (error) {
+        stop();
+        throw error;
+      }
+      return stop;
     },
   };
 }

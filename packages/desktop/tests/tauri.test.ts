@@ -179,3 +179,44 @@ describe("the window's close", () => {
     expect(calls.map((call) => call.command)).toContain("plugin:event|unlisten");
   });
 });
+
+describe("the documents the system gives the app", () => {
+  /** The window with the host listening for documents, `taken` what the app started with. */
+  async function listening(taken: unknown) {
+    const opened: string[] = [];
+    const calls = mockTauri(({ command }) => {
+      if (command === "plugin:event|listen") return 7;
+      if (command === "launch_file_take") {
+        if (taken instanceof Error) throw taken;
+        return taken;
+      }
+      return null;
+    });
+    const stop = tauriHost().launched?.((path) => opened.push(path));
+    return { calls, opened, stop };
+  }
+
+  it("opens the document the app started with, then each given later, until told to stop", async () => {
+    const { calls, opened, stop } = await listening("C:/Plans/Garden.ike");
+    const unlisten = await stop;
+    expect(calls.map((call) => call.command)).toEqual(["plugin:event|listen", "launch_file_take"]);
+    expect(calls[0]?.args).toMatchObject({ event: "eisenhower://launch-file" });
+    expect(opened).toEqual(["C:/Plans/Garden.ike"]);
+    const internals = (window as unknown as { __TAURI_INTERNALS__: Internals }).__TAURI_INTERNALS__;
+    const { handler } = (calls[0]?.args ?? {}) as { handler: number };
+    internals.runCallback(handler, { event: "eisenhower://launch-file", id: 2, payload: "C:/Plans/Week.json" });
+    expect(opened).toEqual(["C:/Plans/Garden.ike", "C:/Plans/Week.json"]);
+    await unlisten?.();
+    expect(calls.map((call) => call.command)).toContain("plugin:event|unlisten");
+  });
+
+  it("opens nothing when the app started without a document, and stops listening when it cannot take one", async () => {
+    const empty = await listening(null);
+    await empty.stop;
+    expect(empty.opened).toEqual([]);
+    const failing = await listening(new Error("not allowed"));
+    await expect(failing.stop).rejects.toThrow("not allowed");
+    await settle();
+    expect(failing.calls.map((call) => call.command)).toContain("plugin:event|unlisten");
+  });
+});

@@ -34,6 +34,11 @@ export type Host = {
    * function that stops asking.
    */
   guardClose: ((unsaved: () => Unsaved | null, failed: (error: unknown) => void) => Promise<() => void>) | undefined;
+  /**
+   * Gives `open` the path of each document the app is given by the system (the window only): one double-clicked
+   * or opened with Eisenhower, when the app starts and while it runs. Resolves to a function that stops listening.
+   */
+  launched: ((open: (path: string) => void) => Promise<() => void>) | undefined;
 };
 
 /** The user closed a dialogue or said no: nothing was written, and nothing went wrong. */
