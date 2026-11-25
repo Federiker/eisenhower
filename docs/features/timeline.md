@@ -196,8 +196,11 @@ Ctrl with the wheel zooms too, and a double-click on an empty spot of a
 lane starts an entry there (New entry does the same from the keyboard). In
 the table and the narrow list, Enter opens an entry, Delete asks to delete
 it and the Menu key opens its menu. In the steps and categories lists,
-Alt+↑ ↓ move a row, F2 or its pencil renames it, Delete deletes it (asking
-where its entries go) and the Menu key opens its menu.
+Alt+↑ ↓ move a row, Delete deletes it (asking where its entries go) and
+the Menu key opens its menu. A step's or category's name and a category's
+line are Tab stops themselves (`EditableText`'s `focusable`): Enter or F2
+there edits them, and the focus comes back to them after; their pencils are
+for the pointer, out of the Tab order (owner, 19 November 2026).
 
 ## Accessibility
 

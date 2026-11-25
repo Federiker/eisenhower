@@ -110,6 +110,7 @@ export function TimelineCategoriesList() {
                 label={t("timeline.categoryNameNumbered", { number: index + 1 })}
                 editLabel={t("timeline.editCategory", { name: category.name })}
                 editIcon={editIcon}
+                focusable
                 pencilVisible={pencil}
                 editRequest={naming?.id === category.id ? naming.nonce : undefined}
                 disabled={readOnly}
@@ -133,6 +134,7 @@ export function TimelineCategoriesList() {
                     label={t("timeline.lineNamed", { name: category.name })}
                     editLabel={t("timeline.editLine", { name: category.name })}
                     editIcon={editIcon}
+                    focusable
                     pencilVisible={pencil}
                     disabled={readOnly}
                     onCommit={(next) => update(category, { line: next as TimelineLine })}

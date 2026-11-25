@@ -6,9 +6,12 @@ import {
   type ChangeEvent,
   type HTMLAttributes,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
   type RefObject,
 } from "react";
+
+import { actionOf, ariaKeyShortcuts, shortcutsIn } from "../keyboard/shortcuts";
 
 import { IconButton } from "./IconButton";
 import { classNames } from "./classNames";
@@ -26,6 +29,10 @@ export type EditableChoice = { value: string; label: string };
 export type PencilVisibility = "visible" | "onHover" | "hidden";
 
 type Field = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+/** The keys a focusable text starts editing with (and Space, as any button): Enter and F2. */
+const KEYS = shortcutsIn();
+const EDIT_KEYS = ariaKeyShortcuts(["open", "rename"]);
 
 /**
  * Text that reads as text until it is edited in place: its pencil button or a double-click turns it into a
@@ -46,6 +53,7 @@ export function EditableText({
   editLabel,
   editIcon,
   pencilVisible = "visible",
+  focusable = false,
   hint,
   caption,
   editRequest,
@@ -75,6 +83,12 @@ export function EditableText({
   editIcon: ReactNode;
   /** When the pencil shows (default: always). Hidden, the text is edited by double-clicking it. */
   pencilVisible?: PencilVisibility;
+  /**
+   * The text itself takes the focus: a Tab stop (a button named by `editLabel`) that Enter or F2 (or Space)
+   * starts editing, and that the focus comes back to; the pencil is then for the pointer only, out of the Tab
+   * order and hidden from assistive technology. Off by default, when the pencil is the Tab stop.
+   */
+  focusable?: boolean;
   /** A note under the field while it is edited (such as "One name per line"). */
   hint?: ReactNode;
   /**
@@ -103,6 +117,8 @@ export function EditableText({
   const [reason, setReason] = useState<string | null>(null);
   const field = useRef<Field>(null);
   const pencil = useRef<HTMLButtonElement>(null);
+  const reader = useRef<HTMLDivElement>(null);
+  const keyed = focusable && !disabled;
   const committing = useRef(false);
   const selectRange = useRef<readonly [number, number] | null>(null);
   // Whether a choice's dropdown was opened with the pointer, so that the pick it closes on saves at once.
@@ -155,7 +171,7 @@ export function EditableText({
     if (focusPencil) {
       window.setTimeout(() => {
         const active = document.activeElement;
-        if (!active || active === document.body) pencil.current?.focus();
+        if (!active || active === document.body) (keyed ? reader : pencil).current?.focus();
       }, 0);
     }
   }
@@ -272,9 +288,31 @@ export function EditableText({
       label={editLabel}
       icon={editIcon}
       disabled={disabled}
+      // With a focusable text, the text is the keys' and assistive technology's way in; the pencil the pointer's.
+      {...(keyed && { tabIndex: -1, "aria-hidden": true })}
       onClick={() => start()}
     />
   );
+  const textProps = keyed
+    ? {
+        ref: reader,
+        role: "button",
+        tabIndex: 0,
+        "aria-label": editLabel,
+        "aria-keyshortcuts": EDIT_KEYS,
+        onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
+          const action = actionOf(event.nativeEvent, KEYS);
+          if (action !== "open" && action !== "rename" && event.key !== " ") return;
+          event.preventDefault();
+          event.stopPropagation();
+          start();
+        },
+        // Assistive technology's click (no pointer detail) edits; a pointer's needs a double-click, as before.
+        onClick: (event: MouseEvent<HTMLDivElement>) => {
+          if (event.detail === 0) start();
+        },
+      }
+    : {};
   return (
     <Container
       {...containerProps}
@@ -284,7 +322,9 @@ export function EditableText({
     >
       {caption === undefined ? (
         <div className="eh-editable-content">
-          <div className="eh-editable-text">{reading}</div>
+          <div className="eh-editable-text" {...textProps}>
+            {reading}
+          </div>
           {pencilButton}
         </div>
       ) : (
@@ -293,7 +333,9 @@ export function EditableText({
             <span aria-hidden="true">{caption}</span>
             {pencilButton}
           </div>
-          <div className="eh-editable-text">{reading}</div>
+          <div className="eh-editable-text" {...textProps}>
+            {reading}
+          </div>
         </>
       )}
     </Container>

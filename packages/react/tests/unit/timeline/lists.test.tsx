@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { acts, d, e, harbour, id } from "./fixtures";
@@ -155,6 +155,40 @@ describe("a timeline's categories", () => {
     expect(details).toHaveTextContent("1 entry");
     const name = within(ships).getByRole("button", { name: "Edit category: Ships" });
     expect(name.closest(".eh-timeline-list-details")).toBeNull();
+  });
+
+  it("take the focus on their name and line, which Enter or F2 edits, their pencils out of the Tab order", async () => {
+    render(<Host initial={harbour([e(20, d(1066))])} editor />);
+    const ships = row(categories(), "Ships");
+    const tabStops = [...ships.querySelectorAll<HTMLElement>("[tabindex='0'], button:not([tabindex='-1'])")];
+    expect(tabStops.map((each) => each.getAttribute("aria-label"))).toEqual([
+      "Edit category: Ships",
+      "Colour: Ships",
+      "Edit line: Ships",
+    ]);
+    for (const pencil of ships.querySelectorAll(".eh-editable-edit")) expect(pencil).toHaveAttribute("tabindex", "-1");
+    const name = within(ships).getByRole("button", { name: "Edit category: Ships" });
+    name.focus();
+    fireEvent.keyDown(name, { key: "F2" });
+    const field = within(ships).getByRole("textbox", { name: "Category 1" });
+    fireEvent.change(field, { target: { value: "Fleet" } });
+    fireEvent.keyDown(field, { key: "Enter" });
+    await act(nextTick);
+    expect(held.value!.categories[0]!.name).toBe("Fleet");
+    await waitFor(() =>
+      expect(within(categories()).getByRole("button", { name: "Edit category: Fleet" })).toHaveFocus(),
+    );
+    const line = within(categories()).getByRole("button", { name: "Edit line: Fleet" });
+    fireEvent.keyDown(line, { key: "Enter" });
+    expect(within(categories()).getByRole("combobox", { name: "Line: Fleet" })).toHaveFocus();
+  });
+
+  it("take the focus on a step's name, which Enter edits", () => {
+    render(<Host initial={acts} editor />);
+    const name = within(steps()).getByRole("button", { name: "Edit step: Act 1" });
+    expect(name).toHaveAttribute("tabindex", "0");
+    fireEvent.keyDown(name, { key: "Enter" });
+    expect(within(steps()).getByRole("textbox", { name: "Step 1" })).toHaveFocus();
   });
 
   it("show their colour read-only, the picker disabled", () => {

@@ -229,7 +229,9 @@ Accessibility is part of each feature (decision 8):
 From jerome's components, with their tests, their keys and their ARIA:
 `Button`, `IconButton`, `TextField`, `TextArea`, `Select`, `Checkbox`,
 `Notice`, `InlineQuestion` (a question asked in place), `EditableText`
-(text with a pencil that becomes a field), `LabelledField`, `InlineRename`,
+(text with a pencil that becomes a field; with `focusable`, the text is
+the Tab stop, edited with Enter or F2, and the pencil only the pointer's),
+`LabelledField`, `InlineRename`,
 `NameField`, `ReorderList` (rows put in order by dragging, a pointer drag that a Tauri
 window does not catch, Alt+↑ ↓ or their
 menu), `ContextMenu` with `opensMenu` and `placeBelow`, `TreeDialog` (a

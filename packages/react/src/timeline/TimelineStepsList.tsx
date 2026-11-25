@@ -99,6 +99,7 @@ export function TimelineStepsList() {
                 label={t("timeline.stepName", { number: index + 1 })}
                 editLabel={t("timeline.editStep", { name: step.name })}
                 editIcon={editIcon}
+                focusable
                 pencilVisible={readOnly ? "hidden" : "visible"}
                 editRequest={naming?.id === step.id ? naming.nonce : undefined}
                 disabled={readOnly}

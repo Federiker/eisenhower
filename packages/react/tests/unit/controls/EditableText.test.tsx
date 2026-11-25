@@ -344,3 +344,48 @@ describe("EditableText", () => {
     expect(screen.getByRole("cell")).toHaveAttribute("data-editing", "true");
   });
 });
+
+describe("EditableText with a focusable text", () => {
+  const text = () => screen.getByRole("button", { name: "Edit the approved translations of fiume" });
+
+  it("is a Tab stop itself, its pencil the pointer's only", () => {
+    editable({ focusable: true });
+    expect(text()).toHaveClass("eh-editable-text");
+    expect(text()).toHaveTextContent("river");
+    expect(text()).toHaveAttribute("tabindex", "0");
+    expect(text()).toHaveAttribute("aria-keyshortcuts", "Enter F2");
+    const pencilButton = document.querySelector(".eh-editable-edit")!;
+    expect(pencilButton).toHaveAttribute("tabindex", "-1");
+    expect(pencilButton).toHaveAttribute("aria-hidden", "true");
+    // The pencil still edits with the pointer.
+    fireEvent.click(pencilButton);
+    expect(field()).toHaveFocus();
+  });
+
+  it("starts editing with Enter, F2 or Space, and the focus comes back to the text after", async () => {
+    editable({ focusable: true });
+    for (const key of ["Enter", "F2", " "]) {
+      text().focus();
+      fireEvent.keyDown(text(), { key });
+      expect(field()).toHaveFocus();
+      fireEvent.keyDown(field(), { key: "Escape" });
+      await waitFor(() => expect(text()).toHaveFocus());
+    }
+  });
+
+  it("is not edited by a pointer's single click, but by assistive technology's", () => {
+    editable({ focusable: true });
+    fireEvent.click(text(), { detail: 1 });
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    fireEvent.keyDown(text(), { key: "a" });
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    fireEvent.click(text(), { detail: 0 });
+    expect(field()).toHaveFocus();
+  });
+
+  it("stays plain text when disabled", () => {
+    editable({ focusable: true, disabled: true, pencilVisible: "hidden" });
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByText("river")).not.toHaveAttribute("tabindex");
+  });
+});
