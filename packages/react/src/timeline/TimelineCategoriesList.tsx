@@ -115,29 +115,31 @@ export function TimelineCategoriesList() {
                 disabled={readOnly}
                 onCommit={(next) => update(category, { name: next })}
               />
-              <span className="eh-timeline-list-choice">
-                <span aria-hidden="true">{t("timeline.colour")}</span>
-                <ColourPicker
-                  value={category.colour}
-                  aria-label={t("timeline.colourNamed", { name: category.name })}
-                  disabled={readOnly}
-                  onChange={(colour) => view.change((current) => updateCategory(current, { ...category, colour }))}
-                />
+              <span className="eh-timeline-list-details">
+                <span className="eh-timeline-list-choice">
+                  <span aria-hidden="true">{t("timeline.colour")}</span>
+                  <ColourPicker
+                    value={category.colour}
+                    aria-label={t("timeline.colourNamed", { name: category.name })}
+                    disabled={readOnly}
+                    onChange={(colour) => view.change((current) => updateCategory(current, { ...category, colour }))}
+                  />
+                </span>
+                <span className="eh-timeline-list-choice">
+                  <span aria-hidden="true">{t("timeline.line")}</span>
+                  <EditableText
+                    text={category.line}
+                    choices={lines}
+                    label={t("timeline.lineNamed", { name: category.name })}
+                    editLabel={t("timeline.editLine", { name: category.name })}
+                    editIcon={editIcon}
+                    pencilVisible={pencil}
+                    disabled={readOnly}
+                    onCommit={(next) => update(category, { line: next as TimelineLine })}
+                  />
+                </span>
+                {count > 0 && <Notice as="span">{t("timeline.entriesCount", { count })}</Notice>}
               </span>
-              <span className="eh-timeline-list-choice">
-                <span aria-hidden="true">{t("timeline.line")}</span>
-                <EditableText
-                  text={category.line}
-                  choices={lines}
-                  label={t("timeline.lineNamed", { name: category.name })}
-                  editLabel={t("timeline.editLine", { name: category.name })}
-                  editIcon={editIcon}
-                  pencilVisible={pencil}
-                  disabled={readOnly}
-                  onCommit={(next) => update(category, { line: next as TimelineLine })}
-                />
-              </span>
-              {count > 0 && <Notice as="span">{t("timeline.entriesCount", { count })}</Notice>}
               {deleting === category.id && (
                 <InlineQuestion
                   label={t("timeline.deleteCategory", { name: category.name })}

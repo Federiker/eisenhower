@@ -128,7 +128,11 @@ steps (a Sequence) and the categories, each in a list put in order by
 dragging (a pointer drag, so it works in a Tauri window too; a row is
 pressed anywhere but its fields, and a line marks where it goes), Alt+↑ ↓
 or its menu. A category's colour is a colour picker (its
-swatch and name), which saves the colour chosen at once; Esc keeps it.
+swatch and name), which saves the colour chosen at once; Esc keeps it. It
+reads as text, as the line beside it does, with its chevron, and shows its
+field's border while the pointer is over it or it is open. A category's
+colour, line and number of entries keep together at the row's end, or, in
+a list narrower than 480 pixels, on a line of their own under its name.
 
 The view never stores anything: jerome kept each drawing's zoom in
 `localStorage`; here the zoom is the view's own state unless the host passes

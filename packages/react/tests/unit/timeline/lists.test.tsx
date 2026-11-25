@@ -146,6 +146,17 @@ describe("a timeline's categories", () => {
     expect(picker("Ships")).toHaveFocus();
   });
 
+  it("keep a category's colour, line and entries together, which a narrow list puts under its name", () => {
+    render(<Host initial={harbour([e(20, d(1066))])} editor />);
+    const ships = row(categories(), "Ships");
+    const details = ships.querySelector<HTMLElement>(".eh-timeline-list-details")!;
+    expect(within(details).getByRole("combobox", { name: "Colour: Ships" })).toBeInTheDocument();
+    expect(within(details).getByRole("button", { name: "Edit line: Ships" })).toBeInTheDocument();
+    expect(details).toHaveTextContent("1 entry");
+    const name = within(ships).getByRole("button", { name: "Edit category: Ships" });
+    expect(name.closest(".eh-timeline-list-details")).toBeNull();
+  });
+
   it("show their colour read-only, the picker disabled", () => {
     render(<Host initial={harbour([e(20, d(1066))])} editor readOnly />);
     expect(screen.getByRole("combobox", { name: "Colour: Ships" })).toBeDisabled();
