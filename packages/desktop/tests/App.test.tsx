@@ -80,23 +80,23 @@ describe("the start screen", () => {
 
   it("creates a document of the type chosen where the user says, and opens it", async () => {
     renderApp();
-    await create("Gantt chart", "Garden: spring", "/Preview/Garden spring.json");
-    expect(prompt).toHaveBeenCalledWith("Save the document as:", "/Preview/Garden spring.json");
-    expect(JSON.parse(file("/Preview/Garden spring.json") ?? "")).toMatchObject({
+    await create("Gantt chart", "Garden: spring", "/Preview/Garden spring.ike");
+    expect(prompt).toHaveBeenCalledWith("Save the document as:", "/Preview/Garden spring.ike");
+    expect(JSON.parse(file("/Preview/Garden spring.ike") ?? "")).toMatchObject({
       format: "eisenhower",
       kind: "gantt",
     });
-    expect(status()).toHaveTextContent("Created Garden spring.json.");
-    await waitFor(() => expect(document.title).toBe("Garden spring.json – Eisenhower"));
+    expect(status()).toHaveTextContent("Created Garden spring.ike.");
+    await waitFor(() => expect(document.title).toBe("Garden spring.ike – Eisenhower"));
     expect(JSON.parse(localStorage.getItem(RECENT_KEY) ?? "")).toMatchObject([
-      { path: "/Preview/Garden spring.json", name: "Garden spring.json", kind: "gantt" },
+      { path: "/Preview/Garden spring.ike", name: "Garden spring.ike", kind: "gantt" },
     ]);
   });
 
   it("makes a timeline of dates or of steps", async () => {
     renderApp();
-    await create("Timeline (sequence)", "Story", "/Preview/Story.json");
-    expect(JSON.parse(file("/Preview/Story.json") ?? "")).toMatchObject({
+    await create("Timeline (sequence)", "Story", "/Preview/Story.ike");
+    expect(JSON.parse(file("/Preview/Story.ike") ?? "")).toMatchObject({
       kind: "timeline",
       data: { kind: "sequence" },
     });
@@ -132,22 +132,19 @@ describe("the start screen", () => {
     await saysError("Full.json could not be created.");
   });
 
-  it("lists the documents opened, the latest first, and opens one", async () => {
+  it("lists the documents opened, the latest first, by name without .ike or .json, and opens one", async () => {
     putFile("/Preview/Older.json", boardText);
-    putFile("/Preview/Newer.json", serialiseDocument(boardDocument, emptyBoard()));
+    putFile("/Preview/Newer.ike", serialiseDocument(boardDocument, emptyBoard()));
     localStorage.setItem(
       RECENT_KEY,
       JSON.stringify([
-        recentEntry("/Preview/Newer.json", "Newer.json"),
+        recentEntry("/Preview/Newer.ike", "Newer.ike"),
         recentEntry("/Preview/Older.json", "Older.json"),
       ]),
     );
     renderApp();
     const items = within(screen.getByRole("list")).getAllByRole("button");
-    expect(items.map((item) => item.querySelector(".start-recent-name")?.textContent)).toEqual([
-      "Newer.json",
-      "Older.json",
-    ]);
+    expect(items.map((item) => item.querySelector(".start-recent-name")?.textContent)).toEqual(["Newer", "Older"]);
     expect(items[1]).toHaveTextContent(/Board/);
     expect(items[1]).toHaveTextContent(/\/Preview/);
     expect(items[1]).toHaveTextContent(/Opened 3 Nov 2026/);
@@ -169,13 +166,13 @@ describe("the start screen", () => {
       ]),
     );
     renderApp();
-    await waitFor(() => expect(screen.queryByText("Gone.json")).not.toBeInTheDocument());
-    expect(screen.getByText("Here.json")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText("Gone")).not.toBeInTheDocument());
+    expect(screen.getByText("Here")).toBeInTheDocument();
 
     localStorage.removeItem(`${PREVIEW_PREFIX}/Preview/Soon gone.json`);
-    fireEvent.click(screen.getByText("Soon gone.json"));
+    fireEvent.click(screen.getByText("Soon gone"));
     await saysError("Soon gone.json is no longer there, so it is taken off the list.");
-    expect(screen.queryByText("Soon gone.json")).not.toBeInTheDocument();
+    expect(screen.queryByText("Soon gone")).not.toBeInTheDocument();
   });
 
   it("says when the recent list cannot be read", () => {
@@ -207,8 +204,9 @@ describe("the start screen", () => {
 });
 
 describe("a document open", () => {
-  it("saves with Ctrl+S, marks unsaved changes and undoes them", async () => {
+  it("saves with Ctrl+S, in place even as .json, marks unsaved changes and undoes them", async () => {
     renderApp();
+    // A file chosen as .json (as documents were saved before .ike) is saved where it is, as it is.
     await create("Board", "Moving", "/Preview/Moving.json");
     fireEvent.click(screen.getByRole("button", { name: "New column" }));
     expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
@@ -233,7 +231,8 @@ describe("a document open", () => {
     prompt.mockReturnValueOnce("/Preview/Week 2.json");
     fireEvent.click(screen.getByRole("button", { name: "Save as…" }));
     await screen.findByRole("heading", { level: 2, name: "Week 2.json" });
-    expect(prompt).toHaveBeenLastCalledWith("Save the document as:", "/Preview/Week.json");
+    // A .json document from before is offered as .ike.
+    expect(prompt).toHaveBeenLastCalledWith("Save the document as:", "/Preview/Week.ike");
     expect(JSON.parse(file("/Preview/Week 2.json") ?? "")).toMatchObject({ kind: "todo" });
     expect(JSON.parse(localStorage.getItem(RECENT_KEY) ?? "")[0]).toMatchObject({ path: "/Preview/Week 2.json" });
 
@@ -287,7 +286,7 @@ describe("a document open", () => {
     confirm.mockReturnValueOnce(true);
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
     await screen.findByRole("heading", { name: "Recent documents" });
-    expect(screen.getByText("Draft.json")).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Eisenhower"));
   });
 

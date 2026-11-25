@@ -8,7 +8,9 @@ import { type Call, mockTauri } from "./ipc";
 
 const HASH = "a".repeat(64);
 const path = "C:\\Plans\\Garden.json";
-const filters = [{ name: "Eisenhower documents", extensions: ["json"] }];
+// Open… takes .ike and the .json documents saved before; a new file is .ike.
+const filters = [{ name: "Eisenhower documents", extensions: ["ike", "json"] }];
+const saveFilters = [{ name: "Eisenhower documents", extensions: ["ike"] }];
 
 describe("the Tauri host", () => {
   it("chooses a file to open, or nothing when the dialogue is cancelled", async () => {
@@ -23,9 +25,9 @@ describe("the Tauri host", () => {
 
   it("asks where to save, suggesting the file's name", async () => {
     const calls = mockTauri(() => path);
-    expect(await tauriHost().chooseNewFile("Garden.json")).toBe(path);
+    expect(await tauriHost().chooseNewFile("Garden.ike")).toBe(path);
     expect(calls).toMatchObject([
-      { command: "plugin:dialog|save", args: { options: { defaultPath: "Garden.json", filters } } },
+      { command: "plugin:dialog|save", args: { options: { defaultPath: "Garden.ike", filters: saveFilters } } },
     ]);
   });
 

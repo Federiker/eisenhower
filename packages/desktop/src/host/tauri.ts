@@ -5,9 +5,11 @@ import { ask, message, open, save } from "@tauri-apps/plugin-dialog";
 import { fill, appStrings as text } from "../strings";
 import { type CloseChoice, mayClose } from "./closing";
 import type { Host, Question } from "./host";
-import { DOCUMENT_EXTENSION } from "./names";
+import { DOCUMENT_EXTENSION, OPEN_EXTENSIONS } from "./names";
 
-const FILTERS = [{ name: text.documentFiles, extensions: [DOCUMENT_EXTENSION] }];
+/** Open… takes the app's .ike documents and the .json ones saved before; Save as… and new documents are .ike. */
+const OPEN_FILTERS = [{ name: text.documentFiles, extensions: [...OPEN_EXTENSIONS] }];
+const SAVE_FILTERS = [{ name: text.documentFiles, extensions: [DOCUMENT_EXTENSION] }];
 
 const askQuestion = ({ title, message, ok, cancel }: Question) =>
   ask(message, { title, kind: "warning", okLabel: ok, cancelLabel: cancel });
@@ -34,8 +36,8 @@ export function tauriHost(): Host {
   return {
     kind: "tauri",
     storage: tauriStorage(),
-    chooseFile: () => open({ multiple: false, directory: false, filters: FILTERS }),
-    chooseNewFile: (suggested) => save({ defaultPath: suggested, filters: FILTERS }),
+    chooseFile: () => open({ multiple: false, directory: false, filters: OPEN_FILTERS }),
+    chooseNewFile: (suggested) => save({ defaultPath: suggested, filters: SAVE_FILTERS }),
     ask: askQuestion,
     setTitle: (title) => getCurrentWindow().setTitle(title),
     guardClose: (unsaved, failed) => {

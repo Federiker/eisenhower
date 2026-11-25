@@ -2,7 +2,7 @@ import { Button, TextField } from "@eisenhower/react";
 import { type FormEvent, type RefObject, useEffect, useId, useRef, useState } from "react";
 
 import { NEW_TYPES, type NewType } from "./documents";
-import { folderOf } from "./host/names";
+import { documentName, folderOf } from "./host/names";
 import { APP_KEYS } from "./keys";
 import type { RecentDocument } from "./recent";
 import { fill, appStrings as text } from "./strings";
@@ -55,7 +55,8 @@ export function StartScreen({
             {recent.map((document) => (
               <li key={document.path}>
                 <button type="button" className="start-recent-item" onClick={() => onOpenRecent(document)}>
-                  <span className="start-recent-name">{document.name}</span>
+                  {/* Its name without .ike or .json: the folder below says where it is. */}
+                  <span className="start-recent-name">{documentName(document.name)}</span>
                   <span className="start-recent-kind">{text.kinds[document.kind]}</span>
                   <span className="start-recent-folder">{folderOf(document.path)}</span>
                   <span className="start-recent-when">

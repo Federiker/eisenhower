@@ -17,32 +17,33 @@ const item = (id: string, title: string, urgent: boolean, important: boolean) =>
 test("creates a board, saves it with Ctrl+S, and opens it again from the recent list", async ({ page }) => {
   const errors = await openDesktop(page);
   await expect(page.getByText("No documents opened yet. Open one, or create a new one.")).toBeVisible();
-  const asked = answerDialogues(page, "/Preview/Moving house.json");
+  const asked = answerDialogues(page, "/Preview/Moving house.ike");
 
   await page.getByRole("radio", { name: "Board" }).check();
   await page.getByRole("textbox", { name: "Name" }).fill("Moving house");
   await page.getByRole("button", { name: "Create…" }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Moving house.json" })).toBeFocused();
+  await expect(page.getByRole("heading", { level: 2, name: "Moving house.ike" })).toBeFocused();
   expect(asked).toEqual(["Save the document as:"]);
-  await expect(page).toHaveTitle("Moving house.json – Eisenhower");
+  await expect(page).toHaveTitle("Moving house.ike – Eisenhower");
 
   await page.getByRole("button", { name: "New column" }).click();
   await expect(page.getByRole("heading", { level: 2, name: /Unsaved changes/ })).toBeVisible();
   await page.keyboard.press("Escape");
   await page.locator("body").press("Control+s");
-  await expect(page.getByRole("contentinfo").getByRole("status")).toHaveText("Saved Moving house.json.");
-  expect(JSON.parse((await fileText(page, "/Preview/Moving house.json")) ?? "").data.columns).toHaveLength(1);
+  await expect(page.getByRole("contentinfo").getByRole("status")).toHaveText("Saved Moving house.ike.");
+  expect(JSON.parse((await fileText(page, "/Preview/Moving house.ike")) ?? "").data.columns).toHaveLength(1);
 
   await page.getByRole("button", { name: "Start" }).click();
   const recent = page.getByRole("list").getByRole("button");
   await expect(recent).toHaveCount(1);
-  await expect(recent).toContainText("Moving house.json");
+  // Listed by its name, without .ike.
+  await expect(recent.locator(".start-recent-name")).toHaveText("Moving house");
   await expect(recent).toContainText("Board");
   await expect(page).toHaveTitle("Eisenhower");
 
   await page.reload();
   await recent.click();
-  await expect(page.getByRole("heading", { level: 2, name: "Moving house.json" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Moving house.ike" })).toBeVisible();
   await expect(page.getByRole("region", { name: "New column" })).toBeVisible();
   expect(errors).toEqual([]);
 });

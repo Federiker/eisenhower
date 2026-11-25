@@ -1,7 +1,8 @@
 # @eisenhower/desktop
 
 Eisenhower as a desktop application (decision 19): a Tauri window that
-creates, opens and saves any view's document as a `.json` file. It is a host
+creates, opens and saves any view's document as an `.ike` file (its JSON;
+`.json` documents saved before still open). It is a host
 like any other, built only from `@eisenhower/model`, `@eisenhower/react`,
 `@eisenhower/tauri` and `tauri-plugin-eisenhower`; what it does is described
 in [the desktop app](../../docs/features/desktop.md).
@@ -20,8 +21,9 @@ page's `prompt` and `confirm`.
 
 ## What it shows
 
-- **Start**: the recent documents (the latest first, up to 20, each with
-  its kind, folder and when it was opened; files that are gone are dropped),
+- **Start**: the recent documents (the latest first, up to 20, each by its
+  name without `.ike` or `.json`, with its kind, folder and when it was
+  opened; files that are gone are dropped),
   **Open…**, and **New document**: a type (Board, Timeline (dates),
   Timeline (sequence), Gantt chart, Todo list) and a name, then **Create…**,
   which asks where to save it, writes the empty document and opens it.

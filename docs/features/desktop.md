@@ -16,8 +16,9 @@ decision 19 in [development.md](../development.md#decisions)).
 The window opens on **Start**:
 
 - **Recent documents**, the latest opened first, up to 20: each shows the
-  file's name, its kind (Board, Timeline, Gantt chart, Todo list), its
-  folder and when it was last opened; choosing one opens it. The list is
+  document's name (its file's name without `.ike` or `.json`), its kind
+  (Board, Timeline, Gantt chart, Todo list), its folder and when it was
+  last opened; choosing one opens it. The list is
   kept in the window's `localStorage` (`eisenhower-desktop:recent`), so the
   development window (Vite's address) and the built app keep separate lists.
   A document is put at the top each time it is opened, created or saved
@@ -26,16 +27,28 @@ The window opens on **Start**:
   without a word; a file that is there but cannot be read stays listed, and
   opening it says why.
 - **Open…**: a file chosen with the dialog (the filter "Eisenhower
-  documents", `*.json`); its `kind` says which view it is for, so any
+  documents", `*.ike` and `*.json`); its `kind` says which view it is for, so any
   document opens. One that is not a valid document is refused with its
   problem in words, and the start screen stays.
 - **New document**: a form with the type (Board, Timeline (dates), Timeline
   (sequence), Gantt chart, Todo list) and a name; **Create…** asks where
-  with a save dialog suggesting `<name>.json`, writes the kind's empty
+  with a save dialog suggesting `<name>.ike`, writes the kind's empty
   document there (`serialiseDocument` with the kind's `DocumentKind`,
   through `saveDocument` and `tauriStorage`; `emptyBoard()`,
   `emptyTimeline("dates" | "sequence")`, `emptyGantt()`, `{ items: [] }`)
   and opens it. Cancelling the dialog leaves the form as it was.
+
+## Its files
+
+The app saves its documents as `.ike` files (owner, 25 November 2026),
+whose content is the document's JSON, the same as any host stores
+(`serialiseDocument`; [the models](model.md)): only the name's end is the
+app's. Open… still opens the `.json` documents saved before. **Save** writes
+a document where it was read from, so a `.json` document stays `.json`
+(the least surprising: its file is neither renamed nor copied); **Save as…**
+and a new document suggest `.ike`. The library's packages are unchanged:
+hosts that embed the documents in their own files (jerome) never read or
+write `.ike`.
 
 ## A document open
 
@@ -49,7 +62,8 @@ is the file's name.
 
 Saving is the demo's: **Save** writes the file with the hash it was read
 with, and asks before overwriting a file another program changed since;
-**Save as…** asks for a new file. Going to Start, opening another document
+**Save as…** asks for a new file, suggesting the document's name with
+`.ike`. Going to Start, opening another document
 or closing the window with unsaved changes asks first (Save, Don't save,
 Cancel for the window; Discard or Cancel for the others), as
 [the demo app](tauri.md#the-demo-app) does.
@@ -106,8 +120,14 @@ Choices made while building it; they stand until the owner says otherwise:
   undo and redo are left to it); none works in a dialogue.
 - The window's title starts with "• " while the document has unsaved
   changes.
-- The recent list shows the file's name, never its path in full, and the
-  folder below it; a list that cannot be read is said so and starts again.
+- The recent list shows the document's name (without `.ike` or `.json`,
+  owner, 25 November 2026), never its path in full, and the folder below
+  it; a list that cannot be read is said so and starts again. The list
+  keeps the file's name as it did (`name`), so lists kept before read as
+  they are.
+- Save keeps a `.json` document as `.json`, in place; Save as… suggests
+  the document's name with `.ike`, and a name typed with `.ike` or
+  `.json` is not given the extension twice.
 - A new document is written as soon as its file is chosen, so a document on
   the recent list always has a file.
 - The theme and the locale are kept in the window's `localStorage`; a

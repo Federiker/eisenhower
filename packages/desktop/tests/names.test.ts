@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { mayClose } from "../src/host/closing";
 import { messageOf } from "../src/host/messages";
-import { baseName, fileName, folderOf } from "../src/host/names";
+import { baseName, DOCUMENT_EXTENSION, documentName, fileName, folderOf, OPEN_EXTENSIONS } from "../src/host/names";
 
 describe("names of files", () => {
   it("takes a path apart on every system", () => {
@@ -16,10 +16,22 @@ describe("names of files", () => {
     expect(folderOf("Garden.json")).toBe("");
   });
 
-  it("makes a file name from a document's name", () => {
-    expect(fileName("Garden: spring?")).toBe("Garden spring.json");
-    expect(fileName("plan.JSON")).toBe("plan.JSON");
-    expect(fileName("***")).toBe("document.json");
+  it("makes a .ike file name from a document's name or a file's", () => {
+    expect(fileName("Garden: spring?")).toBe("Garden spring.ike");
+    expect(fileName("plan.JSON")).toBe("plan.ike");
+    expect(fileName("plan.ike")).toBe("plan.ike");
+    expect(fileName("notes.v2")).toBe("notes.v2.ike");
+    expect(fileName("***")).toBe("document.ike");
+    expect(fileName(".json")).toBe("document.ike");
+  });
+
+  it("names a document without .ike or .json, and opens both", () => {
+    expect(documentName("C:\\Plans\\Garden.ike")).toBe("Garden");
+    expect(documentName("/home/ada/Garden.JSON")).toBe("Garden");
+    expect(documentName("/home/ada/notes.v2.txt")).toBe("notes.v2.txt");
+    expect(documentName("/home/ada/.ike")).toBe(".ike");
+    expect(DOCUMENT_EXTENSION).toBe("ike");
+    expect(OPEN_EXTENSIONS).toEqual(["ike", "json"]);
   });
 });
 
