@@ -29,7 +29,10 @@ export const boardCardSchema = z
     /** One line; may be empty. */
     summary: z
       .string()
-      .refine((text) => oneLineFits(text, MAX_SUMMARY_LENGTH), "A summary is one line of up to 500 characters."),
+      .refine(
+        (text) => oneLineFits(text, MAX_SUMMARY_LENGTH),
+        `A summary is one line of up to ${MAX_SUMMARY_LENGTH} characters.`,
+      ),
     /** One of the palette's colours, or null for none. */
     colour: colourSchema,
   })

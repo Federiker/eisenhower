@@ -102,7 +102,7 @@ export const timeline = {
 
   "timeline.problem.titleBlank": "Give the entry a title.",
   "timeline.problem.titleTooLong": "A title is at most 200 characters.",
-  "timeline.problem.summaryTooLong": "A summary is at most 500 characters.",
+  "timeline.problem.summaryTooLong": "A summary is at most 5,000 characters.",
   "timeline.problem.category": "Add a category first: every entry belongs to one.",
   "timeline.problem.step": "Add a step first, and choose where the entry is.",
   "timeline.problem.year": "Type a year from 1 to 999 999 and choose BCE or CE.",

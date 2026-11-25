@@ -1,4 +1,5 @@
 import { fireEvent, screen, within } from "@testing-library/react";
+import { MAX_TODO_NOTES_LENGTH } from "@eisenhower/model";
 import { describe, expect, it } from "vitest";
 
 import { check, current, find, LIST, show, t } from "./fixtures";
@@ -13,7 +14,9 @@ describe("an item's details", () => {
     expect(field(t("todo.title"))).toHaveValue("Book flights");
     expect(field(t("todo.dueDay"))).toHaveValue("2026-11-02");
     expect(field(t("todo.notes"))).toHaveValue("");
-    expect(field(t("todo.notes"))).toHaveAccessibleDescription(t("todo.notesCount", { count: 0, max: 250 }));
+    expect(field(t("todo.notes"))).toHaveAccessibleDescription(
+      t("todo.notesCount", { count: 0, max: MAX_TODO_NOTES_LENGTH }),
+    );
     expect(field(t("todo.tags"))).toHaveValue("Travel");
     expect(field(t("todo.urgent"))).toBeChecked();
     expect(field(t("todo.important"))).toBeChecked();
@@ -25,7 +28,9 @@ describe("an item's details", () => {
     fireEvent.change(field(t("todo.title")), { target: { value: "Book trains" } });
     fireEvent.change(field(t("todo.dueDay")), { target: { value: "" } });
     fireEvent.change(field(t("todo.notes")), { target: { value: "Window seat\nQuiet coach" } });
-    expect(field(t("todo.notes"))).toHaveAccessibleDescription(t("todo.notesCount", { count: 23, max: 250 }));
+    expect(field(t("todo.notes"))).toHaveAccessibleDescription(
+      t("todo.notesCount", { count: 23, max: MAX_TODO_NOTES_LENGTH }),
+    );
     fireEvent.change(field(t("todo.tags")), { target: { value: "Travel, work, ,Work" } });
     fireEvent.click(field(t("todo.urgent")));
     fireEvent.click(screen.getByRole("button", { name: t("common.save") }));
@@ -45,13 +50,13 @@ describe("an item's details", () => {
     show();
     fireEvent.keyDown(check("Book flights"), { key: "Enter" });
     fireEvent.change(field(t("todo.title")), { target: { value: " " } });
-    fireEvent.change(field(t("todo.notes")), { target: { value: "x".repeat(251) } });
+    fireEvent.change(field(t("todo.notes")), { target: { value: "x".repeat(MAX_TODO_NOTES_LENGTH + 1) } });
     fireEvent.change(field(t("todo.tags")), { target: { value: "x".repeat(41) } });
     fireEvent.click(screen.getByRole("button", { name: t("common.save") }));
     expect(field(t("todo.title"))).toHaveAccessibleDescription(t("todo.problem.blank"));
     expect(field(t("todo.title"))).toHaveAttribute("aria-invalid", "true");
     expect(field(t("todo.notes"))).toHaveAccessibleDescription(
-      `${t("todo.problem.notesTooLong", { max: 250 })} ${t("todo.notesCount", { count: 251, max: 250 })}`,
+      `${t("todo.problem.notesTooLong", { max: MAX_TODO_NOTES_LENGTH })} ${t("todo.notesCount", { count: MAX_TODO_NOTES_LENGTH + 1, max: MAX_TODO_NOTES_LENGTH })}`,
     );
     expect(field(t("todo.tags"))).toHaveAccessibleDescription(
       `${t("todo.problem.tagTooLong", { max: 40 })} ${t("todo.tagsHint")}`,
@@ -81,5 +86,17 @@ describe("an item's details", () => {
     fireEvent.keyDown(field(t("todo.title")), { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(current).toBe(LIST);
+  });
+});
+
+describe("an item's notes", () => {
+  it("take up to 5,000 characters, counted as such", () => {
+    expect(MAX_TODO_NOTES_LENGTH).toBe(5000);
+    show();
+    fireEvent.keyDown(check("Book flights"), { key: "Enter" });
+    fireEvent.change(field(t("todo.notes")), { target: { value: "x".repeat(4000) } });
+    expect(field(t("todo.notes"))).toHaveAccessibleDescription("4,000 of 5,000 characters");
+    fireEvent.click(screen.getByRole("button", { name: t("common.save") }));
+    expect(find("b").notes).toHaveLength(4000);
   });
 });

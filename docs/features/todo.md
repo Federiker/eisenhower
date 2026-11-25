@@ -34,7 +34,7 @@ items; it starts off in the list and on in the matrix, and each layout
 remembers its own (a host that passes `hideDone` decides for both).
 
 The details dialog (Enter, or **Details…** in the menu) edits the title,
-the due date, the notes (with how many of the 250 characters are used), the
+the due date, the notes (with how many of the 5,000 characters are used), the
 tags (separated by commas) and the urgent and important flags; Save checks
 every field and says under each one why it cannot be saved.
 
@@ -49,7 +49,7 @@ every field and says under each one why it cannot be saved.
 | `title` | 1 to 120 characters, trimmed (the names' limit everywhere) |
 | `done` | Whether it is ticked |
 | `due` | A calendar day (`YYYY-MM-DD`) or `null` |
-| `notes` | Up to 250 characters, several lines allowed, trimmed |
+| `notes` | Up to 5,000 characters (`MAX_TODO_NOTES_LENGTH`; 250 before 25 November 2026), several lines allowed, trimmed |
 | `tags` | Up to 20, each trimmed, one line, 1 to 40 characters, once each ignoring case |
 | `urgent`, `important` | The flags that place it in the matrix |
 | `parentId` | The top-level item it is a subtask of, or `null` |
@@ -166,7 +166,7 @@ Owner decisions, 27 October 2026:
 These change what the user sees and are open to the owner:
 
 - A title has the names' limit, 120 characters.
-- Notes may have several lines; the 250 characters count the line breaks.
+- Notes may have several lines; the 5,000 characters count the line breaks.
 - A new item (from a field or Add a subtask) takes the filter's tags, so
   that it stays in sight.
 - In the matrix, the order within a quadrant is the list's: Alt+arrows and

@@ -167,7 +167,8 @@ Owner decisions, 27 October 2026, on the views:
     may come later).
 18. **The todo list**: items with an optional due date (overdue shown), one
     level of subtasks, tags the view filters by, and notes of up to 250
-    characters. The same list has a second layout, the **Eisenhower
+    characters (5,000 since 25 November 2026, with the board's and the
+    timeline's summaries, 500 before). The same list has a second layout, the **Eisenhower
     matrix**: items flagged urgent and important fall into its four
     quadrants, and moving an item between quadrants changes its flags. The
     quadrants are headed **Do**, **Schedule**, **Delegate** and **Drop**,

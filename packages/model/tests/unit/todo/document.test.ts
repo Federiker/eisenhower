@@ -25,7 +25,7 @@ describe("the todo document", () => {
   it("refuses items that break the schema", () => {
     expect(details({ items: [{ ...item("x", "Title"), title: " Title" }] })[0]).toMatch(/^items\.0\.title/);
     expect(details({ items: [item("x", "")] })[0]).toMatch(/title/);
-    expect(details({ items: [item("x", "Title", { notes: "x".repeat(251) })] })[0]).toMatch(/notes/);
+    expect(details({ items: [item("x", "Title", { notes: "x".repeat(5001) })] })[0]).toMatch(/notes/);
     expect(details({ items: [item("x", "Title", { tags: [" spaced"] })] })[0]).toMatch(/tags/);
     expect(details({ items: [item("x", "Title", { tags: ["x".repeat(41)] })] })[0]).toMatch(/tags/);
     expect(details({ items: [item("x", "Title", { due: "2026-13-01" })] })[0]).toMatch(/due/);

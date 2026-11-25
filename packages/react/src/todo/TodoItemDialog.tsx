@@ -40,7 +40,7 @@ function problemText(t: Translate, field: Field, problem: Problem): string {
 
 /**
  * An item's details in a small modal dialog: its title, due date, notes (with how many characters are left
- * of the 250), tags (separated by commas) and its urgent and important flags. Save checks every field with
+ * of the 5,000), tags (separated by commas) and its urgent and important flags. Save checks every field with
  * the model's edits, saying under each field why it cannot be saved, and otherwise saves them all at once;
  * Cancel or Escape closes without saving.
  */

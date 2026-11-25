@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { idSchema } from "../common/ids";
 import { PALETTE_SIZE } from "../common/palette";
-import { nameFits, oneLineFits } from "../common/text";
+import { MAX_SUMMARY_LENGTH, nameFits, oneLineFits } from "../common/text";
 import type { DocumentKind } from "../storage/document";
 import { compareTimelineDates, timelineDateSchema } from "./date";
 
@@ -62,7 +62,9 @@ export const timelineEntrySchema = z
     /** Where a span ends; null for an entry at one point. */
     end: timelinePointSchema.nullable(),
     /** One line; may be empty. */
-    summary: z.string().refine((text) => oneLineFits(text), "A summary is one line of up to 500 characters."),
+    summary: z
+      .string()
+      .refine((text) => oneLineFits(text), `A summary is one line of up to ${MAX_SUMMARY_LENGTH} characters.`),
   })
   .strict();
 

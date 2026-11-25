@@ -6,8 +6,8 @@ import { characterCount, MAX_NAME_LENGTH } from "../common/text";
 
 /** The longest title of an item, in characters: a name, as everywhere else ({@link MAX_NAME_LENGTH}). */
 export const MAX_TODO_TITLE_LENGTH = MAX_NAME_LENGTH;
-/** The longest notes of an item, in characters, line breaks included (decision 18). */
-export const MAX_TODO_NOTES_LENGTH = 250;
+/** The longest notes of an item, in characters, line breaks included (decision 18; 250 before 25 November 2026). */
+export const MAX_TODO_NOTES_LENGTH = 5000;
 /** The longest tag, in characters. */
 export const MAX_TAG_LENGTH = 40;
 /** The most tags one item may have. */
@@ -58,7 +58,10 @@ export const todoItemSchema = z
     due: calendarDaySchema.nullable(),
     notes: z
       .string()
-      .refine((notes) => characterCount(notes) <= MAX_TODO_NOTES_LENGTH, "Notes are 250 characters at most."),
+      .refine(
+        (notes) => characterCount(notes) <= MAX_TODO_NOTES_LENGTH,
+        `Notes are ${MAX_TODO_NOTES_LENGTH} characters at most.`,
+      ),
     tags: z.array(tagSchema).max(MAX_TAGS),
     urgent: z.boolean(),
     important: z.boolean(),

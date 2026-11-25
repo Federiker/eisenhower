@@ -56,16 +56,16 @@ export const board = {
   "board.card.keepEditing": "Keep editing",
   "board.card.problemTitleBlank": "Give the card a title.",
   "board.card.problemTitleTooLong": "A card's title is at most 120 characters.",
-  "board.card.problemSummaryTooLong": "A summary is at most 500 characters.",
+  "board.card.problemSummaryTooLong": "A summary is at most 5,000 characters.",
   "board.card.problemColumn": "Choose a column that is still on the board, or No column.",
   "board.card.problemColour": "Choose one of the colours, or No colour.",
 
   "board.problem.blank": "A name is needed.",
-  "board.problem.tooLong": "Names are at most 120 characters, and summaries 500.",
+  "board.problem.tooLong": "Names are at most 120 characters, and summaries 5,000.",
   "board.problem.limit": "There are too many to add another: a board has at most 50 columns and 500 cards.",
   "board.problem.missing": "It is no longer on the board.",
   "board.problem.duplicate": "That id is already used on the board.",
   "board.problem.order": "That order is not possible.",
   "board.problem.invalid":
-    "This cannot be saved: names are 1 to 120 characters, summaries one line of up to 500, and every card's column is on the board.",
+    "This cannot be saved: names are 1 to 120 characters, summaries one line of up to 5,000, and every card's column is on the board.",
 } as const;

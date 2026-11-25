@@ -8,7 +8,7 @@ describe("a card's dialog", () => {
     expect(cardFromDraft(draft, "x", BOARD)).toEqual({ problems: ["titleBlank", "column", "colour"] });
     expect(
       cardFromDraft(
-        { ...draft, title: "x".repeat(121), summary: "y".repeat(501), columnId: "", colour: "1.5" },
+        { ...draft, title: "x".repeat(121), summary: "y".repeat(5001), columnId: "", colour: "1.5" },
         "x",
         BOARD,
       ),

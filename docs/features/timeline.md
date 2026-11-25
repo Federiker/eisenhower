@@ -55,7 +55,7 @@ type Timeline = {
     categoryId: string;
     start: TimelinePoint;                               // { step } or a date
     end: TimelinePoint | null;                          // a span's end, or null
-    summary: string;                                    // one line, up to 500
+    summary: string;                                    // one line, up to 5,000 (MAX_SUMMARY_LENGTH)
   }[];
 };
 type TimelineDate = { year: number; month: number | null; day: number | null; approximate: boolean };

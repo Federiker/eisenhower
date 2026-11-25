@@ -2,8 +2,8 @@ import type { Problem } from "./result";
 
 /** The longest name of a column, a card, a step, a task… in characters (code points), as jerome's research names. */
 export const MAX_NAME_LENGTH = 120;
-/** The longest one-line summary of a card or an entry, in characters. */
-export const MAX_SUMMARY_LENGTH = 500;
+/** The longest one-line summary of a card or an entry, in characters (500 before 25 November 2026). */
+export const MAX_SUMMARY_LENGTH = 5000;
 
 /** Characters, not UTF-16 units: an emoji or a CJK extension character counts once. */
 export function characterCount(text: string): number {

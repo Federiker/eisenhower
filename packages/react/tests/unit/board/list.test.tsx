@@ -228,7 +228,7 @@ describe("a board's cards", () => {
     const { view, onChange } = renderBoard({ layout: "list" });
     fireEvent.click(titleButton(view, "Draft"));
     fireEvent.change(field(t("board.card.title")), { target: { value: " " } });
-    fireEvent.change(field(t("board.card.summary")), { target: { value: "x".repeat(501) } });
+    fireEvent.change(field(t("board.card.summary")), { target: { value: "x".repeat(5001) } });
     // The reasons are given once Save is tried.
     expect(within(dialog()).queryByRole("alert")).not.toBeInTheDocument();
     fireEvent.click(within(dialog()).getByRole("button", { name: t("common.save") }));

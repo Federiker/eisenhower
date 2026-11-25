@@ -245,6 +245,10 @@ g[data-selected="true"] .eh-timeline-bar {
   padding: 4px 6px;
   border-bottom: 1px solid var(--eh-line);
 }
+/* A long summary (up to 5,000 characters) wraps within the table, even a word as long as a link. */
+.eh-timeline-entries td:last-child {
+  overflow-wrap: anywhere;
+}
 /* When: on one line, but in a narrow table a span breaks after its separator; a date is never cut in two. */
 .eh-timeline-entries {
   container-type: inline-size;

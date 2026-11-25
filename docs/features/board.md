@@ -53,7 +53,9 @@ BoardCard[] }`, stored as the document kind `board`, version 1
   parts).
 - A **card** is `{ id, title, columnId, summary, colour }`: a title of 1 to
   120 characters, its column's id or `null` for none, a one-line summary of
-  up to 500 characters (it may be empty), and a palette colour (0 to 7) or
+  up to 5,000 characters (it may be empty; `MAX_SUMMARY_LENGTH`, 500 before 25
+  November 2026), shown on a card in three lines at most and in the list on
+  one, and a palette colour (0 to 7) or
   `null`. At most 500 cards (`MAX_BOARD_CARDS`).
 - The cards of a column are the board's cards with its id, in the board's
   order. Every id is used once (columns and cards alike), and every card's

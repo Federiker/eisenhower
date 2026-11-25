@@ -73,7 +73,7 @@ describe("the entry form's values", () => {
     ).toMatchObject({ entry: { start: { year: -999_998 } } });
     expect(
       entryFromDraft(
-        { ...draft, title: "a".repeat(201), summary: "a".repeat(501), categoryId: id(19) },
+        { ...draft, title: "a".repeat(201), summary: "a".repeat(5001), categoryId: id(19) },
         id(20),
         timeline,
       ),

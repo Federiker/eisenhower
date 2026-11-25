@@ -144,7 +144,9 @@ describe("a board's cards", () => {
       ok: false,
       reason: "tooLong",
     });
-    expect(addCard(BOARD, { ...card(13, "one"), summary: "x".repeat(501) }, 0)).toEqual({
+    // A summary takes up to 5,000 characters (500 before 25 November 2026).
+    expect(addCard(BOARD, { ...card(13, "one"), summary: "x".repeat(5000) }, 0).ok).toBe(true);
+    expect(addCard(BOARD, { ...card(13, "one"), summary: "x".repeat(5001) }, 0)).toEqual({
       ok: false,
       reason: "tooLong",
     });
