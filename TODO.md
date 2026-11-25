@@ -43,7 +43,21 @@ is under **Verification** and **Awaiting owner decisions**.
   restart and after a file is moved away, Ctrl+N, O, S and Shift+S, the
   window's title, and closing with unsaved changes (Save, Don't save, Cancel).
 - [ ] Every view with a screen reader (NVDA on Windows, VoiceOver on macOS):
-  names, roles and the announcements of moves.
+  names, roles and the announcements of moves; a timeline's step and
+  category names and lines as buttons ("Edit category: Ships"), edited with
+  Enter or F2, their pencils silent.
+- [ ] The desktop app's `.ike` files, with its installers (`mise run
+  app:release`; NSIS and MSI on Windows, the `.app`/`.dmg` on macOS, `.deb`
+  on Linux) installed: a `.ike` file shows Eisenhower's icon in Explorer
+  and Finder and is named "Eisenhower document"; double-clicking one opens
+  it with the app closed, and in the window already open (brought to the
+  front, asking about unsaved changes) with it running; "Open with" a
+  `.json` document opens it; a moved or broken file says why. On Linux,
+  whether the file manager offers Eisenhower for `.ike` without a MIME
+  definition (the bundle declares `application/x-eisenhower` only).
+- [ ] The desktop app's window after build.rs's change (the common controls'
+  manifest from the linker): the open, save and question dialogues still
+  look and work as before on Windows.
 - [ ] The board's and the todo list's pointer drags in the desktop app's
   window on Windows (WebView2), where the HTML5 drags did nothing.
 - [ ] The gantt chart's ⌘+drag link on macOS (the tests only press Ctrl),
