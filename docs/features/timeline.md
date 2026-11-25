@@ -121,7 +121,9 @@ jerome's timeline page below it: the entries as a table grouped by
 category (a heading row a category, in the categories' order, with its
 swatch and number of entries, that folds and unfolds its rows; the fold
 lasts while the view is open and is not stored; categories without entries
-are left out), each group in time order (when, title and summary), the
+are left out), each group in time order (when, title and summary; when
+is on one line, but in a table narrower than 560 pixels a span breaks
+after its separator, never inside a date), the
 steps (a Sequence) and the categories, each in a list put in order by
 dragging (a pointer drag, so it works in a Tauri window too; a row is
 pressed anywhere but its fields, and a line marks where it goes), Alt+↑ ↓

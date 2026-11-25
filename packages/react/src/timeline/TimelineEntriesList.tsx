@@ -6,7 +6,7 @@ import { placeBelow } from "../controls/ContextMenu";
 import { Notice } from "../controls/Notice";
 import { actionOf, shortcutsIn } from "../keyboard/shortcuts";
 import { type TimelineView, useTimelineView } from "./context";
-import { formatWhen } from "./format";
+import { formatWhenLines } from "./format";
 import { CategorySwatch } from "./labels";
 
 const KEYS = shortcutsIn("timeline");
@@ -125,7 +125,9 @@ function EntryRow({ entry, view }: { entry: TimelineEntry; view: TimelineView })
         view.openMenu(entry.id, { left: event.clientX, top: event.clientY }, title ?? event.currentTarget);
       }}
     >
-      <td>{formatWhen(entry, timeline, showCe, words)}</td>
+      <td className="eh-timeline-entries-when">
+        <WhenPieces pieces={formatWhenLines(entry, timeline, showCe, words)} whole={timeline.kind === "dates"} />
+      </td>
       <td>
         <Button
           variant="quiet"
@@ -149,5 +151,24 @@ function EntryRow({ entry, view }: { entry: TimelineEntry; view: TimelineView })
       </td>
       <td>{entry.summary}</td>
     </tr>
+  );
+}
+
+/**
+ * When an entry is, in its table cell: a date is never cut in two (`whole`, in Dates), but a span may break
+ * after its separator when the column is narrow; a step's name wraps as any text.
+ */
+function WhenPieces({ pieces, whole }: { pieces: readonly string[]; whole: boolean }) {
+  const [first, second] = pieces;
+  return (
+    <>
+      <span data-whole={whole || undefined}>{first}</span>
+      {second !== undefined && (
+        <>
+          {" "}
+          <span data-whole={whole || undefined}>{second}</span>
+        </>
+      )}
+    </>
   );
 }

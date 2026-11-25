@@ -1,7 +1,9 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { d, dated, e, id } from "./fixtures";
+import { createTranslate } from "../../../src";
+import { formatWhenLines } from "../../../src/timeline/format";
+import { acts, d, dated, e, id } from "./fixtures";
 import { Host, held, tableRows } from "./host";
 
 const table = () => within(screen.getByRole("region", { name: "Entries" })).getByRole("table");
@@ -94,5 +96,39 @@ describe("the timeline's entries table", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete the entry" }));
     expect(within(table()).queryByRole("button", { name: /^Ships/ })).not.toBeInTheDocument();
     expect(tableRows(table())[0]).toBe("Harbour, 3 entries");
+  });
+});
+
+describe("the table's When column", () => {
+  const words = { t: createTranslate(), locale: "en-GB" };
+
+  it("may break a span after its separator, never inside a date", () => {
+    const span = e(20, d(-429, null, null, true), d(-329, null, null, true));
+    const timeline = dated([span, e(21, d(1066, 10, 14))]);
+    expect(formatWhenLines(span, timeline, true, words)).toEqual(["c. 430 BCE –", "c. 330 BCE"]);
+    expect(formatWhenLines(timeline.entries[1]!, timeline, true, words)).toEqual(["14 October 1066 CE"]);
+    render(<Host editor initial={timeline} />);
+    const cell = within(table()).getAllByRole("cell")[0]!;
+    expect(cell).toHaveTextContent("c. 430 BCE – c. 330 BCE");
+    const pieces = [...cell.querySelectorAll("[data-whole]")].map((piece) => piece.textContent);
+    expect(pieces).toEqual(["c. 430 BCE –", "c. 330 BCE"]);
+  });
+
+  it("follows the host's own words for a span, and keeps one without a space whole", () => {
+    const span = e(20, d(1600), d(1650));
+    const timeline = dated([span]);
+    const until = createTranslate({ strings: { "timeline.date.range": "from {start} until {end}" } });
+    expect(formatWhenLines(span, timeline, false, { t: until, locale: "en-GB" })).toEqual(["from 1600 until", "1650"]);
+    const reversed = createTranslate({ strings: { "timeline.date.range": "{end} back to {start}" } });
+    expect(formatWhenLines(span, timeline, false, { t: reversed, locale: "en-GB" })).toEqual(["1650 back to", "1600"]);
+    const dash = createTranslate({ strings: { "timeline.date.range": "{start}–{end}" } });
+    expect(formatWhenLines(span, timeline, false, { t: dash, locale: "en-GB" })).toEqual(["1600–1650"]);
+  });
+
+  it("lets a step's name wrap as any text", () => {
+    render(<Host editor initial={acts} />);
+    const cell = within(table()).getAllByRole("cell")[0]!;
+    expect(cell.querySelector("[data-whole]")).toBeNull();
+    expect(cell).toHaveTextContent("Act 1 – Act 2");
   });
 });

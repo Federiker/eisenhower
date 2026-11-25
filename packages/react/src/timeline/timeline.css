@@ -245,9 +245,21 @@ g[data-selected="true"] .eh-timeline-bar {
   padding: 4px 6px;
   border-bottom: 1px solid var(--eh-line);
 }
-.eh-timeline-entries td:first-child {
+/* When: on one line, but in a narrow table a span breaks after its separator; a date is never cut in two. */
+.eh-timeline-entries {
+  container-type: inline-size;
+}
+.eh-timeline-entries-when {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+@container (max-width: 560px) {
+  .eh-timeline-entries-when {
+    white-space: normal;
+  }
+}
+.eh-timeline-entries-when [data-whole] {
+  white-space: nowrap;
 }
 .eh-timeline-entries tr[data-selected="true"] {
   background: var(--eh-selected);

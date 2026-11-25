@@ -76,3 +76,29 @@ export function formatWhen(entry: TimelineEntry, timeline: Timeline, showCe: boo
     ? start
     : words.t("timeline.date.range", { start, end: formatPoint(entry.end, timeline, showCe, words) });
 }
+
+/** Stand-ins for a span's ends in its message, found again once it is written. */
+const START = String.fromCharCode(1);
+const END = String.fromCharCode(2);
+
+/**
+ * When an entry is, as {@link formatWhen} writes it, in the pieces a narrow table may break it into: a point
+ * whole, a span after the separator ("c. 430 BCE –" and "c. 330 BCE"), so that a date is never cut in two.
+ * A message with no space before its second end stays whole.
+ */
+export function formatWhenLines(
+  entry: TimelineEntry,
+  timeline: Timeline,
+  showCe: boolean,
+  words: DateWords,
+): [string] | [string, string] {
+  const start = formatPoint(entry.start, timeline, showCe, words);
+  if (entry.end === null) return [start];
+  const end = formatPoint(entry.end, timeline, showCe, words);
+  const pattern = words.t("timeline.date.range", { start: START, end: END });
+  const fill = (piece: string) => piece.replace(START, start).replace(END, end);
+  const [first, second] = [pattern.indexOf(START), pattern.indexOf(END)].sort((a, b) => a - b) as [number, number];
+  const space = pattern.lastIndexOf(" ", second);
+  if (space <= first) return [fill(pattern)];
+  return [fill(pattern.slice(0, space)), fill(pattern.slice(space + 1))];
+}
