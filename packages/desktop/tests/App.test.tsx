@@ -487,3 +487,14 @@ describe("the title bar", () => {
     await screen.findByRole("heading", { name: "Recent documents" });
   });
 });
+
+describe("the title bar's logo", () => {
+  it("shows before the name as a picture only, on the start screen and in the button back to it", async () => {
+    const { container } = renderApp();
+    expect(container.querySelector(".app-title img.app-logo")).toHaveAttribute("alt", "");
+    expect(screen.getByRole("heading", { level: 1, name: "Eisenhower" })).toBeInTheDocument();
+    await create("Board", "Logo", "/Preview/Logo.ike");
+    const home = screen.getByRole("button", { name: "Eisenhower: back to the start screen" });
+    expect(home.querySelector("img.app-logo")).not.toBeNull();
+  });
+});

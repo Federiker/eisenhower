@@ -32,7 +32,7 @@ page's `prompt` and `confirm`.
   **Save as…**; **Eisenhower** in the title bar goes back to Start. The
   window's title is the file's name.
 - The title bar (the app's own: the window has no system one, on macOS the
-  system's buttons over it): **Eisenhower**, the **Theme** and the locale of
+  system's buttons over it): the logo and **Eisenhower**, the **Theme** and the locale of
   dates and numbers, kept in the window's `localStorage` with the recent
   list, and on Windows and Linux the window's minimise, maximise and close.
 - The footer: the status messages (a polite live region) and the errors (an

@@ -1,6 +1,7 @@
 import { EisenhowerProvider, Select, type Theme } from "@eisenhower/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import logo from "./assets/logo.svg";
 import { type DocumentControls, DocumentScreen } from "./DocumentScreen";
 import { type AnyDocument, emptyDocument, loadAnyDocument, type NewType, saveAnyDocument } from "./documents";
 import type { Host } from "./host/host";
@@ -15,6 +16,14 @@ import type { OpenFile, Report } from "./useFileDocument";
 import { WindowControls } from "./WindowControls";
 
 type Message = { text: string; tone: "status" | "error" };
+
+/** The app's name in the title bar, after its logo (the matrix, a picture only: the name is the text). */
+const appName = (
+  <>
+    <img className="app-logo" src={logo} alt="" width={20} height={20} />
+    {text.title}
+  </>
+);
 
 /** The document shown, with a number that tells two openings of the same file apart. */
 type Shown = OpenFile & { opening: number };
@@ -280,10 +289,10 @@ export function App({ host, keep = windowStorage() }: { host: Host; keep?: Stora
       <header className="app-header" data-frame={host.frame} data-tauri-drag-region="deep">
         <h1 className="app-title">
           {shown === null ? (
-            text.title
+            <span className="app-name">{appName}</span>
           ) : (
             <button type="button" className="app-home" title={text.home} aria-label={text.home} onClick={goHome}>
-              {text.title}
+              {appName}
             </button>
           )}
         </h1>

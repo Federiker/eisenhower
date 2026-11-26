@@ -96,7 +96,8 @@ Cancel for the window; Discard or Cancel for the others), as
 
 The window has no system title bar on Windows and Linux (`decorations:
 false`); the app draws its own, as jerome does (owner, 26 November 2026):
-the header, with **Eisenhower**, the theme and the locale (kept between
+the header, with the app's logo (`src/assets/logo.svg`, a picture only)
+and **Eisenhower**, the theme and the locale (kept between
 visits) and, at its end, the window's minimise, maximise (restore when
 maximised) and close, drawn as Windows 11 draws its own and out of the Tab
 order, as the system's are (Alt+F4 and Windows+Up and Down do the same).

@@ -74,6 +74,21 @@ html:has(.app[data-theme="dark"]) {
   white-space: nowrap;
 }
 
+/* The app's logo before its name, on the start screen and in the button back to it. */
+.app-name,
+.app-home {
+  display: inline-flex;
+  gap: var(--eh-space-2);
+  align-items: center;
+}
+
+.app-logo {
+  display: block;
+  flex-shrink: 0;
+  width: calc(20px * var(--eh-scale, 1));
+  height: calc(20px * var(--eh-scale, 1));
+}
+
 /* The app's name, while a document is open: back to the start screen. */
 .app-home {
   margin: 0 calc(-1 * var(--eh-space-2));
