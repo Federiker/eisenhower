@@ -279,12 +279,12 @@ describe("a document open", () => {
     fireEvent.click(screen.getByRole("button", { name: "New column" }));
 
     confirm.mockReturnValueOnce(false);
-    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    fireEvent.click(screen.getByRole("button", { name: "Eisenhower: back to the start screen" }));
     await waitFor(() => expect(confirm).toHaveBeenCalledWith(expect.stringContaining("Draft.json has changes")));
     expect(screen.getByRole("heading", { level: 2, name: /Draft.json/ })).toBeInTheDocument();
 
     confirm.mockReturnValueOnce(true);
-    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    fireEvent.click(screen.getByRole("button", { name: "Eisenhower: back to the start screen" }));
     await screen.findByRole("heading", { name: "Recent documents" });
     expect(screen.getByText("Draft")).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Eisenhower"));
@@ -411,5 +411,79 @@ describe("the documents the system gives the app", () => {
     await waitFor(() =>
       expect(screen.getAllByRole("alert").at(-1)).toHaveTextContent("Documents opened from the file manager"),
     );
+  });
+});
+
+describe("the title bar", () => {
+  /** A window with the app's own title bar: its calls recorded, its maximised state given by `maximised`. */
+  function framedHost(maximised: () => Promise<boolean> = async () => false) {
+    const calls: string[] = [];
+    let resized: (() => void) | undefined;
+    const stop = vi.fn();
+    const record = (name: string) => async () => {
+      calls.push(name);
+    };
+    const host: Host = {
+      ...previewHost(),
+      frame: "custom",
+      window: {
+        minimise: record("minimise"),
+        toggleMaximise: record("toggleMaximise"),
+        close: record("close"),
+        isMaximised: maximised,
+        onResized: async (handler) => {
+          resized = handler;
+          return stop;
+        },
+      },
+    };
+    return { host, calls, stop, resize: () => resized?.() };
+  }
+
+  it("draws the window's buttons, out of the Tab order, and they act on the window", async () => {
+    let maximised = false;
+    const { host, calls, stop, resize } = framedHost(async () => maximised);
+    const { unmount } = renderApp(host);
+    const header = screen.getByRole("banner");
+    expect(header).toHaveAttribute("data-tauri-drag-region", "deep");
+    expect(header).toHaveAttribute("data-frame", "custom");
+    const minimise = screen.getByRole("button", { name: "Minimise" });
+    expect(minimise).toHaveAttribute("tabindex", "-1");
+    fireEvent.click(minimise);
+    fireEvent.click(screen.getByRole("button", { name: "Maximise" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(calls).toEqual(["minimise", "toggleMaximise", "close"]));
+
+    maximised = true;
+    act(() => resize());
+    fireEvent.click(await screen.findByRole("button", { name: "Restore" }));
+    await waitFor(() => expect(calls.at(-1)).toBe("toggleMaximise"));
+    unmount();
+    expect(stop).toHaveBeenCalled();
+  });
+
+  it("says when the window cannot do what a button asks", async () => {
+    const { host } = framedHost(() => Promise.reject(new Error("not allowed")));
+    renderApp(host);
+    await saysError("The window could not do that.");
+  });
+
+  it("has no window buttons in the preview or on macOS, whose own buttons stay", () => {
+    renderApp();
+    expect(screen.queryByRole("button", { name: "Minimise" })).not.toBeInTheDocument();
+    const { host } = framedHost();
+    renderApp({ ...host, frame: "macOverlay" });
+    expect(screen.getAllByRole("banner").at(-1)).toHaveAttribute("data-frame", "macOverlay");
+    expect(screen.queryByRole("button", { name: "Minimise" })).not.toBeInTheDocument();
+  });
+
+  it("shows the app's name as plain text on the start screen, and as the way back to it from a document", async () => {
+    renderApp();
+    expect(screen.getByRole("heading", { level: 1, name: "Eisenhower" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /back to the start screen/ })).not.toBeInTheDocument();
+    await create("Todo list", "Week", "/Preview/Week.ike");
+    expect(screen.queryByRole("button", { name: "Start" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Eisenhower: back to the start screen" }));
+    await screen.findByRole("heading", { name: "Recent documents" });
   });
 });

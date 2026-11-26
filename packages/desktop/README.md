@@ -27,11 +27,14 @@ page's `prompt` and `confirm`.
   **Open…**, and **New document**: a type (Board, Timeline (dates),
   Timeline (sequence), Gantt chart, Todo list) and a name, then **Create…**,
   which asks where to save it, writes the empty document and opens it.
-- **A document**: its view, with **Start**, **Undo**, **Redo**, the board's
-  layout, the file's name (marked while it has unsaved changes), **Open…**,
-  **Save** and **Save as…**. The window's title is the file's name.
-- The header: the **Theme** and the locale of dates and numbers, kept in the
-  window's `localStorage` with the recent list.
+- **A document**: its view, with **Undo**, **Redo**, the board's layout, the
+  file's name (marked while it has unsaved changes), **Open…**, **Save** and
+  **Save as…**; **Eisenhower** in the title bar goes back to Start. The
+  window's title is the file's name.
+- The title bar (the app's own: the window has no system one, on macOS the
+  system's buttons over it): **Eisenhower**, the **Theme** and the locale of
+  dates and numbers, kept in the window's `localStorage` with the recent
+  list, and on Windows and Linux the window's minimise, maximise and close.
 - The footer: the status messages (a polite live region) and the errors (an
   alert).
 

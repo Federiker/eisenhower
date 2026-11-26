@@ -180,6 +180,35 @@ describe("the window's close", () => {
   });
 });
 
+describe("the Tauri window's own title bar", () => {
+  it("is drawn off macOS, where its buttons call the window", async () => {
+    const calls = mockTauri(({ command }) => (command === "plugin:window|is_maximized" ? true : 1));
+    mockWindows("main");
+    const host = tauriHost();
+    expect(host.frame).toBe("custom");
+    await host.window?.minimise();
+    await host.window?.toggleMaximise();
+    await host.window?.close();
+    expect(await host.window?.isMaximised()).toBe(true);
+    const stop = await host.window?.onResized(() => undefined);
+    expect(typeof stop).toBe("function");
+    expect(calls.map((call) => call.command)).toEqual([
+      "plugin:window|minimize",
+      "plugin:window|toggle_maximize",
+      "plugin:window|close",
+      "plugin:window|is_maximized",
+      "plugin:event|listen",
+    ]);
+    expect(calls.at(-1)?.args).toMatchObject({ event: "tauri://resize" });
+  });
+
+  it("leaves macOS's own window buttons", () => {
+    const agent = vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 (Macintosh; Intel Mac OS X)");
+    expect(tauriHost().frame).toBe("macOverlay");
+    agent.mockRestore();
+  });
+});
+
 describe("the documents the system gives the app", () => {
   /** The window with the host listening for documents, `taken` what the app started with. */
   async function listening(taken: unknown) {
@@ -215,7 +244,8 @@ describe("the documents the system gives the app", () => {
     await empty.stop;
     expect(empty.opened).toEqual([]);
     const failing = await listening(new Error("not allowed"));
-    await expect(failing.stop).rejects.toThrow("not allowed");
+    // Vitest 5.0.5's `rejects.toThrow` reads every rejection as '' here, so the error's message is compared.
+    await expect(failing.stop).rejects.toHaveProperty("message", "not allowed");
     await settle();
     expect(failing.calls.map((call) => call.command)).toContain("plugin:event|unlisten");
   });

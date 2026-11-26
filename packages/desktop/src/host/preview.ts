@@ -17,6 +17,8 @@ export const PREVIEW_FOLDER = "/Preview/";
 export function previewHost(storage?: Storage): Host {
   return {
     kind: "preview",
+    frame: "none",
+    window: undefined,
     storage: localStorageAdapter(PREVIEW_PREFIX, storage),
     chooseFile: async () => window.prompt(text.previewOpen, PREVIEW_FOLDER) || null,
     chooseNewFile: async (suggested) => window.prompt(text.previewSave, `${PREVIEW_FOLDER}${suggested}`) || null,

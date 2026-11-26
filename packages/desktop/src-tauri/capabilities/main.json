@@ -1,12 +1,16 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
-  "description": "The desktop app's window: Tauri's defaults, its title set to the document's name, closing itself once it has asked about unsaved changes, the open, save and question dialogue boxes, and Eisenhower's plugin (documents read and written with the hash guard).",
+  "description": "The desktop app's window: Tauri's defaults, its title set to the document's name, its own title bar's buttons and dragging (no system title bar on Windows and Linux), closing itself once it has asked about unsaved changes, the open, save and question dialogue boxes, and Eisenhower's plugin (documents read and written with the hash guard).",
   "windows": ["main"],
   "permissions": [
     "core:default",
     "core:window:allow-set-title",
     "core:window:allow-destroy",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
     "dialog:default",
     "eisenhower:default"
   ]

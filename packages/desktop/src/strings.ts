@@ -13,6 +13,14 @@ export const appStrings = {
   themeDark: "Dark",
   locale: "Dates and numbers",
   preview: "Preview: the files are kept in this browser, not on disk.",
+  /** The app's name in the title bar, while a document is open: it goes back to the start screen. */
+  home: "Eisenhower: back to the start screen",
+  // The window's own buttons, where the app draws its title bar (their tooltips too).
+  windowMinimise: "Minimise",
+  windowMaximise: "Maximise",
+  windowRestore: "Restore",
+  windowClose: "Close",
+  windowFailed: "The window could not do that. Use the system's keys instead (Alt+F4 closes it).",
 
   // The start screen.
   start: "Start",

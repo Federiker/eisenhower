@@ -33,7 +33,7 @@ test("creates a board, saves it with Ctrl+S, and opens it again from the recent 
   await expect(page.getByRole("contentinfo").getByRole("status")).toHaveText("Saved Moving house.ike.");
   expect(JSON.parse((await fileText(page, "/Preview/Moving house.ike")) ?? "").data.columns).toHaveLength(1);
 
-  await page.getByRole("button", { name: "Start" }).click();
+  await page.getByRole("button", { name: "Eisenhower: back to the start screen" }).click();
   const recent = page.getByRole("list").getByRole("button");
   await expect(recent).toHaveCount(1);
   // Listed by its name, without .ike.
@@ -77,9 +77,9 @@ test("asks before leaving unsaved changes, and drops files that are gone from th
   await page.getByRole("button", { name: "New task" }).first().click();
   await page.keyboard.press("Escape");
 
-  await page.getByRole("button", { name: "Start" }).click();
+  await page.getByRole("button", { name: "Eisenhower: back to the start screen" }).click();
   await expect(page.getByRole("heading", { level: 2, name: /Draft.json/ })).toBeVisible();
-  await page.getByRole("button", { name: "Start" }).click();
+  await page.getByRole("button", { name: "Eisenhower: back to the start screen" }).click();
   await expect(page.getByRole("heading", { name: "Recent documents" })).toBeVisible();
   expect(asked.slice(1)).toEqual([
     "Unsaved changes\n\nDraft.json has changes that are not saved. Discard them?",

@@ -76,20 +76,44 @@ opened. Jerome's `launch_file.rs`, adapted, is the crate's `launch.rs`.
 ## A document open
 
 The window holds one document at a time, in its view (`<Board>`,
-`<TimelineEditor>`, `<Gantt>` or `<TodoList>`), with a toolbar: **Start**
-(back to the start screen), **Undo**, **Redo**, the view's own switches
-(the board's layout), the file's name with a mark while it has unsaved
-changes, **Open…**, **Save** and **Save as…**; the theme and the locale are
-in the header on every screen, and kept between visits. The window's title
-is the file's name.
+`<TimelineEditor>`, `<Gantt>` or `<TodoList>`), with a toolbar: **Undo**,
+**Redo**, the view's own switches (the board's layout), the file's name
+with a mark while it has unsaved changes, **Open…**, **Save** and **Save
+as…**. **Eisenhower** in the title bar is then a button (named "Eisenhower:
+back to the start screen", its tooltip too) that goes back to the start
+screen (owner, 26 November 2026); on the start screen it is the plain
+heading. The window's title is the file's name.
 
 Saving is the demo's: **Save** writes the file with the hash it was read
 with, and asks before overwriting a file another program changed since;
 **Save as…** asks for a new file, suggesting the document's name with
-`.ike`. Going to Start, opening another document
+`.ike`. Going back to the start screen, opening another document
 or closing the window with unsaved changes asks first (Save, Don't save,
 Cancel for the window; Discard or Cancel for the others), as
 [the demo app](tauri.md#the-demo-app) does.
+
+## The window's frame
+
+The window has no system title bar on Windows and Linux (`decorations:
+false`); the app draws its own, as jerome does (owner, 26 November 2026):
+the header, with **Eisenhower**, the theme and the locale (kept between
+visits) and, at its end, the window's minimise, maximise (restore when
+maximised) and close, drawn as Windows 11 draws its own and out of the Tab
+order, as the system's are (Alt+F4 and Windows+Up and Down do the same).
+The header's empty room drags the window and a double-click there
+maximises it (`data-tauri-drag-region="deep"`). Close asks to close the
+window as the system's button does, so the unsaved-changes question comes
+first. On macOS the window keeps its own buttons over the header's start
+(`tauri.macos.conf.json`: `titleBarStyle` Overlay, the title hidden), and
+the header leaves them room; the preview in a browser has no buttons. A
+button the window refuses says so in the footer.
+
+The frame never scrolls or overscrolls, as in jerome: the page and the
+app's root are clipped, only the screen under the title bar scrolls, and
+nothing bounces or carries on past its ends (`overscroll-behavior: none`),
+so WebView2 no longer stretches the page or shows white at the window's
+edges. The page behind and the window itself (`backgroundColor`, before
+the page has drawn) are the app's background colour.
 
 ## Keys
 

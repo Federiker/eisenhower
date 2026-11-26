@@ -16,6 +16,9 @@ const SAVE_FILTERS = [{ name: text.documentFiles, extensions: [DOCUMENT_EXTENSIO
 /** The event a document given to the app while the window listens arrives by (the crate's `launch.rs`). */
 export const LAUNCH_FILE_EVENT = "eisenhower://launch-file";
 
+/** Whether the window is on macOS, which keeps its own window buttons over the app (tauri.macos.conf.json). */
+const onMac = () => /Mac/i.test(globalThis.navigator?.userAgent ?? "");
+
 const askQuestion = ({ title, message, ok, cancel }: Question) =>
   ask(message, { title, kind: "warning", okLabel: ok, cancelLabel: cancel });
 
@@ -40,6 +43,14 @@ async function askToSave(name: string): Promise<CloseChoice> {
 export function tauriHost(): Host {
   return {
     kind: "tauri",
+    frame: onMac() ? "macOverlay" : "custom",
+    window: {
+      minimise: () => getCurrentWindow().minimize(),
+      toggleMaximise: () => getCurrentWindow().toggleMaximize(),
+      close: () => getCurrentWindow().close(),
+      isMaximised: () => getCurrentWindow().isMaximized(),
+      onResized: (handler) => getCurrentWindow().onResized(() => handler()),
+    },
     storage: tauriStorage(),
     chooseFile: () => open({ multiple: false, directory: false, filters: OPEN_FILTERS }),
     chooseNewFile: (suggested) => save({ defaultPath: suggested, filters: SAVE_FILTERS }),

@@ -63,6 +63,16 @@ is under **Verification** and **Awaiting owner decisions**.
   window on Windows (WebView2), where the HTML5 drags did nothing.
 - [ ] The gantt chart's ⌘+drag link on macOS (the tests only press Ctrl),
   and its links and pushes in the Tauri window on Windows (WebView2).
+- [ ] The desktop app's own title bar (26 November 2026), installed on
+  Windows (x64 and arm64) and Linux: dragging the header's empty room moves
+  the window, a double-click maximises and restores it, Windows 11's snap
+  layouts and Windows+arrows still work, minimise, maximise (restore) and
+  close act, close asks about unsaved changes first, the selects and
+  **Eisenhower** still take clicks; light, dark and High Contrast. On
+  macOS: the system's buttons over the header's start, nothing under them.
+- [ ] No bounce or white edge in the desktop app's window: a touchpad
+  scroll or a drag past the end of a long todo list, a board and a gantt
+  chart, and a resize from each edge, in light and dark.
 
 ## Later
 

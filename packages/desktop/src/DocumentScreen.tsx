@@ -20,16 +20,15 @@ import { type OpenFile, type Report, useFileDocument } from "./useFileDocument";
 export type DocumentControls = { dirty: boolean; name: string; save: () => Promise<boolean> };
 
 /**
- * The open document in its view, with the toolbar: Start, Undo, Redo, the view's own switches, the file's
- * name (marked while it has unsaved changes), Open…, Save and Save as…. Ctrl+S saves, Ctrl+Shift+S saves as,
- * Ctrl+Z and Ctrl+Y undo and redo.
+ * The open document in its view, with the toolbar: Undo, Redo, the view's own switches, the file's name (marked
+ * while it has unsaved changes), Open…, Save and Save as… (the title bar's "Eisenhower" goes back to the start
+ * screen). Ctrl+S saves, Ctrl+Shift+S saves as, Ctrl+Z and Ctrl+Y undo and redo.
  */
 export function DocumentScreen({
   host,
   file,
   report,
   stored,
-  onStart,
   onOpen,
   controls,
 }: {
@@ -37,7 +36,6 @@ export function DocumentScreen({
   file: OpenFile;
   report: Report;
   stored: (path: string, name: string, document: AnyDocument) => void;
-  onStart: () => void;
   onOpen: () => void;
   controls: RefObject<DocumentControls | null>;
 }) {
@@ -78,7 +76,6 @@ export function DocumentScreen({
     <main className="app-main app-panel">
       {/* biome-ignore lint/a11y/useSemanticElements: a row of buttons, not a form's fieldset */}
       <div className="app-toolbar" role="group" aria-label={text.documentActions}>
-        <Button onClick={onStart}>{text.start}</Button>
         <Button onClick={history.undo} disabled={!history.canUndo} aria-keyshortcuts={APP_KEYS.undo}>
           {text.undo}
         </Button>

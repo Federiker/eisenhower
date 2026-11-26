@@ -11,6 +11,24 @@ export type Unsaved = {
 };
 
 /**
+ * The window's frame the app draws: its own title bar with the window's buttons (Windows and Linux), a bar under
+ * macOS's own buttons, or a plain header in a browser.
+ */
+export type WindowFrame = "custom" | "macOverlay" | "none";
+
+/** The window's own buttons, where the app draws its title bar. */
+export type WindowCalls = {
+  minimise: () => Promise<void>;
+  /** Maximises the window, or restores it when it is maximised. */
+  toggleMaximise: () => Promise<void>;
+  /** Asks to close the window, as the system's close button does: the close question runs first. */
+  close: () => Promise<void>;
+  isMaximised: () => Promise<boolean>;
+  /** Calls `handler` after each change of the window's size; resolves to a function that stops listening. */
+  onResized: (handler: () => void) => Promise<() => void>;
+};
+
+/**
  * What the desktop app needs from where it runs: the Tauri window (files on disk through
  * `tauri-plugin-eisenhower`, chosen with Tauri's dialogues) or the preview in a browser (files kept in the
  * browser, dialogues answered in the page). The documents themselves are read and written through `storage`,
@@ -18,6 +36,10 @@ export type Unsaved = {
  */
 export type Host = {
   kind: "tauri" | "preview";
+  /** The title bar the app draws: the window has no system title bar on Windows and Linux. */
+  frame: WindowFrame;
+  /** The window's minimise, maximise and close (the window only). */
+  window: WindowCalls | undefined;
   /** Where the documents are, by path: `tauriStorage()` in the window. */
   storage: StorageAdapter;
   /** Asks for a document to open; null when the user cancels. */

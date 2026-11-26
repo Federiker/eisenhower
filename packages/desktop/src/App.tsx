@@ -12,6 +12,7 @@ import { LOCALES, readSettings, type Settings, writeSettings } from "./settings"
 import { StartScreen } from "./StartScreen";
 import { fill, appStrings as text } from "./strings";
 import type { OpenFile, Report } from "./useFileDocument";
+import { WindowControls } from "./WindowControls";
 
 type Message = { text: string; tone: "status" | "error" };
 
@@ -156,6 +157,16 @@ export function App({ host, keep = windowStorage() }: { host: Host; keep?: Stora
     return true;
   }, [mayLeave]);
 
+  const goHome = () => void goStart();
+
+  const windowFailed = useCallback(
+    (error: unknown) => {
+      console.error(error);
+      report(text.windowFailed, "error");
+    },
+    [report],
+  );
+
   const newDocument = useCallback(async () => {
     if (shown === null) {
       nameField.current?.focus();
@@ -265,8 +276,17 @@ export function App({ host, keep = windowStorage() }: { host: Host; keep?: Stora
 
   return (
     <EisenhowerProvider theme={settings.theme} locale={settings.locale} className="app">
-      <header className="app-header">
-        <h1 className="app-title">{text.title}</h1>
+      {/* The window's title bar where it has no system one: dragged by its empty room, double-clicked to maximise. */}
+      <header className="app-header" data-frame={host.frame} data-tauri-drag-region="deep">
+        <h1 className="app-title">
+          {shown === null ? (
+            text.title
+          ) : (
+            <button type="button" className="app-home" title={text.home} aria-label={text.home} onClick={goHome}>
+              {text.title}
+            </button>
+          )}
+        </h1>
         {host.kind === "preview" && <p className="app-preview">{text.preview}</p>}
         {/* biome-ignore lint/a11y/useSemanticElements: a row of settings, not a form's fieldset */}
         <div className="app-settings" role="group" aria-label={text.settings}>
@@ -293,6 +313,7 @@ export function App({ host, keep = windowStorage() }: { host: Host; keep?: Stora
             ))}
           </Select>
         </div>
+        {host.frame === "custom" && host.window && <WindowControls calls={host.window} failed={windowFailed} />}
       </header>
       {shown === null ? (
         <StartScreen
@@ -310,7 +331,6 @@ export function App({ host, keep = windowStorage() }: { host: Host; keep?: Stora
           file={shown}
           report={report}
           stored={remember}
-          onStart={() => void goStart()}
           onOpen={() => void chooseAndOpen()}
           controls={controls}
         />

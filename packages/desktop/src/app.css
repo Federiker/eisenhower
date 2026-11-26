@@ -2,31 +2,152 @@
  * The desktop app's own layout. Its colours are the views' theme (--eh-*): the whole window is inside the
  * EisenhowerProvider, so the theme chosen in the header colours it too.
  */
+/*
+ * The window's frame never scrolls or overscrolls; only the screen under the title bar does (as in jerome's
+ * frame.css). A page that scrolled as a whole bounced at its ends in WebView2, a drag past the window's edge
+ * carried it along, and the page behind showed white at its edges. The page is clipped instead, nothing bounces
+ * or chains past a pane's end, and the page behind is the colour the frame shows.
+ */
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
+}
+
+html {
+  background: #f5f6f3;
+}
+html:has(.app[data-theme="dark"]) {
+  background: #202722;
+}
+@media (prefers-color-scheme: dark) {
+  html:not(:has(.app[data-theme="light"])) {
+    background: #202722;
+  }
 }
 
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: clip;
+  overscroll-behavior: none;
   box-sizing: border-box;
 }
 
+/* The title bar: the app's name, the settings and, where the window has no system title bar, its buttons. */
 .app-header {
   display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
-  gap: var(--eh-space-3) var(--eh-space-4);
+  gap: var(--eh-space-2) var(--eh-space-4);
   align-items: center;
-  padding: var(--eh-space-3) var(--eh-space-4);
+  min-height: 44px;
+  padding: var(--eh-space-1) var(--eh-space-4);
+  box-sizing: border-box;
   background: var(--eh-panel);
   border-bottom: 1px solid var(--eh-line);
+  user-select: none;
+}
+
+/* The window's buttons end the bar, as tall as it, with no room after them. */
+.app-header[data-frame="custom"] {
+  flex-wrap: nowrap;
+  padding-block: 0;
+  padding-inline-end: 0;
+}
+
+/* macOS draws its own window buttons over the bar's start. */
+.app-header[data-frame="macOverlay"] {
+  padding-inline-start: 84px;
 }
 
 .app-title {
   margin: 0;
-  font-size: calc(1.35rem * var(--eh-scale, 1));
+  font-size: calc(1.1rem * var(--eh-scale, 1));
+  font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* The app's name, while a document is open: back to the start screen. */
+.app-home {
+  margin: 0 calc(-1 * var(--eh-space-2));
+  padding: var(--eh-space-1) var(--eh-space-2);
+  font: inherit;
+  color: var(--eh-ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--eh-radius, 4px);
+  cursor: pointer;
+}
+
+.app-home:hover {
+  background: var(--eh-surface, var(--eh-background));
+  border-color: var(--eh-line);
+}
+
+.app-home:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: 2px;
+}
+
+/* The window's minimise, maximise and close, drawn as Windows 11 draws its own (jerome's window-controls.css). */
+.app-window-controls {
+  --window-control-hover: rgb(0 0 0 / 0.05);
+  --window-control-pressed: rgb(0 0 0 / 0.09);
+  display: flex;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 32px;
+}
+.app[data-theme="dark"] .app-window-controls {
+  --window-control-hover: rgb(255 255 255 / 0.07);
+  --window-control-pressed: rgb(255 255 255 / 0.11);
+}
+@media (prefers-color-scheme: dark) {
+  .app:not([data-theme="light"]) .app-window-controls {
+    --window-control-hover: rgb(255 255 255 / 0.07);
+    --window-control-pressed: rgb(255 255 255 / 0.11);
+  }
+}
+.app-window-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  margin: 0;
+  padding: 0;
+  color: var(--eh-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: default;
+}
+.app-window-control svg {
+  display: block;
+}
+.app-window-control:hover {
+  background: var(--window-control-hover);
+}
+.app-window-control:active {
+  background: var(--window-control-pressed);
+}
+.app-window-control[data-control="close"]:hover {
+  color: #ffffff;
+  background: #c42b1c;
+}
+.app-window-control[data-control="close"]:active {
+  color: #ffffff;
+  background: rgb(196 43 28 / 0.9);
+}
+.app-window-control:focus-visible {
+  outline: 2px solid var(--eh-focus);
+  outline-offset: -2px;
 }
 
 .app-preview {
@@ -45,9 +166,13 @@ body {
   margin-inline-start: auto;
 }
 
+/* The screen under the title bar scrolls on its own, without bouncing or carrying the window along. */
 .app-main {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: none;
   padding: var(--eh-space-3) var(--eh-space-4);
 }
 
@@ -231,7 +356,8 @@ body {
 }
 
 .app-footer {
-  padding: 0 var(--eh-space-4) var(--eh-space-3);
+  flex-shrink: 0;
+  padding: var(--eh-space-1) var(--eh-space-4) var(--eh-space-2);
   min-height: 1.5em;
 }
 
@@ -245,7 +371,13 @@ body {
 
 @media (forced-colors: active) {
   .start-section,
-  .start-recent-item:hover {
+  .start-recent-item:hover,
+  .app-home:hover {
     border-color: CanvasText;
+  }
+  .app-window-control:hover,
+  .app-window-control[data-control="close"]:hover {
+    color: HighlightText;
+    background: Highlight;
   }
 }
